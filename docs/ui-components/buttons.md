@@ -22,7 +22,7 @@ nav_order: 2
 <div class="code-example" markdown="1">
 [Link button](https://just-the-docs.com){: .btn }
 
-[Link button](https://just-the-docs.com){: .btn .btn-purple }
+[Link button](https://just-the-docs.com){: .btn .btn-orange }
 [Link button](https://just-the-docs.com){: .btn .btn-blue }
 [Link button](https://just-the-docs.com){: .btn .btn-green }
 
@@ -31,7 +31,7 @@ nav_order: 2
 ```markdown
 [Link button](https://just-the-docs.com){: .btn }
 
-[Link button](https://just-the-docs.com){: .btn .btn-purple }
+[Link button](https://just-the-docs.com){: .btn .btn-orange }
 [Link button](https://just-the-docs.com){: .btn .btn-blue }
 [Link button](https://just-the-docs.com){: .btn .btn-green }
 

@@ -109,11 +109,15 @@
 }
 
 .btn-blue {
-  @include btn-color($white, $blue-000);
+  @include btn-color($white, #0058A9);
 }
 
 .btn-green {
   @include btn-color($white, $green-100);
+}
+
+.btn-orange {
+  @include btn-color($white, #FE7501);
 }
 
 .btn-reset {
