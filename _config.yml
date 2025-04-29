@@ -1,6 +1,7 @@
-title: Just the Docs Template
-description: A starter template for a Jeykll site using the Just the Docs theme!
-remote_theme: just-the-docs/just-the-docs
+title: Ctrl-Z Technical Documentation
+description: A Wiki for all the technical information about Ctrl-Z FRC Team 4096
+theme: just-the-docs
+repository: CtrlZ-FRC4096/CtrlZ-FRC4096.github.io
 
 url: https://ctrlz-frc4096.github.io/
 base:url: ""
