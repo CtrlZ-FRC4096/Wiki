@@ -1,5 +1,6 @@
 ---
-title: Test Pages
-parent: Electrical
-nav_order: 2
+title: Child Pages
+parent: Mechanical
+nav_order: 4
 ---
+# Child Pages
