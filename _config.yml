@@ -3,7 +3,7 @@ description: A Wiki for all the technical information about Ctrl-Z FRC Team 4096
 theme: just-the-docs
 repository: CtrlZ-FRC4096/CtrlZ-FRC4096.github.io
 
-url: https://ctrlz-frc4096.github.io/
+url: https://wiki.team4096.org/
 base:url: ""
 
 aux_links:
