@@ -21,6 +21,7 @@ This Wiki is designed for internal team use but may include resources we want to
 ## Contributing
 
 Team members are encouraged to add information to the wiki.
+- The best way to contribute is to create a branch, add your content, and then submit a Pull Request.
 - Only add and modify Markdown (.md) files in the documents sections.
 - Add images to the assets/images folder.
 - Please do not change anything else unless you know what you are doing.
