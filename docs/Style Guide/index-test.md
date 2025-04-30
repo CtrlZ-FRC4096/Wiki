@@ -1,5 +1,6 @@
 ---
-title: Markdown kitchen sink
+title: Markdown Examples
+parent: Style Guide 
 nav_order: 99
 ---
 
