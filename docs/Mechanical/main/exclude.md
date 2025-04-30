@@ -1,6 +1,6 @@
 ---
 title: Excluding Pages
-parent: Main Navigation
+parent: Main Mechanical
 nav_order: 2
 ---
 
@@ -20,7 +20,7 @@ permalink: /404
 ---
 ```
 
-The `nav_exclude` parameter does not affect the [breadcrumbs]({% link docs/navigation/parents.md %}), nor the [lists of child pages]({% link docs/navigation/children.md %}), which you can use to access pages excluded from the main navigation.
+The `nav_exclude` parameter does not affect the [breadcrumbs]({% link docs/Mechanical/parents.md %}), nor the [lists of child pages]({% link docs/Mechanical/children.md %}), which you can use to access pages excluded from the main navigation.
 
 Pages with no `title` are automatically excluded from the main navigation, except when they are in collections (where Jekyll provides default titles based on file names).
 

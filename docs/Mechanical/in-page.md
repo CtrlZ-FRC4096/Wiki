@@ -1,6 +1,6 @@
 ---
 title: In-Page Navigation
-parent: Navigation
+parent: Mechanical
 nav_order: 5
 ---
 

@@ -1,6 +1,6 @@
 ---
 title: Ancestry
-parent: Main Navigation
+parent: Main Mechanical
 nav_order: 4
 ---
 
@@ -42,11 +42,11 @@ The following pages illustrate `parent` disambiguation using `grand_parent` and 
 - [T][YT] is the only child of [S][YS]. Its `parent` is disambiguated by its `ancestor`
 - [U][YU] is the only child of [T][YT]. Its `parent` is disambiguated by its `ancestor`.
 
-[X]: {% link docs/navigation/main/x.md %}
-[XS]: {% link docs/navigation/main/xs.md %}
-[XT]: {% link docs/navigation/main/xt.md %}
-[XU]: {% link docs/navigation/main/xu.md %}
-[Y]: {% link docs/navigation/main/y.md %}
-[YS]: {% link docs/navigation/main/ys.md %}
-[YT]: {% link docs/navigation/main/yt.md %}
-[YU]: {% link docs/navigation/main/yu.md %}
+[X]: {% link docs/Mechanical/main/x.md %}
+[XS]: {% link docs/Mechanical/main/xs.md %}
+[XT]: {% link docs/Mechanical/main/xt.md %}
+[XU]: {% link docs/Mechanical/main/xu.md %}
+[Y]: {% link docs/Mechanical/main/y.md %}
+[YS]: {% link docs/Mechanical/main/ys.md %}
+[YT]: {% link docs/Mechanical/main/yt.md %}
+[YU]: {% link docs/Mechanical/main/yu.md %}

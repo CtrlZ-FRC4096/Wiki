@@ -1,6 +1,6 @@
 ---
 title: Ordering Pages
-parent: Main Navigation
+parent: Main Mechanical
 nav_order: 1
 ---
 

@@ -1,6 +1,6 @@
 ---
 title: Collections
-parent: Main Navigation
+parent: Main Mechanical
 nav_order: 5
 ---
 

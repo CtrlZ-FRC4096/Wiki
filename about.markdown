@@ -4,15 +4,15 @@ title: About
 permalink: /about/
 ---
 
-This is the base Jekyll theme. You can find out more info about customizing your Jekyll theme, as well as basic Jekyll usage documentation at [jekyllrb.com](https://jekyllrb.com/)
+Todo: Write a team history blurb, information on how to join, etc.
 
-You can find the source code for Minima at GitHub:
-[jekyll][jekyll-organization] /
-[minima](https://github.com/jekyll/minima)
+You can find more information on the [team website][Team Website]
 
-You can find the source code for Jekyll at GitHub:
-[jekyll][jekyll-organization] /
-[jekyll](https://github.com/jekyll/jekyll)
+You can find code for Ctrl-Z robots on [Github][Github]
+
+You can find the competitive results of the team on [The Blue Alliance][The Blue Alliance]
 
 
-[jekyll-organization]: https://github.com/jekyll
+[The Blue Alliance]: https://www.thebluealliance.com/team/4096
+[Github]: https://github.com/CtrlZ-FRC4096
+[Team Website]: http://team4096.org/
