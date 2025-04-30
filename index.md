@@ -29,9 +29,10 @@ There are also fully organized training courses here:
 ### Contributing
 
 Read more about contributing in the [GitHub repo](https://github.com/CtrlZ-FRC4096/CtrlZ-FRC4096.github.io).
+
 Reach out on slack with ideas, questions, or concerns.
 
-#### Thank you to the contributors the Ctrl-Z Documentation!
+#### Thank you to the contributors of the Ctrl-Z Documentation!
 
 <ul class="list-style-none">
 {% for contributor in site.github.contributors %}
