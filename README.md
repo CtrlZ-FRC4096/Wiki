@@ -26,6 +26,7 @@ Team members are encouraged to add information to the wiki.
 - Please do not change anything else unless you know what you are doing.
 - Ask for help on slack or open issues in Github.
 - If something breaks say something. It is ok to make mistakes and we have version control to keep work safe.
+- Althought not preferred, if you are uncomfortable writing markdown you can create a Google Doc on the team Drive with the content and send the link.
 
 ## Building and previewing your site locally
 
