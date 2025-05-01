@@ -5,8 +5,8 @@ nav_order: 1
 description: "This wiki is an organized and searchable collection of technical information documenting the best practices of FRC Team 4096, Ctrl-Z."
 permalink: /
 ---
+# How do I build a Ctrl-Z robot in the _FIRST_ Robotics Competition?
 
-# How do I build a Ctrl-Z robot in the First Robotics Competition?
 {: .fs-9 }
 
 This wiki is an organized and searchable collection of technical information documenting the best practices of FRC Team 4096, Ctrl-Z.
