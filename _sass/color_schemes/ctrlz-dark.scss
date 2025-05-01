@@ -1,0 +1,28 @@
+@import "./dark.scss";
+@import "../custom/custom.scss";
+$color-scheme: "ctrlz";
+$sidebar-color: darken($team-blue, 0%);
+$body-background-color: $grey-dk-400;
+$link-color: darken($team-orange, 0%);
+$nav-child-link-color: #fff;
+$base-button-color: $grey-dk-300;
+$btn-primary-color: $team-blue;
+$border-color: darken($team-blue, 10%);
+$feedback-color: darken($team-blue, 10%);
+$search-background-color: $grey-dk-400;
+$search-result-preview-color: $grey-dk-000;
+
+// $body-heading-color: $grey-lt-000;
+// $body-text-color: $grey-lt-300;
+// $link-color: $blue-000;
+// $nav-child-link-color: $grey-dk-000;
+// $sidebar-color: $grey-dk-300;
+// $base-button-color: $grey-dk-250;
+// $btn-primary-color: $blue-200;
+// $code-background-color: #31343f; // OneDarkJekyll default for syntax-one-dark-vivid
+// $code-linenumber-color: #dee2f7; // OneDarkJekyll .nf for syntax-one-dark-vivid
+// $feedback-color: darken($sidebar-color, 3%);
+// $table-background-color: $grey-dk-250;
+// $search-background-color: $grey-dk-250;
+// $search-result-preview-color: $grey-dk-000;
+// $border-color: $grey-dk-200;
