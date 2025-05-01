@@ -1,1 +1,13 @@
 // custom SCSS (or CSS) goes here
+
+$team-blue: #0058A9;
+$team-orange: #cb5f01;
+$grey-dk-400: hsl(252deg, 6%, 7%);
+
+.site-footer{
+    color: #fff
+}
+
+.btn-orange{
+    background-color: $team-orange;
+}
