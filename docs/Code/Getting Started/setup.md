@@ -5,7 +5,7 @@ nav_order: 1
 ---
 
 # Driver Station & Robot Code Setup
-*Team 4096, last edited 12/2023*
+*Team 4096, last edited 5/2025*
 
 ## Overview
 This guide explains how to set up a new PC (or Driver Station PC) with the environment necessary to write, test, and run Python code on the robot.

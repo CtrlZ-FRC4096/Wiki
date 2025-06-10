@@ -116,6 +116,13 @@ compress_html:
   # ignore:
   #   envs: all
 
+exclude:
+  - _site
+  - node_modules
+  - .git
+  - .vscode
+  - .DS_Store
+
 plugins:
   - jekyll-seo-tag
   - jekyll-github-metadata
