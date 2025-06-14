@@ -100,3 +100,7 @@ py -3 -m robotpy sim
 - After installation, you can cancel when asked to activate the software.
 
 ---
+
+## 8. Configuring the Radio
+
+Follow the [radio programming](https://docs.wpilib.org/en/stable/docs/zero-to-robot/step-3/radio-programming.html) to configure the VH-109 radio so you can connect to the robot.
