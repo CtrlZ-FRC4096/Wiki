@@ -122,7 +122,6 @@ exclude:
   - .git
   - .vscode
   - .DS_Store
-  - vendor
 
 plugins:
   - jekyll-seo-tag
