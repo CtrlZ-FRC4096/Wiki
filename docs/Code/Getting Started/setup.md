@@ -104,3 +104,11 @@ py -3 -m robotpy sim
 ## 8. Configuring the Radio
 
 Follow the [radio programming](https://docs.wpilib.org/en/stable/docs/zero-to-robot/step-3/radio-programming.html) to configure the VH-109 radio so you can connect to the robot.
+
+## 9. Phoenix Tuner X
+
+Phoenix Tuner is Cross the Road Electronics (CTRE) software that updates, configures, analyzes, and can even control most of the electronics on our robot.
+
+Follow the installation instructions [here](https://v6.docs.ctr-electronics.com/en/stable/docs/tuner/index.html). It is recommended to install using the Windows app store if you are on a windows device.
+
+The documentation has good tutorials on using the software. The main use phoenix for tuner is to set up CAN bus IDs which allow the code to communicate with the motors. We also use it to control individual motors on the robot for troubleshooting, monitor output speeds and current to set thresholds for logic, and quickly tune controllers.
