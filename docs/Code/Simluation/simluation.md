@@ -84,4 +84,4 @@ pip install shapely
 - Instead of zeroing the gyro (not available in sim), use POV.down to clear scored coral
 - You can practice swerve driving around obstacles (feature coming soon)
 
-Happy practicing, and try not to break any virtual walls!### 3. Code Configuration
+Happy practicing, and try not to break any virtual walls!
