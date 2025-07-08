@@ -28,7 +28,7 @@ This guide explains how to set up a new PC (or Driver Station PC) with the envir
 
 ### Windows Only
 
-- Install the [Microsoft Visual C++ Redistributable for Visual Studio 2015, 2017, and 2019](https://support.microsoft.com/en-us/help/2977003/the-latest-supported-visual-c-downloads) (choose the "x64" version).
+- Install the [Microsoft Visual C++ Redistributable for Visual Studio 2015, 2017, and 2019](https://learn.microsoft.com/en-us/cpp/windows/latest-supported-vc-redist?view=msvc-170) (choose the "x64" version).
 
 ---
 
@@ -61,6 +61,8 @@ Open a command prompt:
 - Clone the desired repository from the [CtrlZ-FRC4096 GitHub organization](https://github.com/CtrlZ-FRC4096).
 - For training, use the [Robot-Code-Starter repo](https://github.com/CtrlZ-FRC4096/Robot-Code-Starter).
 - For full robot work, clone the latest `Robot-20xx` repo.
+
+You can also perform this step after installing VS Code by typing Git: Clone into the Command Palette (Ctrl + Shift + P)
 
 ---
 
@@ -104,3 +106,11 @@ py -3 -m robotpy sim
 ## 8. Configuring the Radio
 
 Follow the [radio programming](https://docs.wpilib.org/en/stable/docs/zero-to-robot/step-3/radio-programming.html) to configure the VH-109 radio so you can connect to the robot.
+
+## 9. Phoenix Tuner X
+
+Phoenix Tuner is Cross the Road Electronics (CTRE) software that updates, configures, analyzes, and can even control most of the electronics on our robot.
+
+Follow the installation instructions [here](https://v6.docs.ctr-electronics.com/en/stable/docs/tuner/index.html). It is recommended to install using the Windows app store if you are on a windows device.
+
+The documentation has good tutorials on using the software. The main use phoenix for tuner is to set up CAN bus IDs which allow the code to communicate with the motors. We also use it to control individual motors on the robot for troubleshooting, monitor output speeds and current to set thresholds for logic, and quickly tune controllers.
