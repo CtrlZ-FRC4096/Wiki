@@ -28,7 +28,7 @@ This guide explains how to set up a new PC (or Driver Station PC) with the envir
 
 ### Windows Only
 
-- Install the [Microsoft Visual C++ Redistributable for Visual Studio 2015, 2017, and 2019](https://support.microsoft.com/en-us/help/2977003/the-latest-supported-visual-c-downloads) (choose the "x64" version).
+- Install the [Microsoft Visual C++ Redistributable for Visual Studio 2015, 2017, and 2019](https://learn.microsoft.com/en-us/cpp/windows/latest-supported-vc-redist?view=msvc-170) (choose the "x64" version).
 
 ---
 
@@ -61,6 +61,8 @@ Open a command prompt:
 - Clone the desired repository from the [CtrlZ-FRC4096 GitHub organization](https://github.com/CtrlZ-FRC4096).
 - For training, use the [Robot-Code-Starter repo](https://github.com/CtrlZ-FRC4096/Robot-Code-Starter).
 - For full robot work, clone the latest `Robot-20xx` repo.
+
+You can also perform this step after installing VS Code by typing Git: Clone into the Command Palette (Ctrl + Shift + P)
 
 ---
 
