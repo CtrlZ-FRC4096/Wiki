@@ -28,6 +28,10 @@
     { x: 10.6, y: 2.10, w: 1.0, h: 4.20, label: "B" }
   ];
 
+  // The start pose is part of the task, the same as a starting position in a
+  // match. The user does not choose it.
+  var START = { x: 1.0, y: 2.6, heading: 0 };
+
   var TARGET_SCORE = 2;
   var TIME_LIMIT = 15;
   var INTAKE_SECONDS = 0.5;
@@ -399,6 +403,7 @@
 
   return {
     LOAD: LOAD,
+    START: START,
     GOAL: GOAL,
     SHOT_RANGE: SHOT_RANGE,
     rangeToGoal: rangeToGoal,

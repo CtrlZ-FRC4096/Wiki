@@ -102,9 +102,11 @@ Three conditions make this an exercise and not a straight line:
   those actions into the paths. This saves approximately two seconds.
 
 To add a waypoint, select a step in the list, then click the field. To move a
-waypoint, drag it. To delete a waypoint, right-click it. The green circle is
-the start pose, and you can drag it. Press **Check routine** when the routine
-is complete.
+waypoint, drag it. To delete a waypoint, right-click it. Press **Check
+routine** when the routine is complete.
+
+The green START marker is the start pose. It is part of the task, the same as a
+starting position in a match. You cannot move it.
 
 ### The display
 

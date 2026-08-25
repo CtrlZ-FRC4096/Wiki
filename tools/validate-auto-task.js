@@ -19,6 +19,7 @@ const F = require(path.join(dir, "field-sim.js"));
 const LIMITS = { maxV: 4.5, maxA: 4.5 };
 const LOW = 3.0, HIGH = 4.8;
 const lx = A.LOAD.x, ly = A.LOAD.y;
+const START = A.START;
 // Fire from the near edge of the range ring rather than driving to the goal —
 // using the range is most of what makes this fit in the period.
 const STANDOFF = A.SHOT_RANGE * 0.98;
@@ -41,7 +42,7 @@ function slalom(parallel) {
   const spin = parallel ? [] : [{ kind: "action", action: "spin_up_shooter", timeout: 1.0 }];
   return {
     name: "wiki_auto",
-    startPose: { x: 1.0, y: 2.6, heading: 0 },
+    startPose: { x: START.x, y: START.y, heading: START.heading },
     steps: [
       { kind: "path", waypoints: [{ x: 4.6, y: LOW }, { x: 8.0, y: LOW }, { x: 9.7, y: HIGH }, fire],
         endHeading: 0, parallel: along(["spin_up_shooter"]) },
@@ -60,7 +61,7 @@ function slalom(parallel) {
 
 const naive = {
   name: "wiki_auto",
-  startPose: { x: 1.0, y: 2.6, heading: 0 },
+  startPose: { x: START.x, y: START.y, heading: START.heading },
   steps: [
     { kind: "path", waypoints: [fire], endHeading: 0, parallel: ["spin_up_shooter"] },
     { kind: "action", action: "shoot", timeout: 0.6 }

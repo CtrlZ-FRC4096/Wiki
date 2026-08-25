@@ -21,7 +21,7 @@
   function setup(root) {
     var CZField = window.CZField;
     var A = window.CZAuto;
-    var LOAD = A.LOAD, GOAL = A.GOAL, SHOT_RANGE = A.SHOT_RANGE, BARRIERS = A.BARRIERS, ACTIONS = A.ACTIONS;
+    var LOAD = A.LOAD, GOAL = A.GOAL, START = A.START, SHOT_RANGE = A.SHOT_RANGE, BARRIERS = A.BARRIERS, ACTIONS = A.ACTIONS;
     var TARGET_SCORE = A.TARGET_SCORE, TIME_LIMIT = A.TIME_LIMIT;
     var INTAKE_SECONDS = A.INTAKE_SECONDS, READY_SPEED = A.READY_SPEED;
     var actionById = A.actionById, inZone = A.inZone, robotHitsBox = A.robotHitsBox;
@@ -41,7 +41,7 @@
     // the task — the second half is the exercise.
     var DEFAULT = {
       name: "wiki_auto",
-      startPose: { x: 1.0, y: 2.6, heading: 0 },
+      startPose: { x: START.x, y: START.y, heading: START.heading },
       steps: [
         { kind: "path", waypoints: [{ x: 4.6, y: 3.0 }], endHeading: 0, parallel: ["spin_up_shooter"] }
       ]
@@ -59,6 +59,7 @@
     try {
       var saved = JSON.parse(window.localStorage.getItem(STORAGE_KEY) || "null");
       if (saved && saved.routine) { routine = saved.routine; limits = saved.limits || limits; }
+      routine.startPose = { x: START.x, y: START.y, heading: START.heading };
     } catch (e) { /* nothing saved */ }
 
     function persist() {
@@ -82,14 +83,9 @@
 
       var startRow = el("div", "cz-auto__step cz-auto__step--start");
       startRow.appendChild(el("span", "cz-auto__step-kind", "start"));
-      var startBody = el("span", "cz-auto__step-body");
-      startBody.appendChild(document.createTextNode(
-        routine.startPose.x.toFixed(2) + ", " + routine.startPose.y.toFixed(2) + " m facing "));
-      startBody.appendChild(numberInput(routine.startPose.heading, -180, 180, 15, function (v) {
-        routine.startPose.heading = v; rebuild();
-      }));
-      startBody.appendChild(document.createTextNode("°"));
-      startRow.appendChild(startBody);
+      startRow.appendChild(el("span", "cz-auto__step-body",
+        routine.startPose.x.toFixed(2) + ", " + routine.startPose.y.toFixed(2) + " m facing " +
+        routine.startPose.heading + "° — set by the task"));
       stepsBox.appendChild(startRow);
 
       routine.steps.forEach(function (step, index) {
@@ -403,7 +399,6 @@
       for (var i = 0; i < list.length; i++) {
         if (Math.hypot(list[i].x - point.x, list[i].y - point.y) < 0.35) return i;
       }
-      if (Math.hypot(routine.startPose.x - point.x, routine.startPose.y - point.y) < 0.35) return "start";
       return -1;
     }
 
@@ -419,6 +414,11 @@
 
     canvas.addEventListener("mousedown", function (e) {
       var point = onField(view.pointFromEvent(e));
+
+      // The start marker is fixed. Absorb clicks on it, so an attempt to drag
+      // it does not leave a waypoint under the robot.
+      if (Math.hypot(routine.startPose.x - point.x, routine.startPose.y - point.y) < 0.5) return;
+
       var hit = hitWaypoint(point);
       if (hit !== -1) { dragging = hit; return; }
       var step = routine.steps[selected];
@@ -430,11 +430,8 @@
     window.addEventListener("mousemove", function (e) {
       if (dragging === null) return;
       var point = onField(view.pointFromEvent(e));
-      if (dragging === "start") { routine.startPose.x = point.x; routine.startPose.y = point.y; }
-      else {
-        var list = waypointsOf(routine.steps[selected]);
-        if (list[dragging]) { list[dragging].x = point.x; list[dragging].y = point.y; }
-      }
+      var list = waypointsOf(routine.steps[selected]);
+      if (list[dragging]) { list[dragging].x = point.x; list[dragging].y = point.y; }
       rebuild();
     });
 
@@ -562,7 +559,26 @@
           label: String(i + 1), labelColor: "#1a1a1a"
         });
       });
-      view.drawMarker(routine.startPose, { radius: 0.24, color: "#4cc38a", outline: "rgba(255,255,255,0.8)" });
+      // Fixed start: a bracket rather than a handle, so it does not look
+      // like something to drag.
+      var sx = view.px(routine.startPose.x);
+      var sy = view.py(routine.startPose.y);
+      var arm = 0.55 * view.scale;
+      ctx.save();
+      ctx.strokeStyle = "rgba(76,195,138,0.95)";
+      ctx.lineWidth = 2;
+      ctx.beginPath();
+      ctx.moveTo(sx - arm, sy - arm * 0.45);
+      ctx.lineTo(sx - arm, sy + arm * 0.45);
+      ctx.moveTo(sx + arm, sy - arm * 0.45);
+      ctx.lineTo(sx + arm, sy + arm * 0.45);
+      ctx.stroke();
+      ctx.fillStyle = "rgba(76,195,138,0.95)";
+      ctx.font = "10px system-ui, sans-serif";
+      ctx.textAlign = "center";
+      ctx.textBaseline = "top";
+      ctx.fillText("START", sx, sy + arm * 0.6);
+      ctx.restore();
 
       // Where the crash happens, if it does.
       if (result.collided) {
