@@ -1,0 +1,16 @@
+{
+  "name": "ctrlz-wiki-e2e",
+  "version": "1.0.0",
+  "private": true,
+  "description": "Browser tests for the interactive widgets on the Ctrl-Z wiki",
+  "type": "module",
+  "scripts": {
+    "test": "playwright test",
+    "test:headed": "playwright test --headed",
+    "report": "playwright show-report",
+    "setup": "npm install && playwright install chromium"
+  },
+  "devDependencies": {
+    "@playwright/test": "^1.49.0"
+  }
+}

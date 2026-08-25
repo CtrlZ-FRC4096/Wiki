@@ -101,6 +101,11 @@ PyYAML for the first one.
 | `node tools/validate-swerve.js` | The swerve maths on the wiki agrees with `ctre_module_state.py` on the robot |
 | `node tools/check-ste.js` | Sentence length, paragraph length and word use on the tutorial pages |
 
+If you change the JavaScript in `assets/js/interactive/`, also run the browser
+tests. They open the widgets in a real browser and use them. They need
+Playwright, which is a larger installation, so see
+[`tools/e2e/README.md`](https://github.com/CtrlZ-FRC4096/Wiki/blob/main/tools/e2e/README.md).
+
 To see a page before you push it, build the site and open it:
 
 ```
