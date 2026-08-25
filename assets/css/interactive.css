@@ -1,0 +1,851 @@
+/*
+ * Ctrl-Z Wiki — styling for interactive widgets.
+ *
+ * Loaded only on pages that actually use an interactive include.
+ * Colors are tuned for the ctrlz-dark scheme set in _config.yml; change the
+ * custom properties below if the site theme changes.
+ */
+
+.cz-exercise {
+  --cz-team-blue: #0058a9;
+  --cz-team-orange: #cb5f01;
+  --cz-surface: rgba(255, 255, 255, 0.04);
+  --cz-surface-raised: rgba(255, 255, 255, 0.07);
+  --cz-border: rgba(255, 255, 255, 0.15);
+  --cz-pass: #4cc38a;
+  --cz-fail: #f2777a;
+  --cz-muted: rgba(255, 255, 255, 0.6);
+
+  margin: 1.75rem 0;
+  padding: 1rem 1.15rem 1.15rem;
+  border: 1px solid var(--cz-border);
+  border-left: 4px solid var(--cz-team-orange);
+  border-radius: 6px;
+  background: var(--cz-surface);
+}
+
+.cz-exercise.is-solved {
+  border-left-color: var(--cz-pass);
+}
+
+.cz-exercise__header {
+  display: flex;
+  align-items: center;
+  gap: 0.6rem;
+  flex-wrap: wrap;
+}
+
+.cz-exercise__badge {
+  font-size: 0.7rem;
+  font-weight: 700;
+  letter-spacing: 0.06em;
+  text-transform: uppercase;
+  padding: 0.15rem 0.45rem;
+  border-radius: 3px;
+  background: var(--cz-team-orange);
+  color: #fff;
+}
+
+.cz-exercise__title {
+  margin: 0;
+  font-size: 1.05rem;
+  font-weight: 600;
+}
+
+.cz-exercise__solved-mark {
+  display: none;
+  font-size: 0.8rem;
+  font-weight: 600;
+  color: var(--cz-pass);
+}
+
+.cz-exercise.is-solved .cz-exercise__solved-mark {
+  display: inline;
+}
+
+.cz-exercise__prompt > :first-child {
+  margin-top: 0.6rem;
+}
+
+.cz-exercise__prompt > :last-child {
+  margin-bottom: 0.8rem;
+}
+
+.cz-exercise__label {
+  display: block;
+  font-size: 0.75rem;
+  font-weight: 600;
+  letter-spacing: 0.04em;
+  text-transform: uppercase;
+  color: var(--cz-muted);
+  margin-bottom: 0.3rem;
+}
+
+.cz-exercise__code {
+  display: block;
+  width: 100%;
+  min-height: 120px;
+  padding: 0.7rem 0.8rem;
+  border: 1px solid var(--cz-border);
+  border-radius: 4px;
+  background: rgba(0, 0, 0, 0.35);
+  color: inherit;
+  font-family: ui-monospace, SFMono-Regular, "SF Mono", Menlo, Consolas, monospace;
+  font-size: 0.8rem;
+  line-height: 1.5;
+  tab-size: 4;
+  resize: vertical;
+  overflow-x: auto;
+  white-space: pre;
+}
+
+.cz-exercise__code:focus {
+  outline: 2px solid var(--cz-team-orange);
+  outline-offset: 1px;
+}
+
+.cz-exercise__toolbar {
+  display: flex;
+  align-items: center;
+  gap: 0.5rem;
+  flex-wrap: wrap;
+  margin-top: 0.7rem;
+}
+
+.cz-exercise__btn {
+  font-size: 0.75rem;
+}
+
+.cz-exercise__btn[disabled] {
+  opacity: 0.5;
+  cursor: not-allowed;
+}
+
+.cz-exercise__status {
+  font-size: 0.75rem;
+  color: var(--cz-muted);
+}
+
+.cz-exercise__help {
+  margin: 0.6rem 0 0;
+  font-size: 0.72rem;
+  color: var(--cz-muted);
+}
+
+.cz-exercise__help kbd {
+  font-size: 0.72rem;
+}
+
+.cz-exercise__hints {
+  margin-top: 0.8rem;
+  padding: 0.6rem 0.8rem;
+  border-radius: 4px;
+  background: var(--cz-surface-raised);
+  font-size: 0.85rem;
+}
+
+.cz-exercise__hint + .cz-exercise__hint {
+  margin-top: 0.45rem;
+}
+
+.cz-exercise__output:empty {
+  display: none;
+}
+
+.cz-exercise__output {
+  margin-top: 0.9rem;
+}
+
+.cz-exercise__stdout,
+.cz-exercise__error {
+  margin-bottom: 0.8rem;
+  padding: 0.55rem 0.75rem;
+  border-radius: 4px;
+  background: rgba(0, 0, 0, 0.35);
+}
+
+.cz-exercise__error {
+  border-left: 3px solid var(--cz-fail);
+}
+
+.cz-exercise__stdout-label,
+.cz-exercise__error-label {
+  font-size: 0.7rem;
+  font-weight: 700;
+  letter-spacing: 0.05em;
+  text-transform: uppercase;
+  color: var(--cz-muted);
+  margin-bottom: 0.3rem;
+}
+
+.cz-exercise__error-label {
+  color: var(--cz-fail);
+}
+
+.cz-exercise__stdout pre,
+.cz-exercise__error pre {
+  margin: 0;
+  padding: 0;
+  background: none;
+  border: 0;
+  font-size: 0.75rem;
+  line-height: 1.45;
+  white-space: pre-wrap;
+  overflow-x: auto;
+}
+
+/*
+ * The theme styles every list inside .main-content (indent plus a generated
+ * bullet). These lists carry their own pass/fail icons, so out-specify it.
+ */
+.cz-exercise ul.cz-exercise__checks {
+  list-style: none;
+  margin: 0.4rem 0 0;
+  padding-left: 0;
+}
+
+.cz-exercise ul.cz-exercise__checks > li::before {
+  content: none;
+}
+
+.cz-exercise__check {
+  display: flex;
+  gap: 0.5rem;
+  align-items: flex-start;
+  padding: 0.3rem 0;
+  font-size: 0.85rem;
+}
+
+.cz-exercise__check-icon {
+  flex: 0 0 auto;
+  font-weight: 700;
+  line-height: 1.4;
+}
+
+.cz-exercise__check.is-pass .cz-exercise__check-icon {
+  color: var(--cz-pass);
+}
+
+.cz-exercise__check.is-fail .cz-exercise__check-icon {
+  color: var(--cz-fail);
+}
+
+.cz-exercise__check-body {
+  display: flex;
+  flex-direction: column;
+}
+
+.cz-exercise__check-message {
+  font-size: 0.78rem;
+  color: var(--cz-fail);
+  font-family: ui-monospace, SFMono-Regular, Menlo, Consolas, monospace;
+  margin-top: 0.15rem;
+}
+
+.cz-exercise__verdict {
+  margin: 0.6rem 0 0;
+  font-size: 0.85rem;
+  font-weight: 600;
+}
+
+.cz-exercise__verdict.is-pass {
+  color: var(--cz-pass);
+}
+
+.cz-exercise__verdict.is-fail {
+  color: var(--cz-fail);
+}
+
+.cz-exercise--missing {
+  border-left-color: var(--cz-fail);
+}
+
+/* ------------------------------------------------------------------ *
+ * Controller tuning simulator
+ * ------------------------------------------------------------------ */
+
+.cz-sim {
+  --cz-plot-grid: rgba(255, 255, 255, 0.10);
+  --cz-plot-axis: rgba(255, 255, 255, 0.40);
+  --cz-plot-setpoint: #f0932b;
+  --cz-plot-actual: #57a8ff;
+  --cz-plot-volts: rgba(255, 255, 255, 0.30);
+  --cz-plot-body: rgba(255, 255, 255, 0.70);
+  --cz-plot-text: rgba(255, 255, 255, 0.55);
+}
+
+.cz-sim__stage {
+  position: relative;
+  margin: 0.8rem 0 0.2rem;
+  border: 1px solid var(--cz-border);
+  border-radius: 4px;
+  background: rgba(0, 0, 0, 0.35);
+}
+
+.cz-sim__canvas {
+  display: block;
+  width: 100%;
+  height: 240px;
+}
+
+.cz-sim__legend {
+  position: absolute;
+  top: 6px;
+  right: 10px;
+  display: flex;
+  gap: 0.75rem;
+  font-size: 0.68rem;
+  color: var(--cz-muted);
+}
+
+.cz-sim__key::before {
+  content: "";
+  display: inline-block;
+  width: 14px;
+  height: 0;
+  margin-right: 0.3rem;
+  vertical-align: middle;
+  border-top-width: 2px;
+  border-top-style: solid;
+}
+
+.cz-sim__key--sp::before {
+  border-top-style: dashed;
+  border-top-color: var(--cz-plot-setpoint);
+}
+
+.cz-sim__key--actual::before {
+  border-top-color: var(--cz-plot-actual);
+}
+
+.cz-sim__sliders {
+  display: grid;
+  grid-template-columns: repeat(auto-fit, minmax(190px, 1fr));
+  gap: 0.5rem 1.1rem;
+  margin-top: 0.8rem;
+}
+
+.cz-sim__slider--setpoint {
+  border-top: 1px dashed var(--cz-border);
+  padding-top: 0.5rem;
+}
+
+.cz-sim__slider input[type="range"] {
+  width: 100%;
+  margin: 0;
+  accent-color: var(--cz-team-orange);
+}
+
+.cz-sim__slider-label {
+  display: flex;
+  justify-content: space-between;
+  align-items: baseline;
+  gap: 0.5rem;
+  font-size: 0.75rem;
+}
+
+.cz-sim__gain-name {
+  font-weight: 700;
+  font-family: ui-monospace, SFMono-Regular, Menlo, Consolas, monospace;
+}
+
+.cz-sim__gain-value {
+  font-family: ui-monospace, SFMono-Regular, Menlo, Consolas, monospace;
+  color: var(--cz-muted);
+}
+
+@media (max-width: 500px) {
+  .cz-sim__canvas { height: 300px; }
+}
+
+/* ------------------------------------------------------------------ *
+ * Operator interface task
+ * ------------------------------------------------------------------ */
+
+.cz-oi {
+  --cz-field-carpet: #16181e;
+  --cz-field-line: rgba(255, 255, 255, 0.28);
+  --cz-field-blue: rgba(60, 130, 220, 0.22);
+  --cz-field-red: rgba(220, 70, 70, 0.18);
+  --cz-field-robot: #57a8ff;
+}
+
+.cz-oi__code {
+  min-height: 340px;
+  font-size: 0.82rem;
+  line-height: 1.6;
+}
+
+.cz-oi__stage {
+  position: relative;
+  margin-top: 0.9rem;
+  border: 1px solid var(--cz-border);
+  border-radius: 4px;
+  overflow: hidden;
+  outline: none;
+}
+
+.cz-oi__stage:focus-within,
+.cz-oi__stage:focus {
+  border-color: var(--cz-team-orange);
+  box-shadow: 0 0 0 2px rgba(203, 95, 1, 0.35);
+}
+
+.cz-oi__stage:focus .cz-oi__focus-hint,
+.cz-oi__stage:focus-within .cz-oi__focus-hint {
+  display: none;
+}
+
+.cz-oi__canvas {
+  display: block;
+  width: 100%;
+  aspect-ratio: 17.55 / 8.05;
+  max-height: 46vh;
+}
+
+.cz-oi__focus-hint {
+  position: absolute;
+  inset: 0;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  background: rgba(0, 0, 0, 0.55);
+  font-size: 0.9rem;
+  font-weight: 600;
+  letter-spacing: 0.02em;
+  pointer-events: none;
+}
+
+.cz-oi__hud {
+  position: absolute;
+  top: 8px;
+  left: 8px;
+  display: flex;
+  flex-wrap: wrap;
+  gap: 0.35rem;
+}
+
+.cz-oi__chip {
+  display: inline-flex;
+  gap: 0.3rem;
+  align-items: baseline;
+  padding: 0.15rem 0.4rem;
+  border-radius: 3px;
+  background: rgba(0, 0, 0, 0.55);
+  border: 1px solid var(--cz-border);
+  font-size: 0.68rem;
+  font-family: ui-monospace, SFMono-Regular, Menlo, Consolas, monospace;
+}
+
+.cz-oi__chip.is-on {
+  border-color: var(--cz-pass);
+  color: var(--cz-pass);
+}
+
+.cz-oi__chip-label {
+  text-transform: uppercase;
+  letter-spacing: 0.05em;
+  opacity: 0.7;
+}
+
+.cz-oi__log {
+  position: absolute;
+  right: 8px;
+  bottom: 8px;
+  max-width: 55%;
+  text-align: right;
+  font-size: 0.7rem;
+  color: var(--cz-muted);
+  pointer-events: none;
+}
+
+.cz-oi__log-line + .cz-oi__log-line {
+  opacity: 0.55;
+}
+
+.cz-oi__keys {
+  margin-top: 0.7rem;
+  font-size: 0.72rem;
+}
+
+.cz-oi__keys kbd {
+  font-size: 0.7rem;
+  margin-right: 0.15rem;
+}
+
+.cz-exercise .cz-oi__keys td,
+.cz-exercise .cz-oi__keys th {
+  padding: 0.2rem 0.5rem;
+}
+
+/* ------------------------------------------------------------------ *
+ * Autonomous routine planner
+ * ------------------------------------------------------------------ */
+
+.cz-auto {
+  --cz-field-carpet: #16181e;
+  --cz-field-line: rgba(255, 255, 255, 0.28);
+  --cz-field-blue: rgba(60, 130, 220, 0.22);
+  --cz-field-red: rgba(220, 70, 70, 0.18);
+}
+
+.cz-auto__stage {
+  position: relative;
+  margin: 0.8rem 0 0;
+  border: 1px solid var(--cz-border);
+  border-radius: 4px;
+  overflow: hidden;
+}
+
+.cz-auto__canvas {
+  display: block;
+  width: 100%;
+  aspect-ratio: 17.55 / 8.05;
+  max-height: 52vh;
+  cursor: crosshair;
+}
+
+.cz-auto__clock {
+  position: absolute;
+  top: 8px;
+  left: 8px;
+  padding: 0.15rem 0.45rem;
+  border-radius: 3px;
+  background: rgba(0, 0, 0, 0.6);
+  border: 1px solid var(--cz-border);
+  font-family: ui-monospace, SFMono-Regular, Menlo, Consolas, monospace;
+  font-size: 0.7rem;
+}
+
+.cz-auto__limits {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 1.2rem;
+  margin-top: 0.7rem;
+  font-size: 0.73rem;
+  color: var(--cz-muted);
+}
+
+.cz-auto__limits label {
+  display: flex;
+  align-items: center;
+  gap: 0.4rem;
+}
+
+.cz-auto__limits input[type="range"] {
+  width: 130px;
+  accent-color: var(--cz-team-orange);
+}
+
+.cz-auto__limits span {
+  font-family: ui-monospace, SFMono-Regular, Menlo, Consolas, monospace;
+  min-width: 62px;
+}
+
+.cz-auto__steps {
+  margin-top: 0.8rem;
+  border: 1px solid var(--cz-border);
+  border-radius: 4px;
+  overflow: hidden;
+}
+
+.cz-auto__step {
+  display: flex;
+  align-items: center;
+  gap: 0.6rem;
+  padding: 0.35rem 0.6rem;
+  font-size: 0.76rem;
+  cursor: pointer;
+  border-top: 1px solid rgba(255, 255, 255, 0.07);
+}
+
+.cz-auto__step:first-child { border-top: 0; }
+
+.cz-auto__step.is-selected {
+  background: rgba(240, 147, 43, 0.14);
+  box-shadow: inset 3px 0 0 var(--cz-team-orange);
+}
+
+.cz-auto__step--start,
+.cz-auto__step--total {
+  cursor: default;
+  background: rgba(255, 255, 255, 0.04);
+}
+
+.cz-auto__step-kind {
+  flex: 0 0 72px;
+  font-size: 0.64rem;
+  font-weight: 700;
+  letter-spacing: 0.05em;
+  text-transform: uppercase;
+  color: var(--cz-muted);
+}
+
+.cz-auto__step-kind.is-path { color: var(--cz-plot-setpoint, #f0932b); }
+.cz-auto__step-kind.is-action { color: var(--cz-pass); }
+.cz-auto__step-kind.is-driveTo { color: #9b8cff; }
+
+.cz-auto__step-body {
+  flex: 1 1 auto;
+  display: flex;
+  align-items: center;
+  gap: 0.3rem;
+  flex-wrap: wrap;
+}
+
+.cz-auto__step-body.is-over { color: var(--cz-fail); font-weight: 600; }
+
+.cz-auto__step-time {
+  flex: 0 0 auto;
+  font-family: ui-monospace, SFMono-Regular, Menlo, Consolas, monospace;
+  font-size: 0.72rem;
+  color: var(--cz-muted);
+}
+
+.cz-auto__step-tools {
+  flex: 0 0 auto;
+  display: flex;
+  gap: 0.15rem;
+}
+
+.cz-auto__icon {
+  width: 22px;
+  height: 22px;
+  padding: 0;
+  border: 1px solid var(--cz-border);
+  border-radius: 3px;
+  background: transparent;
+  color: inherit;
+  font-size: 0.7rem;
+  line-height: 1;
+  cursor: pointer;
+}
+
+.cz-auto__icon:hover {
+  border-color: var(--cz-team-orange);
+  color: var(--cz-team-orange);
+}
+
+.cz-auto__num {
+  width: 62px;
+  padding: 0.1rem 0.25rem;
+  border: 1px solid var(--cz-border);
+  border-radius: 3px;
+  background: rgba(0, 0, 0, 0.3);
+  color: inherit;
+  font-family: ui-monospace, SFMono-Regular, Menlo, Consolas, monospace;
+  font-size: 0.72rem;
+}
+
+.cz-auto__select {
+  padding: 0.1rem 0.25rem;
+  border: 1px solid var(--cz-border);
+  border-radius: 3px;
+  background: rgba(0, 0, 0, 0.3);
+  color: inherit;
+  font-size: 0.72rem;
+}
+
+.cz-auto__export {
+  margin-top: 0.9rem;
+}
+
+.cz-auto__export-head {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 0.5rem;
+  margin-bottom: 0.3rem;
+}
+
+.cz-auto__export-head .cz-exercise__label {
+  margin-bottom: 0;
+}
+
+.cz-exercise .cz-auto__code {
+  margin: 0;
+  padding: 0.7rem 0.8rem;
+  max-height: 300px;
+  overflow: auto;
+  border: 1px solid var(--cz-border);
+  border-radius: 4px;
+  background: rgba(0, 0, 0, 0.35);
+  font-size: 0.72rem;
+  line-height: 1.5;
+  white-space: pre;
+}
+
+/* Mode buttons: park the mechanism where one gain is visible and hold the
+   others at zero, so each step of the tuning procedure has a button. */
+.cz-sim__modebar {
+  display: flex;
+  align-items: center;
+  gap: 0.5rem;
+  flex-wrap: wrap;
+  margin-top: 0.7rem;
+}
+
+.cz-sim__modes-label {
+  font-size: 0.7rem;
+  font-weight: 600;
+  letter-spacing: 0.06em;
+  text-transform: uppercase;
+  color: var(--cz-muted);
+}
+
+.cz-sim__modes {
+  display: inline-flex;
+  border: 1px solid var(--cz-border);
+  border-radius: 4px;
+  overflow: hidden;
+}
+
+.cz-sim__mode {
+  padding: 0.25rem 0.7rem;
+  border: 0;
+  border-right: 1px solid var(--cz-border);
+  background: transparent;
+  color: var(--cz-muted);
+  font-family: inherit;
+  font-size: 0.75rem;
+  cursor: pointer;
+}
+
+.cz-sim__mode:last-child { border-right: 0; }
+
+.cz-sim__mode:hover { color: var(--cz-team-orange); }
+
+.cz-sim__mode.is-on {
+  background: var(--cz-team-orange);
+  color: #fff;
+  font-weight: 600;
+}
+
+.cz-sim__mode:focus-visible {
+  outline: 2px solid var(--cz-team-orange);
+  outline-offset: -2px;
+}
+
+.cz-sim__mode-note {
+  margin: 0.4rem 0 0;
+  font-size: 0.76rem;
+  color: var(--cz-muted);
+}
+
+.cz-sim__mode-note:empty { display: none; }
+
+.cz-sim.is-isolating .cz-sim__stage {
+  border-color: var(--cz-team-orange);
+}
+
+.cz-sim__slider input[type="range"]:disabled {
+  opacity: 0.35;
+  cursor: not-allowed;
+}
+
+/* ---- planner: task, HUD, timeline strip, parallel-action chips ---- */
+
+.cz-auto__task {
+  margin: 0.6rem 0 0;
+  padding: 0.5rem 0.75rem;
+  border-left: 3px solid var(--cz-pass);
+  background: rgba(76, 195, 138, 0.08);
+  font-size: 0.85rem;
+}
+
+.cz-auto__hud {
+  position: absolute;
+  top: 8px;
+  right: 8px;
+  display: flex;
+  flex-wrap: wrap;
+  gap: 0.35rem;
+  justify-content: flex-end;
+  max-width: 60%;
+}
+
+.cz-auto__clock.is-over {
+  color: var(--cz-fail);
+  border-color: var(--cz-fail);
+}
+
+/* One block per step, width proportional to how long it takes. The slack
+   block at the end is whatever is left of the fifteen seconds. */
+.cz-auto__strip {
+  position: relative;
+  display: flex;
+  height: 20px;
+  margin-top: 6px;
+  border: 1px solid var(--cz-border);
+  border-radius: 3px;
+  overflow: hidden;
+  background: rgba(0, 0, 0, 0.35);
+}
+
+.cz-auto__seg {
+  position: relative;
+  display: flex;
+  align-items: flex-end;
+  gap: 2px;
+  padding: 0 2px 2px;
+  border-right: 1px solid rgba(0, 0, 0, 0.5);
+  cursor: pointer;
+  min-width: 2px;
+}
+
+.cz-auto__seg.is-path { background: rgba(240, 147, 43, 0.45); }
+.cz-auto__seg.is-driveTo { background: rgba(155, 140, 255, 0.45); }
+.cz-auto__seg.is-action { background: rgba(76, 195, 138, 0.45); }
+.cz-auto__seg.is-wait { background: rgba(255, 255, 255, 0.12); }
+.cz-auto__seg.is-slack { background: transparent; cursor: default; border-right: 0; }
+.cz-auto__seg.is-selected { outline: 1px solid #fff; outline-offset: -1px; }
+
+.cz-auto__pip {
+  width: 5px;
+  height: 5px;
+  border-radius: 50%;
+  flex: 0 0 auto;
+}
+
+.cz-auto__playhead {
+  position: absolute;
+  top: 0;
+  bottom: 0;
+  width: 2px;
+  background: #fff;
+  pointer-events: none;
+}
+
+.cz-auto__parallel {
+  display: inline-flex;
+  align-items: center;
+  gap: 0.25rem;
+  flex-wrap: wrap;
+  margin-left: 0.35rem;
+}
+
+.cz-auto__parallel-label {
+  font-size: 0.66rem;
+  letter-spacing: 0.05em;
+  text-transform: uppercase;
+  color: var(--cz-muted);
+}
+
+.cz-auto__chip {
+  padding: 0.05rem 0.4rem;
+  border: 1px solid var(--cz-border);
+  border-radius: 999px;
+  background: transparent;
+  color: var(--cz-muted);
+  font-size: 0.68rem;
+  cursor: pointer;
+}
+
+.cz-auto__chip.is-on {
+  border-color: var(--chip);
+  color: var(--chip);
+  background: color-mix(in srgb, var(--chip) 18%, transparent);
+  font-weight: 600;
+}
+
+.cz-auto__chip:hover { border-color: var(--chip); }

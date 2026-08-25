@@ -1,0 +1,73 @@
+{%- comment -%}
+  Interactive Python exercise.
+
+  Usage in any docs page:
+
+      {% include interactive/python-exercise.html id="deadband" %}
+
+  The exercise itself lives in _data/exercises/<id>.yml so that contributors
+  only ever edit Markdown and YAML. See docs/Style Guide for the format.
+{%- endcomment -%}
+
+{%- assign ex = site.data.exercises[include.id] -%}
+
+{%- if ex == nil -%}
+<div class="cz-exercise cz-exercise--missing">
+  <p>No exercise named <code>{{ include.id }}</code> was found. Add <code>_data/exercises/{{ include.id }}.yml</code>.</p>
+</div>
+{%- else -%}
+
+{%- unless cz_exercise_assets -%}
+  <link rel="stylesheet" href="{{ '/assets/css/interactive.css' | relative_url }}">
+  <script src="{{ '/assets/js/interactive/python-exercise.js' | relative_url }}" defer></script>
+  {%- assign cz_exercise_assets = true -%}
+{%- endunless -%}
+
+<div class="cz-exercise"
+     data-exercise-id="{{ include.id }}"
+     data-worker-url="{{ '/assets/js/interactive/python-worker.js' | relative_url }}">
+
+  <div class="cz-exercise__header">
+    <span class="cz-exercise__badge">Try it</span>
+    <div class="cz-exercise__title">{{ ex.title }}</div>
+    <span class="cz-exercise__solved-mark" title="You have passed this exercise">✓ solved</span>
+  </div>
+
+  {%- if ex.prompt -%}
+  <div class="cz-exercise__prompt">{{ ex.prompt | markdownify }}</div>
+  {%- endif -%}
+
+  <label class="cz-exercise__label" for="cz-code-{{ include.id }}">Your code</label>
+  <textarea id="cz-code-{{ include.id }}"
+            class="cz-exercise__code"
+            spellcheck="false"
+            autocomplete="off"
+            autocapitalize="off"
+            autocorrect="off"
+            wrap="off"
+            aria-describedby="cz-help-{{ include.id }}">{{ ex.starter }}</textarea>
+
+  <div class="cz-exercise__toolbar">
+    <button type="button" class="btn btn-primary cz-exercise__btn" data-action="run">Run checks</button>
+    <button type="button" class="btn cz-exercise__btn" data-action="reset">Reset</button>
+    {%- if ex.hints -%}
+    <button type="button" class="btn cz-exercise__btn" data-action="hint">Hint</button>
+    {%- endif -%}
+    {%- if ex.solution -%}
+    <button type="button" class="btn cz-exercise__btn" data-action="solution">Show solution</button>
+    {%- endif -%}
+    <span class="cz-exercise__status" role="status" aria-live="polite"></span>
+  </div>
+
+  <p class="cz-exercise__help" id="cz-help-{{ include.id }}">
+    The code operates in your browser. The page sends nothing to a server and saves
+    your work on this computer. Press <kbd>Ctrl</kbd>+<kbd>Enter</kbd> to run it.
+  </p>
+
+  <div class="cz-exercise__hints" hidden></div>
+  <div class="cz-exercise__output"></div>
+
+  <script type="application/json" class="cz-exercise__data">{{ ex | jsonify | replace: '</', '<\/' }}</script>
+</div>
+
+{%- endif -%}

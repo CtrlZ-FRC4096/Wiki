@@ -1,0 +1,51 @@
+{%- comment -%}
+  Controller tuning simulator.
+
+  Usage:  {% include interactive/pid-sim.html plant="flywheel" %}
+  Plants: flywheel, arm, elevator (defined in assets/js/interactive/mechanism-sim.js)
+{%- endcomment -%}
+
+{%- unless cz_sim_assets -%}
+  <link rel="stylesheet" href="{{ '/assets/css/interactive.css' | relative_url }}">
+  <script src="{{ '/assets/js/interactive/mechanism-sim.js' | relative_url }}" defer></script>
+  <script src="{{ '/assets/js/interactive/pid-sim.js' | relative_url }}" defer></script>
+  {%- assign cz_sim_assets = true -%}
+{%- endunless -%}
+
+<div class="cz-exercise cz-sim" data-plant="{{ include.plant }}">
+  <div class="cz-exercise__header">
+    <span class="cz-exercise__badge">Tune it</span>
+    <div class="cz-exercise__title">{{ include.title | default: "Tune this mechanism" }}</div>
+    <span class="cz-exercise__solved-mark" title="Every check passes">✓ tuned</span>
+  </div>
+
+  <div class="cz-sim__stage">
+    <canvas class="cz-sim__canvas" role="img"
+            aria-label="Live plot of the commanded setpoint against what the mechanism actually does"></canvas>
+    <div class="cz-sim__legend">
+      <span class="cz-sim__key cz-sim__key--sp">setpoint</span>
+      <span class="cz-sim__key cz-sim__key--actual">actual</span>
+    </div>
+  </div>
+
+  <div class="cz-sim__sliders"></div>
+
+  <div class="cz-exercise__toolbar">
+    <button type="button" class="btn btn-primary cz-exercise__btn" data-action="check">Check my tuning</button>
+    <button type="button" class="btn cz-exercise__btn" data-action="play">Pause</button>
+    <button type="button" class="btn cz-exercise__btn" data-action="reset">All gains to zero</button>
+    <button type="button" class="btn cz-exercise__btn" data-action="answer">Show a known-good tuning</button>
+  </div>
+
+  <div class="cz-sim__modebar">
+    <span class="cz-sim__modes-label">Isolate:</span>
+    <div class="cz-sim__modes" role="group" aria-label="Which gain to isolate"></div>
+  </div>
+  <p class="cz-sim__mode-note"></p>
+
+  <p class="cz-exercise__help">
+    The plot repeats. When you move a slider, the plot starts again.
+  </p>
+
+  <div class="cz-sim__output cz-exercise__output"></div>
+</div>

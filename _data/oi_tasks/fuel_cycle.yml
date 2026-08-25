@@ -1,0 +1,46 @@
+title: Bind a full scoring cycle
+prompt: |
+  You have a `driver` controller and a `robot`. The robot has three attributes:
+
+  | Attribute | Effect |
+  |:----------|:-------|
+  | `robot.intake_running` | While `True`, the intake collects fuel. It operates only inside the depot |
+  | `robot.shooter_spinning` | While `True`, the shooter increases speed. It needs approximately one second to reach full speed |
+  | `robot.shoot` | Set to `True` to shoot one piece of fuel. The value returns to `False` each loop. Therefore set it from a *pressed* binding |
+
+  Write the bindings for a full cycle. Then press **Load bindings** and complete
+  the cycle with your keyboard.
+starter: |
+  # Hold the left trigger to collect fuel.
+  @driver.LEFT_TRIGGER_AS_BUTTON.whenHeld
+  def _():
+      robot.intake_running = True
+
+  # Now write these bindings:
+  #  - stop the intake when the trigger goes up
+  #  - start the shooter when A is pressed
+  #  - shoot when the right trigger is pressed
+hints:
+  - "whenHeld operates each loop while the button is down. whenReleased operates one time, when the button goes up. Use whenReleased to stop the intake."
+  - "The shooter needs time to reach speed. Bind it to whenPressed and let it continue. Do not bind it to whenHeld on the button that you shoot with."
+  - "robot.shoot returns to False each loop. A whenHeld binding would shoot continuously. Use whenPressed."
+solution: |
+  @driver.LEFT_TRIGGER_AS_BUTTON.whenHeld
+  def _():
+      robot.intake_running = True
+
+  @driver.LEFT_TRIGGER_AS_BUTTON.whenReleased
+  def _():
+      robot.intake_running = False
+
+  @driver.A.whenPressed
+  def _():
+      robot.shooter_spinning = True
+
+  @driver.B.whenPressed
+  def _():
+      robot.shooter_spinning = False
+
+  @driver.RIGHT_TRIGGER_AS_BUTTON.whenPressed
+  def _():
+      robot.shoot = True

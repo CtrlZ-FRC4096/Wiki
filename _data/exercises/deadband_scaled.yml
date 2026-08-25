@@ -1,0 +1,48 @@
+title: Make the deadband continuous
+prompt: |
+  Write `apply_deadband` again. The output must be continuous. It must be `0.0`
+  at the edge of the deadband, and it must increase to full power at the limit
+  of the joystick.
+
+  For a positive joystick value, the output is:
+
+  `(value - deadband) / (1.0 - deadband)`
+
+  A negative joystick value uses the same curve. Therefore `-0.55` and `0.55`
+  must give the same size of output with opposite signs.
+starter: |
+  def apply_deadband(value, deadband):
+      # Inside the deadband, return 0.0.
+      # Outside, increase the output from 0.0 to 1.0 at the joystick limit.
+      return value
+tests:
+  - name: The output is zero inside the deadband
+    code: |
+      got = apply_deadband(0.05, 0.1)
+      assert got == 0.0, f"apply_deadband(0.05, 0.1) returned {got}. Expected 0.0"
+  - name: There is no step change at the edge
+    code: |
+      got = apply_deadband(0.11, 0.1)
+      assert abs(got) < 0.05, f"apply_deadband(0.11, 0.1) returned {got}. Near the edge of the deadband the output must be near 0.0"
+  - name: A joystick at its limit gives full power
+    code: |
+      got = apply_deadband(1.0, 0.1)
+      assert abs(got - 1.0) < 1e-9, f"apply_deadband(1.0, 0.1) returned {got}. Expected 1.0"
+  - name: A middle value is scaled correctly
+    code: |
+      got = apply_deadband(0.55, 0.1)
+      assert abs(got - 0.5) < 1e-9, f"apply_deadband(0.55, 0.1) returned {got}. Expected 0.5"
+  - name: The negative direction is symmetrical
+    code: |
+      assert abs(apply_deadband(-1.0, 0.1) + 1.0) < 1e-9, f"apply_deadband(-1.0, 0.1) returned {apply_deadband(-1.0, 0.1)}. Expected -1.0"
+      assert abs(apply_deadband(-0.55, 0.1) + 0.5) < 1e-9, f"apply_deadband(-0.55, 0.1) returned {apply_deadband(-0.55, 0.1)}. Expected -0.5"
+hints:
+  - Do the inside-the-deadband condition first, and return 0.0. This is the same as the last exercise.
+  - Calculate the result for a positive value. Then apply the sign at the end.
+  - "To get the sign, use: 1.0 if value > 0 else -1.0"
+solution: |
+  def apply_deadband(value, deadband):
+      if abs(value) < deadband:
+          return 0.0
+      sign = 1.0 if value > 0 else -1.0
+      return sign * (abs(value) - deadband) / (1.0 - deadband)

@@ -1,0 +1,84 @@
+---
+title: Tutorials
+parent: Code
+nav_order: 7
+---
+
+# Interactive Tutorials
+
+On these pages you write the code. The page then checks your answer.
+
+The code operates in your browser with
+[Pyodide](https://pyodide.org/){:target="_blank"}. Pyodide is a Python
+interpreter compiled to WebAssembly. The page sends nothing to a server and
+installs nothing. It saves your work on the computer that you use. Therefore
+you can close the page and continue later.
+
+{: .note }
+> The first time you press **Run checks**, the browser downloads Python. The
+> download is a few megabytes and needs some seconds. All the later runs start
+> immediately.
+
+## Available tutorials
+
+Write Python and have it checked:
+
+- [Joystick Deadbands](../joystick-deadband) — why a robot moves when nobody
+  touches the controller, and how to correct it.
+
+Tune a simulated mechanism:
+
+- [How to Tune a Controller](../../Controls/tuning) — the method, and the function of each gain
+- [How to Tune a Flywheel](../../Controls/tuning-flywheel) — velocity control
+- [How to Tune an Arm](../../Controls/tuning-arm) — position control against gravity
+- [How to Tune an Elevator](../../Controls/tuning-elevator) — position control, constant gravity
+
+Drive a robot around:
+
+- [Operator Interface](../../Controls/operator-interface) — write button
+  bindings, then complete a scoring cycle with your keyboard
+- [How to Plan an Auto](../../Autonomous/planning-an-auto) — draw paths and
+  actions on a 2D field, and measure the duration
+
+## Writing a tutorial
+
+Tutorials are Markdown pages. Four includes are available:
+
+| Include | What it gives you |
+|:--------|:------------------|
+| `interactive/python-exercise.html` | A Python editor with auto-checked exercises |
+| `interactive/pid-sim.html` | A tunable mechanism with sliders and a live plot |
+| `interactive/oi-task.html` | Button bindings driven from the keyboard |
+| `interactive/auto-planner.html` | The autonomous path planner |
+
+To drop a Python exercise into a page:
+
+1. Add `_data/exercises/<your-id>.yml` describing the exercise.
+2. Reference it from the page with `{% raw %}{% include interactive/python-exercise.html id="<your-id>" %}{% endraw %}`.
+
+The YAML file looks like this:
+
+```yaml
+title: Ignore stick drift with a deadband
+prompt: |
+  Markdown shown above the editor.
+starter: |
+  def apply_deadband(value, deadband):
+      return value
+tests:
+  - name: A resting stick is treated as zero
+    code: |
+      got = apply_deadband(0.03, 0.1)
+      assert got == 0.0, f"got {got}, expected 0.0"
+hints:
+  - Shown one at a time when the student asks for help.
+solution: |
+  def apply_deadband(value, deadband):
+      return 0.0 if abs(value) < deadband else value
+```
+
+Each check is a small Python program. It operates after the code that the
+student writes. A check passes if it raises no exception.
+
+**Put a message on every `assert`.** The student sees only that message.
+Therefore the message must give the expected value and the actual value.

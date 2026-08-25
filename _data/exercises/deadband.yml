@@ -1,0 +1,42 @@
+title: Ignore joystick drift with a deadband
+prompt: |
+  Write `apply_deadband(value, deadband)`.
+
+  - If the joystick is inside the deadband, return `0.0`.
+  - If it is outside, return the joystick value with no change.
+
+  `value` can be negative. The driver can move the joystick in two directions.
+starter: |
+  def apply_deadband(value, deadband):
+      # Return 0.0 if the joystick is inside the deadband.
+      # If it is outside, return value with no change.
+      return value
+tests:
+  - name: A joystick at rest gives zero
+    code: |
+      got = apply_deadband(0.03, 0.1)
+      assert got == 0.0, f"apply_deadband(0.03, 0.1) returned {got}. Expected 0.0"
+  - name: Drift in the negative direction also gives zero
+    code: |
+      got = apply_deadband(-0.07, 0.1)
+      assert got == 0.0, f"apply_deadband(-0.07, 0.1) returned {got}. Expected 0.0"
+  - name: A large input passes through
+    code: |
+      got = apply_deadband(0.62, 0.1)
+      assert got == 0.62, f"apply_deadband(0.62, 0.1) returned {got}. Expected 0.62"
+  - name: A large negative input passes through
+    code: |
+      got = apply_deadband(-1.0, 0.1)
+      assert got == -1.0, f"apply_deadband(-1.0, 0.1) returned {got}. Expected -1.0"
+  - name: The function uses the deadband parameter
+    code: |
+      got = apply_deadband(0.2, 0.3)
+      assert got == 0.0, f"apply_deadband(0.2, 0.3) returned {got}. Expected 0.0, because 0.2 is inside a deadband of 0.3"
+hints:
+  - The size of the input, without the direction, is abs(value).
+  - Compare abs(value) with deadband. Then return 0.0 or value.
+solution: |
+  def apply_deadband(value, deadband):
+      if abs(value) < deadband:
+          return 0.0
+      return value

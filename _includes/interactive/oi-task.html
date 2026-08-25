@@ -1,0 +1,80 @@
+{%- comment -%}
+  Operator interface task: write bindings, then drive the robot with the
+  keyboard to see whether they work.
+
+  Usage:  {% include interactive/oi-task.html id="fuel_cycle" %}
+  Task content lives in _data/oi_tasks/<id>.yml
+{%- endcomment -%}
+
+{%- assign task = site.data.oi_tasks[include.id] -%}
+
+{%- if task == nil -%}
+<div class="cz-exercise cz-exercise--missing">
+  <p>No task named <code>{{ include.id }}</code>. Add <code>_data/oi_tasks/{{ include.id }}.yml</code>.</p>
+</div>
+{%- else -%}
+
+{%- unless cz_oi_assets -%}
+  <link rel="stylesheet" href="{{ '/assets/css/interactive.css' | relative_url }}">
+  <script src="{{ '/assets/js/interactive/field-sim.js' | relative_url }}" defer></script>
+  <script src="{{ '/assets/js/interactive/oi-task.js' | relative_url }}" defer></script>
+  {%- assign cz_oi_assets = true -%}
+{%- endunless -%}
+
+<div class="cz-exercise cz-oi"
+     data-task-id="{{ include.id }}"
+     data-worker-url="{{ '/assets/js/interactive/python-session-worker.js' | relative_url }}">
+
+  <div class="cz-exercise__header">
+    <span class="cz-exercise__badge">Drive it</span>
+    <div class="cz-exercise__title">{{ task.title }}</div>
+    <span class="cz-exercise__solved-mark" title="Cycle complete">✓ complete</span>
+  </div>
+
+  {%- if task.prompt -%}
+  <div class="cz-exercise__prompt">{{ task.prompt | markdownify }}</div>
+  {%- endif -%}
+
+  <label class="cz-exercise__label" for="cz-oi-code-{{ include.id }}">robot/oi.py</label>
+  <textarea id="cz-oi-code-{{ include.id }}" class="cz-exercise__code cz-oi__code"
+            spellcheck="false" autocomplete="off" autocapitalize="off" wrap="off">{{ task.starter }}</textarea>
+
+  <div class="cz-exercise__toolbar">
+    <button type="button" class="btn btn-primary cz-exercise__btn" data-action="load">Load bindings</button>
+    <button type="button" class="btn cz-exercise__btn" data-action="reset">Reset robot</button>
+    <button type="button" class="btn cz-exercise__btn" data-action="restore">Restore starter code</button>
+    {%- if task.hints -%}<button type="button" class="btn cz-exercise__btn" data-action="hint">Hint</button>{%- endif -%}
+    {%- if task.solution -%}<button type="button" class="btn cz-exercise__btn" data-action="solution">Show bindings</button>{%- endif -%}
+    <span class="cz-exercise__status cz-oi__status" role="status" aria-live="polite"></span>
+  </div>
+
+  <div class="cz-oi__hints cz-exercise__hints" hidden></div>
+
+  <div class="cz-oi__stage" tabindex="0"
+       aria-label="Field view. Click here, then use the keyboard to drive.">
+    <canvas class="cz-oi__canvas"></canvas>
+    <div class="cz-oi__hud"></div>
+    <div class="cz-oi__log"></div>
+    <div class="cz-oi__focus-hint">Click the field, then drive</div>
+  </div>
+
+  <table class="cz-oi__keys">
+    <thead><tr><th>Key</th><th>Controller</th><th>Key</th><th>Controller</th></tr></thead>
+    <tbody>
+      <tr><td><kbd>W</kbd><kbd>A</kbd><kbd>S</kbd><kbd>D</kbd></td><td>left joystick, to drive</td>
+          <td><kbd>J</kbd></td><td><code>A</code></td></tr>
+      <tr><td><kbd>Q</kbd><kbd>E</kbd></td><td>right joystick, to turn</td>
+          <td><kbd>K</kbd></td><td><code>B</code></td></tr>
+      <tr><td><kbd>Shift</kbd></td><td><code>LEFT_TRIGGER_AS_BUTTON</code></td>
+          <td><kbd>U</kbd> <kbd>I</kbd></td><td><code>LEFT_BUMPER</code> / <code>RIGHT_BUMPER</code></td></tr>
+      <tr><td><kbd>L</kbd></td><td><code>RIGHT_TRIGGER_AS_BUTTON</code></td>
+          <td>arrows</td><td><code>POV.UP</code>, <code>POV.DOWN</code>, <code>POV.LEFT</code>, <code>POV.RIGHT</code></td></tr>
+    </tbody>
+  </table>
+
+  <div class="cz-oi__output cz-exercise__output"></div>
+
+  <script type="application/json" class="cz-oi__data">{{ task | jsonify | replace: '</', '<\/' }}</script>
+</div>
+
+{%- endif -%}
