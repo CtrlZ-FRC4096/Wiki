@@ -87,3 +87,24 @@ student writes. A check passes if it raises no exception.
 
 **Put a message on every `assert`.** The student sees only that message.
 Therefore the message must give the expected value and the actual value.
+
+## How to check your work
+
+Run these before you open a pull request. They need no installation except
+PyYAML for the first one.
+
+| Command | What it checks |
+|:--------|:---------------|
+| `python3 tools/validate-exercises.py` | Every exercise. The solution must pass all its checks, the starter must fail at least one, and every assert must carry a message |
+| `node tools/validate-tuning.js` | Every gain quoted on a tuning page. Each one must be reachable on its slider and must pass at every setpoint |
+| `node tools/validate-auto-task.js` | The autonomous task is possible, and a routine with its actions in series is not |
+| `node tools/validate-swerve.js` | The swerve maths on the wiki agrees with `ctre_module_state.py` on the robot |
+| `node tools/check-ste.js` | Sentence length, paragraph length and word use on the tutorial pages |
+
+To see a page before you push it, build the site and open it:
+
+```
+bundle exec jekyll serve
+```
+
+Then go to `localhost:4000`.
