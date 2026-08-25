@@ -5,8 +5,11 @@
   Plants: flywheel, arm, elevator (defined in assets/js/interactive/mechanism-sim.js)
 {%- endcomment -%}
 
-{%- unless cz_sim_assets -%}
+{%- unless cz_interactive_css -%}
   <link rel="stylesheet" href="{{ '/assets/css/interactive.css' | relative_url }}">
+  {%- assign cz_interactive_css = true -%}
+{%- endunless -%}
+{%- unless cz_sim_assets -%}
   <script src="{{ '/assets/js/interactive/mechanism-sim.js' | relative_url }}" defer></script>
   <script src="{{ '/assets/js/interactive/pid-sim.js' | relative_url }}" defer></script>
   {%- assign cz_sim_assets = true -%}

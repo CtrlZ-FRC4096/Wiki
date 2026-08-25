@@ -5,8 +5,11 @@
   Usage:  {% include interactive/auto-planner.html %}
 {%- endcomment -%}
 
-{%- unless cz_auto_assets -%}
+{%- unless cz_interactive_css -%}
   <link rel="stylesheet" href="{{ '/assets/css/interactive.css' | relative_url }}">
+  {%- assign cz_interactive_css = true -%}
+{%- endunless -%}
+{%- unless cz_auto_assets -%}
   <script src="{{ '/assets/js/interactive/field-sim.js' | relative_url }}" defer></script>
   <script src="{{ '/assets/js/interactive/auto-core.js' | relative_url }}" defer></script>
   <script src="{{ '/assets/js/interactive/auto-planner.js' | relative_url }}" defer></script>

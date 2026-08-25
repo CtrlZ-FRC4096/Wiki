@@ -1,0 +1,75 @@
+title: Turn less, drive backwards
+prompt: |
+  A swerve module can drive in two directions. Therefore it never needs to turn
+  more than 90°.
+
+  If the commanded angle is more than 90° away, turn to the opposite angle and
+  make the speed negative. The wheel then pushes the robot in the same
+  direction, but the module turned much less.
+
+  `nearest_equivalent` from the last exercise is written for you.
+
+  Write `optimize(current_angle, target_angle, speed)`. It must return a tuple
+  of `(angle, speed)`.
+starter: |
+  def nearest_equivalent(reference, angle):
+      difference = (angle - reference + 180) % 360 - 180
+      return reference + difference
+
+
+  def optimize(current_angle, target_angle, speed):
+      # 1. Move the target to the equivalent angle closest to current_angle.
+      # 2. If it is still more than 90 degrees away, add or subtract 180
+      #    and make the speed negative.
+      return target_angle, speed
+tests:
+  - name: A small movement does not change
+    code: |
+      angle, speed = optimize(0, 30, 2.0)
+      assert abs(angle - 30) < 1e-9, f"optimize(0, 30, 2.0) gave angle {angle}. Expected 30"
+      assert abs(speed - 2.0) < 1e-9, f"optimize(0, 30, 2.0) gave speed {speed}. Expected 2.0"
+  - name: A movement of 170 degrees becomes a movement of -10 with reverse drive
+    code: |
+      angle, speed = optimize(0, 170, 2.0)
+      assert abs(angle + 10) < 1e-9, f"optimize(0, 170, 2.0) gave angle {angle}. Expected -10"
+      assert abs(speed + 2.0) < 1e-9, f"optimize(0, 170, 2.0) gave speed {speed}. Expected -2.0"
+  - name: A movement of exactly 180 degrees becomes no movement at all
+    code: |
+      angle, speed = optimize(0, 180, 1.5)
+      assert abs(angle) < 1e-9, f"optimize(0, 180, 1.5) gave angle {angle}. Expected 0"
+      assert abs(speed + 1.5) < 1e-9, f"optimize(0, 180, 1.5) gave speed {speed}. Expected -1.5"
+  - name: The module never turns more than 90 degrees
+    code: |
+      for current in [-200, -47, 0, 91, 359, 700]:
+          for target in [-180, -33, 0, 45, 120, 179, 270, 400]:
+              angle, speed = optimize(current, target, 1.0)
+              assert abs(angle - current) <= 90 + 1e-6, f"optimize({current}, {target}, 1.0) turns {abs(angle - current)} degrees. A module never needs more than 90"
+  - name: The wheel still pushes the robot the same way
+    code: |
+      import math
+      for current in [-200, -47, 0, 91, 359, 700]:
+          for target in [-180, -33, 0, 45, 120, 179, 270, 400]:
+              angle, speed = optimize(current, target, 3.0)
+              wanted = (3.0 * math.cos(math.radians(target)), 3.0 * math.sin(math.radians(target)))
+              got = (speed * math.cos(math.radians(angle)), speed * math.sin(math.radians(angle)))
+              assert abs(got[0] - wanted[0]) < 1e-6 and abs(got[1] - wanted[1]) < 1e-6, f"optimize({current}, {target}, 3.0) gave ({angle}, {speed}). That pushes the robot a different way than the command"
+  - name: A speed of zero stays zero
+    code: |
+      angle, speed = optimize(0, 170, 0.0)
+      assert abs(speed) < 1e-9, f"optimize(0, 170, 0.0) gave speed {speed}. Expected 0"
+hints:
+  - Use nearest_equivalent first. Then measure how far the target is from current_angle.
+  - If the distance is more than 90 degrees, add 180 to the target or subtract 180 from it, and make the speed negative.
+  - Select the direction that keeps the result closest to current_angle. nearest_equivalent can do that for you a second time.
+solution: |
+  def nearest_equivalent(reference, angle):
+      difference = (angle - reference + 180) % 360 - 180
+      return reference + difference
+
+
+  def optimize(current_angle, target_angle, speed):
+      angle = nearest_equivalent(current_angle, target_angle)
+      if abs(angle - current_angle) > 90:
+          angle = nearest_equivalent(current_angle, angle + 180)
+          speed = -speed
+      return angle, speed

@@ -1,0 +1,57 @@
+title: Counts per 100 ms to metres per second
+prompt: |
+  Now convert the same signal into the speed of the robot across the carpet.
+
+  `falcon_to_rpm` from the last exercise is already written for you.
+
+  A swerve wheel is 4 inches in diameter, thus its circumference is
+  `0.3192` metres. Our drive gear ratio is `5.68`.
+
+  Write `falcon_to_mps(counts_per_100ms, circumference, gear_ratio)`. It must
+  return metres per second.
+starter: |
+  def falcon_to_rpm(counts_per_100ms, gear_ratio):
+      return counts_per_100ms * 600 / 2048 / gear_ratio
+
+
+  def falcon_to_mps(counts_per_100ms, circumference, gear_ratio):
+      # One turn of the wheel moves the robot one circumference.
+      # RPM is turns for each minute. You need metres for each second.
+      return counts_per_100ms
+tests:
+  - name: One wheel turn each second moves one circumference each second
+    code: |
+      # One wheel turn each second is 60 wheel RPM, thus 60 * gear_ratio motor RPM.
+      counts = 60 * 5.68 * 2048 / 600
+      got = falcon_to_mps(counts, 0.3192, 5.68)
+      assert abs(got - 0.3192) < 1e-6, f"falcon_to_mps({counts}, 0.3192, 5.68) returned {got}. Expected 0.3192"
+  - name: Zero is zero
+    code: |
+      got = falcon_to_mps(0, 0.3192, 5.68)
+      assert got == 0, f"falcon_to_mps(0, 0.3192, 5.68) returned {got}. Expected 0"
+  - name: A larger wheel goes further for the same motor speed
+    code: |
+      small = falcon_to_mps(2048, 0.3192, 5.68)
+      big = falcon_to_mps(2048, 0.6384, 5.68)
+      assert abs(big - 2 * small) < 1e-6, f"A wheel of twice the size must give twice the speed. Got {small} and {big}"
+  - name: A larger gear ratio gives a lower speed
+    code: |
+      fast = falcon_to_mps(2048, 0.3192, 5.68)
+      slow = falcon_to_mps(2048, 0.3192, 11.36)
+      assert abs(slow - fast / 2) < 1e-6, f"A gear ratio of twice the size must give one half the speed. Got {fast} and {slow}"
+  - name: Full motor speed gives a believable robot speed
+    code: |
+      got = falcon_to_mps(6000 * 2048 / 600, 0.3192, 5.68)
+      assert 5 < got < 6.5, f"A motor at 6000 RPM through this gearbox gave {got} m/s. Expected a value between 5 and 6.5"
+hints:
+  - Get the wheel RPM first with falcon_to_rpm.
+  - One turn of the wheel moves the robot one circumference. Multiply the wheel RPM by the circumference to get metres for each minute.
+  - There are 60 seconds in one minute.
+solution: |
+  def falcon_to_rpm(counts_per_100ms, gear_ratio):
+      return counts_per_100ms * 600 / 2048 / gear_ratio
+
+
+  def falcon_to_mps(counts_per_100ms, circumference, gear_ratio):
+      wheel_rpm = falcon_to_rpm(counts_per_100ms, gear_ratio)
+      return wheel_rpm * circumference / 60

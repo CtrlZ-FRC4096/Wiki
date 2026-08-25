@@ -1,0 +1,64 @@
+title: Write the inverse, and prove it
+prompt: |
+  A CANcoder reports an absolute angle as **4096 counts** for one turn. This
+  function converts counts to degrees, and it is correct:
+
+  ```python
+  def cancoder_to_degrees(counts, gear_ratio):
+      return counts * (360 / (gear_ratio * 4096))
+  ```
+
+  Write `degrees_to_cancoder(degrees, gear_ratio)`. It must be the exact
+  inverse.
+
+  The last check converts a value in one direction and then back again. A
+  conversion pair must always return the value that it started with. This is
+  the cheapest test you can write, and it finds the most common error in a file
+  of conversions.
+starter: |
+  def cancoder_to_degrees(counts, gear_ratio):
+      return counts * (360 / (gear_ratio * 4096))
+
+
+  def degrees_to_cancoder(degrees, gear_ratio):
+      # This must undo cancoder_to_degrees exactly.
+      return degrees * (360 / (gear_ratio * 4096))
+tests:
+  - name: One full turn of the mechanism is 4096 counts times the gear ratio
+    code: |
+      got = degrees_to_cancoder(360, 1.0)
+      assert abs(got - 4096) < 1e-6, f"degrees_to_cancoder(360, 1.0) returned {got}. Expected 4096"
+  - name: The gear ratio increases the count value
+    code: |
+      got = degrees_to_cancoder(360, 12.1)
+      assert abs(got - 4096 * 12.1) < 1e-6, f"degrees_to_cancoder(360, 12.1) returned {got}. Expected {4096 * 12.1}"
+  - name: Zero is zero
+    code: |
+      got = degrees_to_cancoder(0, 12.1)
+      assert got == 0, f"degrees_to_cancoder(0, 12.1) returned {got}. Expected 0"
+  - name: A negative angle gives a negative count
+    code: |
+      got = degrees_to_cancoder(-90, 12.1)
+      assert got < 0, f"degrees_to_cancoder(-90, 12.1) returned {got}. Expected a negative value"
+  - name: Counts to degrees and back returns the original counts
+    code: |
+      for counts in [0, 1, 1000, 4096, -2048, 55000]:
+          there = cancoder_to_degrees(counts, 12.1)
+          back = degrees_to_cancoder(there, 12.1)
+          assert abs(back - counts) < 1e-6, f"{counts} counts became {there} degrees, then {back} counts. A conversion pair must return the value it started with"
+  - name: Degrees to counts and back returns the original degrees
+    code: |
+      for degrees in [0, 1.5, 90, 360, -45]:
+          there = degrees_to_cancoder(degrees, 5.68)
+          back = cancoder_to_degrees(there, 5.68)
+          assert abs(back - degrees) < 1e-6, f"{degrees} degrees became {there} counts, then {back} degrees"
+hints:
+  - "cancoder_to_degrees multiplies by 360 / (gear_ratio * 4096). To undo a multiplication, divide by the same value."
+  - "Write it as: degrees / (360 / (gear_ratio * 4096)). Compare it with degrees_to_falcon in our repo, which has the correct form."
+solution: |
+  def cancoder_to_degrees(counts, gear_ratio):
+      return counts * (360 / (gear_ratio * 4096))
+
+
+  def degrees_to_cancoder(degrees, gear_ratio):
+      return degrees / (360 / (gear_ratio * 4096))

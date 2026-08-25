@@ -1,0 +1,43 @@
+{%- comment -%}
+  Swerve module dial: compare the steering movement with and without the
+  reverse-drive optimisation.
+
+  Usage:  {% include interactive/swerve-dial.html %}
+{%- endcomment -%}
+
+{%- unless cz_interactive_css -%}
+  <link rel="stylesheet" href="{{ '/assets/css/interactive.css' | relative_url }}">
+  {%- assign cz_interactive_css = true -%}
+{%- endunless -%}
+{%- unless cz_dial_assets -%}
+  <script src="{{ '/assets/js/interactive/swerve-core.js' | relative_url }}" defer></script>
+  <script src="{{ '/assets/js/interactive/swerve-dial.js' | relative_url }}" defer></script>
+  {%- assign cz_dial_assets = true -%}
+{%- endunless -%}
+
+<div class="cz-exercise cz-dial">
+  <div class="cz-exercise__header">
+    <span class="cz-exercise__badge">Try it</span>
+    <div class="cz-exercise__title">{{ include.title | default: "One swerve module" }}</div>
+  </div>
+
+  <div class="cz-dial__body">
+    <div class="cz-dial__stage">
+      <canvas class="cz-dial__canvas" role="img"
+              aria-label="A dial showing the module angle, the commanded angle, and the optimised angle"></canvas>
+    </div>
+    <div class="cz-dial__readout"></div>
+  </div>
+
+  <div class="cz-dial__sliders"></div>
+
+  <div class="cz-exercise__toolbar">
+    <button type="button" class="btn cz-exercise__btn" data-action="worst">Command the worst case</button>
+  </div>
+
+  <p class="cz-exercise__help">
+    Blue is where the module is now. The dashed orange line is the command. Green
+    is where the module actually goes. The two arcs are the movement with and
+    without the optimisation.
+  </p>
+</div>

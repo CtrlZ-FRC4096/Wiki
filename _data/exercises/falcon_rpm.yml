@@ -1,0 +1,46 @@
+title: Counts per 100 ms to mechanism RPM
+prompt: |
+  A Falcon reports its velocity in **encoder counts per 100 milliseconds**.
+  There are **2048 counts** in one turn of the motor.
+
+  The gear ratio is the number of motor turns for one turn of the mechanism.
+  Our swerve drive uses `5.68`.
+
+  Write `falcon_to_rpm(counts_per_100ms, gear_ratio)`. It must return the speed
+  of the **mechanism** in revolutions per minute.
+starter: |
+  def falcon_to_rpm(counts_per_100ms, gear_ratio):
+      # There are 2048 counts in one motor turn.
+      # There are 600 periods of 100 ms in one minute.
+      # The gear ratio is motor turns for each mechanism turn.
+      return counts_per_100ms
+tests:
+  - name: 2048 counts per 100 ms with no gearbox is 600 RPM
+    code: |
+      got = falcon_to_rpm(2048, 1.0)
+      assert abs(got - 600) < 1e-6, f"falcon_to_rpm(2048, 1.0) returned {got}. Expected 600"
+  - name: The gear ratio decreases the mechanism speed
+    code: |
+      got = falcon_to_rpm(2048, 5.68)
+      assert abs(got - 600 / 5.68) < 1e-6, f"falcon_to_rpm(2048, 5.68) returned {got}. Expected {600 / 5.68}"
+  - name: Zero is zero
+    code: |
+      got = falcon_to_rpm(0, 5.68)
+      assert got == 0, f"falcon_to_rpm(0, 5.68) returned {got}. Expected 0"
+  - name: A negative velocity stays negative
+    code: |
+      got = falcon_to_rpm(-1024, 5.68)
+      assert got < 0, f"falcon_to_rpm(-1024, 5.68) returned {got}. A reverse velocity must stay negative"
+      assert abs(got + 300 / 5.68) < 1e-6, f"falcon_to_rpm(-1024, 5.68) returned {got}. Expected {-300 / 5.68}"
+  - name: The result scales with the count value
+    code: |
+      a = falcon_to_rpm(1000, 3.0)
+      b = falcon_to_rpm(2000, 3.0)
+      assert abs(b - 2 * a) < 1e-6, f"Twice the counts must give twice the RPM. Got {a} and {b}"
+hints:
+  - "Counts to motor turns: divide by 2048. Then a value for each 100 ms becomes a value for each minute: multiply by 600."
+  - The last step is the gear ratio. The mechanism is slower than the motor, so divide.
+solution: |
+  def falcon_to_rpm(counts_per_100ms, gear_ratio):
+      motor_rpm = counts_per_100ms * 600 / 2048
+      return motor_rpm / gear_ratio

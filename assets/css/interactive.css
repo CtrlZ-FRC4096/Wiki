@@ -849,3 +849,93 @@
 }
 
 .cz-auto__chip:hover { border-color: var(--chip); }
+
+/* ------------------------------------------------------------------ *
+ * Swerve module dial
+ * ------------------------------------------------------------------ */
+
+.cz-dial {
+  --cz-plot-actual: #57a8ff;
+  --cz-plot-setpoint: #f0932b;
+  --cz-plot-body: rgba(255, 255, 255, 0.7);
+  --cz-plot-text: rgba(255, 255, 255, 0.55);
+}
+
+.cz-dial__body {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 1rem;
+  align-items: center;
+  margin-top: 0.8rem;
+}
+
+.cz-dial__stage {
+  flex: 1 1 260px;
+  min-width: 240px;
+  border: 1px solid var(--cz-border);
+  border-radius: 4px;
+  background: rgba(0, 0, 0, 0.35);
+}
+
+.cz-dial__canvas {
+  display: block;
+  width: 100%;
+  aspect-ratio: 1 / 1;
+  max-height: 320px;
+}
+
+.cz-dial__readout {
+  flex: 1 1 260px;
+  min-width: 240px;
+}
+
+.cz-exercise .cz-dial__table {
+  width: 100%;
+  margin: 0;
+  border-collapse: collapse;
+  font-size: 0.78rem;
+}
+
+.cz-exercise .cz-dial__table th,
+.cz-exercise .cz-dial__table td {
+  padding: 0.25rem 0.4rem;
+  border: 0;
+  border-bottom: 1px solid rgba(255, 255, 255, 0.07);
+  background: none;
+}
+
+.cz-exercise .cz-dial__table th {
+  text-align: left;
+  font-weight: 400;
+  color: var(--cz-muted);
+}
+
+.cz-exercise .cz-dial__table td {
+  text-align: right;
+  font-family: ui-monospace, SFMono-Regular, Menlo, Consolas, monospace;
+  font-variant-numeric: tabular-nums;
+}
+
+.cz-exercise .cz-dial__table tr.is-key td,
+.cz-exercise .cz-dial__table tr.is-key th {
+  color: var(--cz-pass);
+  font-weight: 600;
+}
+
+.cz-dial__note {
+  margin: 0.6rem 0 0;
+  font-size: 0.78rem;
+  color: var(--cz-muted);
+}
+
+.cz-dial__note.is-saved {
+  color: var(--cz-pass);
+  font-weight: 600;
+}
+
+.cz-dial__sliders {
+  display: grid;
+  grid-template-columns: repeat(auto-fit, minmax(190px, 1fr));
+  gap: 0.5rem 1.1rem;
+  margin-top: 0.9rem;
+}

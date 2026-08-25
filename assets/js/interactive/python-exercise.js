@@ -196,6 +196,7 @@
     var id = root.getAttribute("data-exercise-id");
     var workerUrl = root.getAttribute("data-worker-url");
     var dataNode = root.querySelector(".cz-exercise__data");
+    if (!dataNode) return;
     var data = JSON.parse(dataNode.textContent);
 
     var textarea = root.querySelector(".cz-exercise__code");
@@ -297,7 +298,10 @@
   }
 
   function init() {
-    var blocks = document.querySelectorAll(".cz-exercise");
+    // .cz-exercise is the shared styling class every widget uses. Select the
+    // Python exercises specifically, or this script picks up a tuning
+    // simulator or a swerve dial and fails on the missing data.
+    var blocks = document.querySelectorAll(".cz-pyex");
     for (var i = 0; i < blocks.length; i++) setup(blocks[i]);
   }
 

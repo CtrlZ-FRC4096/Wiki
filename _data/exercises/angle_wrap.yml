@@ -1,0 +1,61 @@
+title: Find the equivalent angle that is closest
+prompt: |
+  An angle of 350° and an angle of −10° put the wheel in the same place. They
+  are the same angle, plus or minus a number of full turns.
+
+  A swerve module must select the value that needs the smallest movement. If
+  the module is at 0° and you command 350°, it must not turn 350°. It must turn
+  −10°.
+
+  Write `nearest_equivalent(reference, angle)`. It must return the value that
+  is equal to `angle` plus or minus a number of full turns, and that is closest
+  to `reference`.
+
+  The result minus `reference` must always be between −180 and +180.
+starter: |
+  def nearest_equivalent(reference, angle):
+      # Add or subtract 360 until the difference from reference
+      # is between -180 and +180.
+      return angle
+tests:
+  - name: An angle that is already close does not change
+    code: |
+      got = nearest_equivalent(0, 45)
+      assert abs(got - 45) < 1e-9, f"nearest_equivalent(0, 45) returned {got}. Expected 45"
+  - name: 350 degrees from 0 becomes -10
+    code: |
+      got = nearest_equivalent(0, 350)
+      assert abs(got + 10) < 1e-9, f"nearest_equivalent(0, 350) returned {got}. Expected -10"
+  - name: 10 degrees from 350 becomes 370
+    code: |
+      got = nearest_equivalent(350, 10)
+      assert abs(got - 370) < 1e-9, f"nearest_equivalent(350, 10) returned {got}. Expected 370"
+  - name: The module can turn many times and still work
+    code: |
+      got = nearest_equivalent(1090, 5)
+      assert abs(got - 1085) < 1e-9, f"nearest_equivalent(1090, 5) returned {got}. Expected 1085, because the module has turned three times"
+  - name: A negative reference works
+    code: |
+      got = nearest_equivalent(-170, 170)
+      assert abs(got + 190) < 1e-9, f"nearest_equivalent(-170, 170) returned {got}. Expected -190"
+  - name: The result is always within 180 degrees of the reference
+    code: |
+      for reference in [-540, -95, 0, 37, 359, 720]:
+          for angle in [-400, -180, -3, 0, 44, 179, 270, 400, 900]:
+              got = nearest_equivalent(reference, angle)
+              assert abs(got - reference) <= 180 + 1e-9, f"nearest_equivalent({reference}, {angle}) returned {got}, which is {abs(got - reference)} degrees away"
+  - name: The result is still the same physical angle
+    code: |
+      for reference in [-540, -95, 0, 37, 359, 720]:
+          for angle in [-400, -180, -3, 0, 44, 179, 270, 400, 900]:
+              got = nearest_equivalent(reference, angle)
+              turns = (got - angle) / 360
+              assert abs(turns - round(turns)) < 1e-9, f"nearest_equivalent({reference}, {angle}) returned {got}. That is not the same angle plus a whole number of turns"
+hints:
+  - Start with the difference between the angle and the reference.
+  - "A short way to do it: take the difference, then use the remainder operator to bring it into one turn, then correct any value above 180."
+  - "In Python, (d + 180) % 360 - 180 brings a difference into the range -180 to +180."
+solution: |
+  def nearest_equivalent(reference, angle):
+      difference = (angle - reference + 180) % 360 - 180
+      return reference + difference

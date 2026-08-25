@@ -25,6 +25,10 @@ Write Python and have it checked:
 
 - [Joystick Deadbands](../joystick-deadband) — why a robot moves when nobody
   touches the controller, and how to correct it.
+- [Unit Conversions](../unit-conversions) — encoder counts to metres per
+  second, and how to find an inverse that is wrong.
+- [Swerve Module Optimization](../swerve-module-optimization) — why a module
+  never turns more than 90 degrees.
 
 Tune a simulated mechanism:
 
@@ -50,6 +54,7 @@ Tutorials are Markdown pages. Four includes are available:
 | `interactive/pid-sim.html` | A tunable mechanism with sliders and a live plot |
 | `interactive/oi-task.html` | Button bindings driven from the keyboard |
 | `interactive/auto-planner.html` | The autonomous path planner |
+| `interactive/swerve-dial.html` | A swerve module dial |
 
 To drop a Python exercise into a page:
 

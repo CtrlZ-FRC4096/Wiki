@@ -14,8 +14,11 @@
 </div>
 {%- else -%}
 
-{%- unless cz_oi_assets -%}
+{%- unless cz_interactive_css -%}
   <link rel="stylesheet" href="{{ '/assets/css/interactive.css' | relative_url }}">
+  {%- assign cz_interactive_css = true -%}
+{%- endunless -%}
+{%- unless cz_oi_assets -%}
   <script src="{{ '/assets/js/interactive/field-sim.js' | relative_url }}" defer></script>
   <script src="{{ '/assets/js/interactive/oi-task.js' | relative_url }}" defer></script>
   {%- assign cz_oi_assets = true -%}
