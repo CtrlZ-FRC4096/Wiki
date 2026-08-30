@@ -19,7 +19,9 @@ npm run setup
 ```
 
 This installs Playwright and downloads a copy of Chromium, which is
-approximately 115 MB. It goes in `tools/e2e/node_modules/` and is ignored by
+approximately 115 MB. Chromium is the only browser needed: the phone tests set
+a phone viewport rather than using a device preset, because the presets for
+real phones ask for WebKit. It goes in `tools/e2e/node_modules/` and is ignored by
 git.
 
 ## Run
@@ -54,6 +56,7 @@ npm run report
 | `operator-interface.spec.mjs` | A syntax error is reported. The bindings complete a full scoring cycle. Reset robot keeps the bindings |
 | `auto-planner.spec.mjs` | The objective is reachable, a straight line hits a barrier, and the start pose cannot be moved |
 | `swerve-dial.spec.mjs` | The dial reports the same values as the maths in `swerve-core.js` |
+| `first-tutorials.spec.mjs` | The three beginner tutorials, at a phone size with touch on. Every control is at least 44px, nothing needs typing, and each exercise passes on the right answer and explains the wrong one |
 
 ## How these tests are written
 
@@ -63,6 +66,10 @@ Two rules keep them useful:
   tests read the reference gains out of `mechanism-sim.js`. The exercise tests
   read each solution out of its own YAML file. If someone retunes a plant, the
   tests follow it instead of failing on a stale number.
+- **Do not sample an animation and compare pixels.** It looks like a strong
+  check and is not: under load two samples land on the same frame and the test
+  fails for no reason. Compare something that does not depend on timing. The
+  tuning tests check the model and the text on the page instead.
 - **Assert on behaviour, not on appearance.** A widget can add a CSS class and
   still do nothing. One of these tests exists because a control set its class,
   greyed its sliders, and then threw before it changed anything. The test

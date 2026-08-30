@@ -1,0 +1,45 @@
+{%- comment -%}
+  First tutorial: give a button a job, then press it.
+  Usage:  {% include interactive/first-bindings.html %}
+{%- endcomment -%}
+
+{%- unless cz_interactive_css -%}
+  <link rel="stylesheet" href="{{ '/assets/css/interactive.css' | relative_url }}">
+  {%- assign cz_interactive_css = true -%}
+{%- endunless -%}
+{%- unless cz_basic_assets -%}
+  <script src="{{ '/assets/js/interactive/robot-scene.js' | relative_url }}" defer></script>
+  <script src="{{ '/assets/js/interactive/beginner.js' | relative_url }}" defer></script>
+  {%- assign cz_basic_assets = true -%}
+{%- endunless -%}
+
+<div class="cz-exercise cz-basic cz-bind">
+  <div class="cz-exercise__header">
+    <span class="cz-exercise__badge">Try it</span>
+    <div class="cz-exercise__title">{{ include.title | default: "Give a button a job" }}</div>
+    <span class="cz-exercise__solved-mark" title="Correct">✓ done</span>
+  </div>
+
+  <div class="cz-basic__scene">
+    <canvas role="img" aria-label="A robot with an intake arm and a shooter"></canvas>
+    <div class="cz-basic__warning"></div>
+  </div>
+
+  <div class="cz-bind__buttons" role="group" aria-label="Which button to set up"></div>
+  <div class="cz-bind__config"></div>
+
+  <p class="cz-basic__prompt">Now press the button and watch the robot.</p>
+  <div class="cz-bind__pads"></div>
+
+  <div class="cz-exercise__toolbar">
+    <button type="button" class="btn btn-primary cz-exercise__btn" data-action="check">Check my answer</button>
+    <button type="button" class="btn cz-exercise__btn" data-action="reset">Start again</button>
+  </div>
+
+  <div class="cz-basic__output cz-exercise__output"></div>
+
+  <details class="cz-basic__peek" markdown="0">
+    <summary>See the code you just made</summary>
+    <pre class="cz-basic__code"></pre>
+  </details>
+</div>

@@ -1,0 +1,45 @@
+{%- comment -%}
+  Third tutorial: one sensor rule.
+  Usage:  {% include interactive/first-rule.html %}
+{%- endcomment -%}
+
+{%- unless cz_interactive_css -%}
+  <link rel="stylesheet" href="{{ '/assets/css/interactive.css' | relative_url }}">
+  {%- assign cz_interactive_css = true -%}
+{%- endunless -%}
+{%- unless cz_basic_assets -%}
+  <script src="{{ '/assets/js/interactive/robot-scene.js' | relative_url }}" defer></script>
+  <script src="{{ '/assets/js/interactive/beginner.js' | relative_url }}" defer></script>
+  {%- assign cz_basic_assets = true -%}
+{%- endunless -%}
+
+<div class="cz-exercise cz-basic cz-rule">
+  <div class="cz-exercise__header">
+    <span class="cz-exercise__badge">Try it</span>
+    <div class="cz-exercise__title">{{ include.title | default: "Teach the robot to decide" }}</div>
+    <span class="cz-exercise__solved-mark" title="Correct">✓ done</span>
+  </div>
+
+  <div class="cz-basic__scene">
+    <canvas role="img" aria-label="A robot collecting a game piece with its intake"></canvas>
+  </div>
+
+  <div class="cz-rule__meter" aria-hidden="true">
+    <span class="cz-rule__meter-label">sensor</span>
+    <span class="cz-rule__meter-track"><span class="cz-rule__meter-fill"></span></span>
+    <span class="cz-rule__reading">40 cm</span>
+  </div>
+
+  <div class="cz-rule__builder"></div>
+
+  <div class="cz-exercise__toolbar">
+    <button type="button" class="btn btn-primary cz-exercise__btn" data-action="play">Play</button>
+  </div>
+
+  <div class="cz-basic__output cz-exercise__output"></div>
+
+  <details class="cz-basic__peek" markdown="0">
+    <summary>See the code you just made</summary>
+    <pre class="cz-basic__code"></pre>
+  </details>
+</div>

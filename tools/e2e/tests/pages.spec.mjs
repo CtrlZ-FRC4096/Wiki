@@ -5,6 +5,9 @@ import { watchForErrors, expectNoErrors } from "./helpers.mjs";
  * scroll sideways on a narrow screen. */
 const PAGES = [
   { path: "/docs/Code/Tutorials/tutorials/", widgets: 0 },
+  { path: "/docs/Code/Tutorials/first-button/", widgets: 1 },
+  { path: "/docs/Code/Tutorials/first-sequence/", widgets: 1 },
+  { path: "/docs/Code/Tutorials/first-rule/", widgets: 1 },
   { path: "/docs/Code/Tutorials/joystick-deadband/", widgets: 2 },
   { path: "/docs/Code/Tutorials/unit-conversions/", widgets: 3 },
   { path: "/docs/Code/Tutorials/swerve-module-optimization/", widgets: 3 },

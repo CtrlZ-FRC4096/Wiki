@@ -6,6 +6,17 @@ nav_order: 7
 
 # Interactive Tutorials
 
+## Start here
+
+These three need no code, no computer and no keyboard. A phone is enough. Do
+them in order.
+
+1. [Give a Button a Job](../first-button) — a robot does what you tell it
+2. [Put the Steps in Order](../first-sequence) — and nothing else
+3. [Teach the Robot to Decide](../first-rule) — sensors and rules
+
+## Then write some code
+
 On these pages you write the code. The page then checks your answer.
 
 The code operates in your browser with
@@ -55,6 +66,9 @@ Tutorials are Markdown pages. Four includes are available:
 | `interactive/oi-task.html` | Button bindings driven from the keyboard |
 | `interactive/auto-planner.html` | The autonomous path planner |
 | `interactive/swerve-dial.html` | A swerve module dial |
+| `interactive/first-bindings.html` | Tap a button, give it a job |
+| `interactive/first-sequence.html` | Order a list of steps |
+| `interactive/first-rule.html` | Build one sensor rule |
 
 To drop a Python exercise into a page:
 

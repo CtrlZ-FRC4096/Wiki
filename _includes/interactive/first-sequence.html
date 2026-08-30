@@ -1,0 +1,45 @@
+{%- comment -%}
+  Second tutorial: put the steps in order.
+  Usage:  {% include interactive/first-sequence.html %}
+{%- endcomment -%}
+
+{%- unless cz_interactive_css -%}
+  <link rel="stylesheet" href="{{ '/assets/css/interactive.css' | relative_url }}">
+  {%- assign cz_interactive_css = true -%}
+{%- endunless -%}
+{%- unless cz_basic_assets -%}
+  <script src="{{ '/assets/js/interactive/robot-scene.js' | relative_url }}" defer></script>
+  <script src="{{ '/assets/js/interactive/beginner.js' | relative_url }}" defer></script>
+  {%- assign cz_basic_assets = true -%}
+{%- endunless -%}
+
+<div class="cz-exercise cz-basic cz-seq">
+  <div class="cz-exercise__header">
+    <span class="cz-exercise__badge">Try it</span>
+    <div class="cz-exercise__title">{{ include.title | default: "Put the steps in order" }}</div>
+    <span class="cz-exercise__solved-mark" title="Correct">✓ done</span>
+  </div>
+
+  <div class="cz-basic__scene">
+    <canvas role="img" aria-label="A robot, a game piece on the floor, and a goal"></canvas>
+    <div class="cz-basic__warning"></div>
+  </div>
+
+  <p class="cz-basic__prompt">Tap a step to add it to the routine.</p>
+  <div class="cz-seq__bank"></div>
+
+  <p class="cz-basic__prompt">Your routine:</p>
+  <div class="cz-seq__list"></div>
+
+  <div class="cz-exercise__toolbar">
+    <button type="button" class="btn btn-primary cz-exercise__btn" data-action="play">Play</button>
+    <button type="button" class="btn cz-exercise__btn" data-action="clear">Start again</button>
+  </div>
+
+  <div class="cz-basic__output cz-exercise__output"></div>
+
+  <details class="cz-basic__peek" markdown="0">
+    <summary>See the code you just made</summary>
+    <pre class="cz-basic__code"></pre>
+  </details>
+</div>

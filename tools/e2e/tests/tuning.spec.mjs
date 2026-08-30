@@ -51,30 +51,41 @@ for (const [plantId, path] of Object.entries(PAGES)) {
     const labels = await sim.locator(".cz-sim__mode").allTextContents();
     expect(labels).toEqual(plant.modes.map((m) => m.label));
 
-    // A picture of the plot, so we can tell whether a mode did anything.
-    const snapshot = () => sim.locator("canvas").evaluate((c) => {
-      const d = c.getContext("2d").getImageData(0, 0, c.width, c.height).data;
-      let sum = 0;
-      for (let i = 0; i < d.length; i += 4) sum += d[i] + d[i + 1] * 3 + d[i + 2] * 7;
-      return sum;
-    });
-
-    const looks = [];
     for (const mode of plant.modes) {
       await sim.locator(".cz-sim__mode", { hasText: mode.label }).click();
-      await page.waitForTimeout(1200);
-      looks.push(await snapshot());
+      await page.waitForTimeout(250);
 
-      // Gains the mode holds at zero must be greyed out.
+      // The note tells the student what this mode is for.
+      expect((await sim.locator(".cz-sim__mode-note").textContent()).trim()).toBe(mode.note);
+
+      // Gains the mode holds at zero must be greyed out, and the rest must not.
       const live = await sim.locator('.cz-sim__slider input[type="range"]:not(:disabled)')
         .evaluateAll((els) => els.map((e) => e.id.split("-").pop()));
-      for (const forced of Object.keys(mode.force)) {
-        expect(live, `${mode.label} left ${forced} enabled`).not.toContain(forced);
+      for (const gain of plant.gains) {
+        if (gain in mode.force) {
+          expect(live, `${mode.label} left ${gain} enabled`).not.toContain(gain);
+        } else {
+          expect(live, `${mode.label} disabled ${gain}, which it does not force`).toContain(gain);
+        }
       }
     }
-    expect(new Set(looks).size, "two modes drew the same plot").toBe(plant.modes.length);
 
     await expectNoErrors(errors);
+  });
+
+  test(`${plantId}: the modes really do run different things`, () => {
+    /* Checked against the model rather than the drawing. Sampling a moving
+     * plot and comparing pixels looks stronger but is not: under load two
+     * samples can land on the same frame, and the test fails for no reason. */
+    const sp = plant.setpoint.value;
+    const traces = plant.modes.map((mode) => {
+      const gains = Object.assign({}, plant.fixed);
+      plant.gains.forEach((g) => { gains[g] = plant.reference[g]; });
+      Object.keys(mode.force).forEach((g) => { gains[g] = mode.force[g]; });
+      const run = CZSim.simulate(plantId, gains, sp, mode.scenario);
+      return run.samples.map((s) => s.y.toFixed(3)).join(",");
+    });
+    expect(new Set(traces).size, "two modes produce an identical run").toBe(plant.modes.length);
   });
 }
 

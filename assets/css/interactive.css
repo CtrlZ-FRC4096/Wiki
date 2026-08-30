@@ -939,3 +939,343 @@
   gap: 0.5rem 1.1rem;
   margin-top: 0.9rem;
 }
+
+/* ------------------------------------------------------------------ *
+ * The first three tutorials
+ *
+ * Built for a phone first. Every control is at least 44px tall, nothing
+ * needs a keyboard, a drag or a hover, and the layout is one column until
+ * there is room for more.
+ * ------------------------------------------------------------------ */
+
+.cz-basic {
+  --cz-scene-line: rgba(255, 255, 255, 0.38);
+  --cz-scene-body: #2b6cb0;
+  --cz-scene-arm: #9aa4b8;
+  --cz-scene-piece: #f0932b;
+  --cz-plot-actual: #57a8ff;
+}
+
+.cz-basic__scene {
+  position: relative;
+  margin: 0.8rem 0 0.2rem;
+  border: 1px solid var(--cz-border);
+  border-radius: 6px;
+  background: rgba(0, 0, 0, 0.35);
+  overflow: hidden;
+}
+
+.cz-basic__scene canvas {
+  display: block;
+  width: 100%;
+  aspect-ratio: 16 / 9;
+  max-height: 44vh;
+}
+
+/* Along the top of the scene, so it never covers the robot. */
+.cz-basic__warning {
+  position: absolute;
+  left: 6px;
+  right: 6px;
+  top: 6px;
+  padding: 0.35rem 0.55rem;
+  border-radius: 4px;
+  background: rgba(0, 0, 0, 0.78);
+  font-size: 0.78rem;
+  line-height: 1.35;
+  font-weight: 600;
+  opacity: 0;
+  transition: opacity 0.15s;
+  pointer-events: none;
+}
+
+.cz-basic__warning.is-on { opacity: 1; }
+
+/* Progress is neutral. Only a real problem is red. */
+.cz-basic__warning.is-warn { color: var(--cz-fail); }
+.cz-basic__warning:not(.is-warn) { color: var(--cz-team-orange); }
+
+.cz-basic__prompt {
+  margin: 0.9rem 0 0.35rem;
+  font-size: 0.9rem;
+  font-weight: 600;
+}
+
+.cz-basic__empty {
+  margin: 0;
+  padding: 0.8rem;
+  color: var(--cz-muted);
+  font-size: 0.85rem;
+  text-align: center;
+}
+
+.cz-basic__choice {
+  margin-bottom: 0.7rem;
+}
+
+.cz-basic__choice-label {
+  margin-bottom: 0.25rem;
+  font-size: 0.7rem;
+  font-weight: 700;
+  letter-spacing: 0.08em;
+  text-transform: uppercase;
+  color: var(--cz-muted);
+}
+
+.cz-basic__choice-row {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 0.4rem;
+}
+
+/* Every tap target is at least 44px tall. That is the smallest size a
+   thumb hits reliably. */
+.cz-basic__opt {
+  flex: 1 1 auto;
+  min-height: 44px;
+  padding: 0.5rem 0.8rem;
+  border: 1px solid var(--cz-border);
+  border-radius: 6px;
+  background: rgba(255, 255, 255, 0.04);
+  color: inherit;
+  font-family: inherit;
+  font-size: 0.85rem;
+  cursor: pointer;
+}
+
+.cz-basic__opt.is-on {
+  border-color: var(--cz-team-orange);
+  background: rgba(203, 95, 1, 0.25);
+  font-weight: 600;
+}
+
+.cz-basic__opt:focus-visible,
+.cz-basic__icon:focus-visible {
+  outline: 2px solid var(--cz-team-orange);
+  outline-offset: 2px;
+}
+
+.cz-basic__icon {
+  width: 44px;
+  height: 44px;
+  border: 1px solid var(--cz-border);
+  border-radius: 6px;
+  background: transparent;
+  color: inherit;
+  font-size: 1rem;
+  cursor: pointer;
+}
+
+.cz-basic__peek {
+  margin-top: 0.9rem;
+}
+
+.cz-basic__peek summary {
+  min-height: 44px;
+  display: flex;
+  align-items: center;
+  cursor: pointer;
+  font-size: 0.85rem;
+  color: var(--cz-team-orange);
+}
+
+.cz-exercise .cz-basic__code {
+  margin: 0.4rem 0 0;
+  padding: 0.7rem 0.8rem;
+  overflow-x: auto;
+  border: 1px solid var(--cz-border);
+  border-radius: 4px;
+  background: rgba(0, 0, 0, 0.35);
+  font-size: 0.75rem;
+  line-height: 1.55;
+  white-space: pre;
+}
+
+/* ---- 1. give a button a job ---- */
+
+.cz-bind__buttons {
+  display: flex;
+  gap: 0.4rem;
+  margin: 0.9rem 0 0.7rem;
+}
+
+.cz-bind__tab {
+  flex: 1 1 0;
+  min-height: 44px;
+  border: 1px solid var(--cz-border);
+  border-radius: 6px;
+  background: transparent;
+  color: var(--cz-muted);
+  font-family: inherit;
+  font-size: 0.82rem;
+  cursor: pointer;
+}
+
+.cz-bind__tab.is-on {
+  border-color: var(--cz-team-orange);
+  color: var(--cz-team-orange);
+  font-weight: 700;
+}
+
+.cz-bind__pads {
+  display: flex;
+  gap: 0.5rem;
+}
+
+.cz-bind__pad {
+  flex: 1 1 0;
+  min-height: 64px;
+  border: 2px solid var(--cz-border);
+  border-radius: 10px;
+  background: rgba(255, 255, 255, 0.06);
+  color: inherit;
+  font-family: inherit;
+  font-size: 0.9rem;
+  font-weight: 600;
+  cursor: pointer;
+  touch-action: none;
+  user-select: none;
+}
+
+.cz-bind__pad.is-down {
+  border-color: var(--cz-team-orange);
+  background: rgba(203, 95, 1, 0.4);
+  transform: translateY(2px);
+}
+
+/* ---- 2. put the steps in order ---- */
+
+.cz-seq__bank {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 0.4rem;
+}
+
+.cz-seq__card {
+  flex: 1 1 46%;
+  min-height: 48px;
+  padding: 0.5rem 0.7rem;
+  border: 1px dashed var(--cz-border);
+  border-radius: 6px;
+  background: rgba(255, 255, 255, 0.04);
+  color: inherit;
+  font-family: inherit;
+  font-size: 0.84rem;
+  cursor: pointer;
+}
+
+.cz-seq__card:active { background: rgba(203, 95, 1, 0.25); }
+
+.cz-seq__list {
+  border: 1px solid var(--cz-border);
+  border-radius: 6px;
+  overflow: hidden;
+}
+
+.cz-seq__row {
+  display: flex;
+  align-items: center;
+  gap: 0.5rem;
+  padding: 0.35rem 0.5rem;
+  border-top: 1px solid rgba(255, 255, 255, 0.07);
+}
+
+.cz-seq__row:first-child { border-top: 0; }
+
+.cz-seq__row.is-running {
+  background: rgba(203, 95, 1, 0.22);
+  box-shadow: inset 3px 0 0 var(--cz-team-orange);
+}
+
+.cz-seq__num {
+  flex: 0 0 26px;
+  height: 26px;
+  border-radius: 50%;
+  background: rgba(255, 255, 255, 0.1);
+  font-size: 0.75rem;
+  font-weight: 700;
+  text-align: center;
+  line-height: 26px;
+}
+
+.cz-seq__name { flex: 1 1 auto; font-size: 0.85rem; }
+
+.cz-seq__tools { display: flex; gap: 0.2rem; }
+
+/* ---- 3. one sensor rule ---- */
+
+.cz-rule__meter {
+  display: flex;
+  align-items: center;
+  gap: 0.5rem;
+  margin-top: 0.7rem;
+  font-size: 0.75rem;
+  color: var(--cz-muted);
+}
+
+.cz-rule__meter-track {
+  flex: 1 1 auto;
+  height: 14px;
+  border: 1px solid var(--cz-border);
+  border-radius: 7px;
+  overflow: hidden;
+  background: rgba(0, 0, 0, 0.35);
+}
+
+.cz-rule__meter-fill {
+  display: block;
+  height: 100%;
+  width: 100%;
+  background: var(--cz-plot-actual);
+  transition: width 0.06s linear;
+}
+
+.cz-rule__meter-fill.is-on { background: var(--cz-pass); }
+
+.cz-rule__reading {
+  flex: 0 0 62px;
+  text-align: right;
+  font-family: ui-monospace, SFMono-Regular, Menlo, Consolas, monospace;
+  font-variant-numeric: tabular-nums;
+}
+
+/* Slider and its value on one line. The value keeps a fixed width so the
+   number does not shift the slider as it changes. */
+.cz-rule__slider {
+  flex: 1 1 auto;
+  min-width: 0;
+  height: 44px;
+  accent-color: var(--cz-team-orange);
+}
+
+.cz-basic__choice:has(.cz-rule__slider) {
+  display: flex;
+  align-items: center;
+  gap: 0.6rem;
+  flex-wrap: wrap;
+}
+
+.cz-basic__choice:has(.cz-rule__slider) .cz-basic__choice-label {
+  flex: 1 0 100%;
+  margin-bottom: 0;
+}
+
+.cz-rule__value {
+  flex: 0 0 62px;
+  text-align: right;
+  font-family: ui-monospace, SFMono-Regular, Menlo, Consolas, monospace;
+  font-variant-numeric: tabular-nums;
+  font-size: 0.9rem;
+  font-weight: 700;
+}
+
+/* On a phone the buttons go full width rather than squeezing side by side. */
+@media (max-width: 460px) {
+  /* A taller scene on a phone: there is width to spare and the robot is what
+     the student is watching. */
+  .cz-basic__scene canvas { aspect-ratio: 4 / 3; }
+  .cz-basic__opt { flex-basis: 100%; }
+  .cz-seq__card { flex-basis: 100%; }
+  .cz-exercise .cz-exercise__toolbar { flex-direction: column; }
+  .cz-exercise .cz-exercise__toolbar .cz-exercise__btn { width: 100%; min-height: 44px; }
+}
