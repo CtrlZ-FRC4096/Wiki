@@ -30,7 +30,7 @@ except ImportError:
 ROOT = os.path.join(os.path.dirname(os.path.abspath(__file__)), "..")
 
 
-def run(source, checks):
+def run(source, checks, setup=""):
     """Run one snippet, then each check against it. Same as the page does."""
     namespace = {"__name__": "__main__"}
     sink = io.StringIO()
@@ -40,6 +40,14 @@ def run(source, checks):
     except BaseException:
         line = traceback.format_exc().strip().split("\n")[-1]
         return [("the code did not run", False, line)]
+
+    if setup:
+        try:
+            with contextlib.redirect_stdout(sink), contextlib.redirect_stderr(sink):
+                exec(compile(setup, "the checks", "exec"), namespace)
+        except BaseException:
+            line = traceback.format_exc().strip().split("\n")[-1]
+            return [("the shared check code did not run", False, line)]
 
     results = []
     for check in checks:
@@ -81,9 +89,10 @@ def main():
                 problems += 1
 
         checks = exercise.get("tests", [])
-        solved = run(exercise.get("solution", ""), checks)
+        setup = exercise.get("setup", "")
+        solved = run(exercise.get("solution", ""), checks, setup)
         failed = [r for r in solved if not r[1]]
-        starter_failures = sum(1 for r in run(exercise.get("starter", ""), checks) if not r[1])
+        starter_failures = sum(1 for r in run(exercise.get("starter", ""), checks, setup) if not r[1])
 
         # A check with no message tells the student nothing useful. Read the
         # syntax tree rather than looking for a comma: a comma inside a call

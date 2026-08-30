@@ -1,0 +1,179 @@
+title: Drive straight while you spin
+prompt: |
+  Every swerve example on the internet contains this line:
+
+  ```python
+  speeds = ChassisSpeeds.fromFieldRelativeSpeeds(vx, vy, omega, heading)
+  ```
+
+  It rotates the speed you want in the field into the robot's own frame. It is
+  correct, and it is correct for **one instant**.
+
+  Your robot does not live in an instant. It decides once every 20 ms and then
+  holds that decision for the whole period. During those 20 ms it is turning. The
+  direction the wheels are pushing turns with it. So the robot does not end the
+  period where the maths says it did.
+
+  Drive straight while spinning at 6 rad/s and the robot slides **0.63 m** off
+  the line in three seconds. It is not wheel slip and it is not a bad gyro. The
+  maths is right for an instant and wrong for a period.
+
+  Write `command(heading, vx_field, vy_field, omega, dt)`. Return the robot-frame
+  speeds to hold for the next `dt`, so that the robot actually ends up where the
+  field-frame speeds said it should.
+
+  You are allowed to be 0.020 m off the path. The starter is 0.63 m off.
+
+  There are seven cases. One of them does not spin at all, and it is there for a
+  reason.
+setup: |
+  import math
+
+  DT = 0.02          # the robot decides once every 20 ms and holds it
+  SUB = 200          # how finely the checks work out what really happened
+  LIMIT = 0.020      # metres you are allowed to be away from the path
+
+  def truly(x, y, h, vx, vy, omega, dt=DT):
+      """What really happens when the robot holds these speeds for one period.
+
+      vx and vy are in the ROBOT's frame. The robot turns the whole time, so the
+      direction they point in the field turns with it.
+      """
+      sub = dt / SUB
+      for _ in range(SUB):
+          x += (vx * math.cos(h) - vy * math.sin(h)) * sub
+          y += (vx * math.sin(h) + vy * math.cos(h)) * sub
+          h += omega * sub
+      return x, y, h
+
+  CASES = [
+    {"name": "straight, spinning slowly", "seconds": 3.0,
+     "velocity": lambda t: (3.5, 0.0), "spin": lambda t: 2.0},
+    {"name": "straight, spinning fast", "seconds": 3.0,
+     "velocity": lambda t: (3.5, 0.0), "spin": lambda t: 6.0},
+    {"name": "strafing while spinning", "seconds": 3.0,
+     "velocity": lambda t: (2.5, 2.0), "spin": lambda t: 5.0},
+    {"name": "spinning the other way", "seconds": 3.0,
+     "velocity": lambda t: (3.0, -1.5), "spin": lambda t: -6.0},
+    {"name": "not spinning at all", "seconds": 3.0,
+     "velocity": lambda t: (3.5, 1.0), "spin": lambda t: 0.0},
+    {"name": "a spin that stops", "seconds": 3.0,
+     "velocity": lambda t: (3.0, 0.0), "spin": lambda t: 6.0 * (1.0 - t / 3.0)},
+    {"name": "a curving path", "seconds": 3.0,
+     "velocity": lambda t: (3.0 * math.cos(0.8 * t), 3.0 * math.sin(0.8 * t)),
+     "spin": lambda t: 4.0},
+  ]
+
+  def drive(case):
+      """Drive the case with your command(), and see how far off the path it gets."""
+      if "command" not in globals():
+          raise AssertionError("There is no function called command in your code.")
+      x = y = h = 0.0
+      wanted_x = wanted_y = 0.0
+      worst = 0.0
+      for i in range(int(case["seconds"] / DT)):
+          t = i * DT
+          vxf, vyf = case["velocity"](t)
+          omega = case["spin"](t)
+          answer = command(h, vxf, vyf, omega, DT)
+          try:
+              vx, vy, w = answer
+          except (TypeError, ValueError):
+              raise AssertionError(
+                  "command() must return three numbers: the robot-frame vx, the "
+                  "robot-frame vy, and the turn rate. On %r it returned %r."
+                  % (case["name"], answer))
+          x, y, h = truly(x, y, h, vx, vy, w)
+          wanted_x += vxf * DT
+          wanted_y += vyf * DT
+          worst = max(worst, math.hypot(x - wanted_x, y - wanted_y))
+      return worst, math.hypot(x - wanted_x, y - wanted_y), (x, y), (wanted_x, wanted_y)
+
+  def check(case):
+      """Grade one case, and say where the robot went instead."""
+      worst, final, got, wanted = drive(case)
+      assert worst <= LIMIT, (
+          "On %r the robot left the path by %.3f m. It finished at (%.2f, %.2f) "
+          "when it was told to go to (%.2f, %.2f). You are allowed %.3f m."
+          % (case["name"], worst, got[0], got[1], wanted[0], wanted[1], LIMIT))
+starter: |
+  import math
+
+  def command(heading, vx_field, vy_field, omega, dt):
+      """Turn a field-frame speed into the robot-frame speed to command.
+
+      heading    where the robot is pointing now, in radians
+      vx_field   how fast to move along the field x, in metres a second
+      vy_field   how fast to move along the field y
+      omega      how fast to spin, in radians a second
+      dt         how long the robot will hold this command, in seconds
+
+      Return (vx_robot, vy_robot, omega).
+      """
+      # Rotate the field speed into the robot frame. This is what every swerve
+      # example does, and it is right for one instant only.
+      c = math.cos(-heading)
+      s = math.sin(-heading)
+      return vx_field * c - vy_field * s, vx_field * s + vy_field * c, omega
+tests:
+  - name: Your code has a command function that returns three numbers
+    code: |
+        assert "command" in dir(), "There is no function called command in your code."
+        answer = command(0.0, 1.0, 0.0, 0.0, DT)
+        assert answer is not None and len(answer) == 3, "command() must return (vx, vy, omega). It returned %r." % (answer,)
+        vx, vy, w = answer
+        assert abs(vx - 1.0) < 1e-6 and abs(vy) < 1e-6, "With the robot pointing along the field x and not spinning, a field speed of (1, 0) is (1, 0) in the robot frame. Your code returned (%.3f, %.3f)." % (vx, vy)
+  - name: It holds the path when straight, spinning slowly
+    code: |
+        check(CASES[0])
+  - name: It holds the path when straight, spinning fast
+    code: |
+        check(CASES[1])
+  - name: It holds the path when strafing while spinning
+    code: |
+        check(CASES[2])
+  - name: It holds the path when spinning the other way
+    code: |
+        check(CASES[3])
+  - name: It holds the path when not spinning at all
+    code: |
+        check(CASES[4])
+  - name: It holds the path when a spin that stops
+    code: |
+        check(CASES[5])
+  - name: It holds the path when a curving path
+    code: |
+        check(CASES[6])
+hints:
+  - Work out where the robot really goes when it holds a robot-frame speed for a whole period while turning. It is not speed times dt.
+  - The easy version: the wheels point in the right direction half way through the period, not at the start. Use the heading you will have then.
+  - That is worth trying, and it is nearly right. It is the first term of the exact answer.
+  - For the exact answer, integrate the rotation over the period. A robot-frame speed held for dt while turning through theta lands rotated by theta/2 and shortened by sin(theta/2)/(theta/2).
+  - Then invert that, because you know where you want to land and you need the speed that gets you there.
+  - Whatever you write, look at it again with omega set to zero. WPILib calls this ChassisSpeeds.discretize, and this is the bug people hit in it.
+solution: |
+  import math
+
+  def command(heading, vx_field, vy_field, omega, dt):
+      # Into the robot frame as it is at the start of the period.
+      c, s = math.cos(-heading), math.sin(-heading)
+      bx = vx_field * c - vy_field * s
+      by = vx_field * s + vy_field * c
+
+      # Standing still in the turn: nothing to undo, and the exact maths below
+      # would divide by zero.
+      if abs(omega) < 1e-9:
+          return bx, by, omega
+
+      # Over one period the robot frame sweeps through this angle.
+      theta = omega * dt
+
+      # Hold a robot-frame speed for the whole period and the field displacement
+      # is not speed * dt. It is speed * dt turned and shortened by
+      #     A = (1 / theta) * [[sin theta, -(1 - cos theta)],
+      #                        [1 - cos theta,  sin theta]]
+      # so ask for the speed that lands where we wanted: A inverse times ours.
+      a = math.sin(theta) / theta
+      b = -(1 - math.cos(theta)) / theta
+      det = a * a + b * b            # A is a rotation and scale, so this inverts
+      return (a * bx - b * by) / det, (b * bx + a * by) / det, omega

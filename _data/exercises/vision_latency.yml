@@ -1,0 +1,276 @@
+title: Trust a camera that tells you the past
+prompt: |
+  The wheels always tell you something, and it is always slowly wrong. The camera
+  tells you the truth, and it tells you late.
+
+  Your robot drives a lap at up to 4.9 m/s. Two things describe where it is:
+
+  - **The wheels.** `update(dt, vx, vy)` runs every 20 ms. Smooth, always there,
+    and it drifts, because wheels are never quite the size you think. It also
+    misses anything that is not the wheels turning.
+  - **The camera.** `add_vision(timestamp, x, y)` runs about twelve times a
+    second. It reads an AprilTag and works out where the robot was. `timestamp`
+    is when the **picture was taken**, which is 90 ms to 230 ms before you get it.
+
+  `pose()` returns your best guess right now.
+
+  Three things go wrong:
+
+  1. **The picture is old.** At 4.9 m/s a 0.14 s old picture is 0.69 m out of
+     date. Snap to it and the robot jumps backwards down its own path.
+  2. **Some pictures are wrong.** A tag read as the wrong tag puts the robot
+     metres away. It is never a little bit wrong.
+  3. **At 6 s a defender shoves the robot.** The wheels keep turning and never
+     notice. Only the camera knows, so you cannot simply stop believing it.
+
+  You are judged on three things in each of three runs: how close you stay once
+  settled, the worst you ever get late in the run, and how fast you recover from
+  being shoved.
+
+  {: .note }
+  > The simulator shares your namespace, so you can read it. `_truth` is in there.
+  > Calling it passes every check and teaches you nothing.
+setup: |
+  import math
+
+  DT = 0.02
+  SAMPLES = 600                    # twelve seconds
+  CAMERA_PERIOD = 1.0 / 12.0       # the camera gives twelve pictures a second
+
+  STEADY_LIMIT = 0.15              # metres, once the estimate has settled
+  OUTLIER_LIMIT = 0.30             # metres, worst error late in the run
+  RECOVER_LIMIT = 1.50             # seconds, to get over being shoved
+
+  _SLIP_AT, _SLIP_FOR, _SLIP_SPEED = 6.0, 0.30, (2.4, -1.4)
+
+  def _truth(t):
+      """Where the robot really is. Your code is not allowed to call this."""
+      return (8.0 + 5.5 * math.cos(0.70 * t), 4.0 + 3.2 * math.sin(0.95 * t))
+
+  def _true_velocity(t):
+      return (-5.5 * 0.70 * math.sin(0.70 * t), 3.2 * 0.95 * math.cos(0.95 * t))
+
+  def _wob(seed, i):
+      x = (seed * 1103515245 + i * 12345 + 7919) & 0x7FFFFFFF
+      x ^= (x >> 13)
+      x = (x * 1103515245) & 0x7FFFFFFF
+      return ((x >> 7) % 2001) / 1000.0 - 1.0
+
+  def _odometry(t, i):
+      """What the wheels say: a little biased, a little noisy, and once wrong."""
+      vx, vy = _true_velocity(t)
+      vx += 0.030 + 0.05 * _wob(11, i)
+      vy += -0.022 + 0.05 * _wob(12, i)
+      if _SLIP_AT <= t < _SLIP_AT + _SLIP_FOR:      # a defender shoves the robot
+          vx += _SLIP_SPEED[0]
+          vy += _SLIP_SPEED[1]
+      return vx, vy
+
+  CASES = [
+    {"name": "a normal match", "latency": (0.090, 0.050), "bad_every": 12, "seed": 0},
+    {"name": "a slow camera", "latency": (0.170, 0.060), "bad_every": 12, "seed": 100},
+    {"name": "a quarter of the tags misread", "latency": (0.090, 0.050), "bad_every": 4, "seed": 200},
+  ]
+
+  def _pictures(case):
+      """(when it arrives, when it was taken, x, y). Some are nonsense."""
+      out, k, t = [], 0, 0.5
+      s0 = case["seed"]
+      while t < SAMPLES * DT:
+          latency = case["latency"][0] + case["latency"][1] * (0.5 + 0.5 * _wob(21 + s0, k))
+          tx, ty = _truth(t)
+          if k % case["bad_every"] == 3 % case["bad_every"]:
+              # A tag read as the wrong tag puts the robot somewhere else
+              # entirely. It is never a little bit wrong.
+              angle = math.pi * _wob(31 + s0, k)
+              radius = 3.0 + 2.0 * abs(_wob(32 + s0, k))
+              tx += radius * math.cos(angle)
+              ty += radius * math.sin(angle)
+          else:
+              tx += 0.04 * _wob(41 + s0, k)
+              ty += 0.04 * _wob(42 + s0, k)
+          out.append((t + latency, t, tx, ty))
+          t += CAMERA_PERIOD
+          k += 1
+      return out
+
+  def play(case):
+      """Drive the lap and report how far out your estimate was, all the way."""
+      if "PoseEstimator" not in globals():
+          raise AssertionError("There is no class called PoseEstimator in your code.")
+      start = _truth(0.0)
+      estimator = PoseEstimator(start[0], start[1])
+      waiting = _pictures(case)
+      errors = []
+      for i in range(SAMPLES):
+          t = i * DT
+          estimator.update(DT, *_odometry(t, i))
+          while waiting and waiting[0][0] <= t:
+              _, taken_at, x, y = waiting.pop(0)
+              estimator.add_vision(taken_at, x, y)
+          answer = estimator.pose()
+          try:
+              x, y = answer
+          except (TypeError, ValueError):
+              raise AssertionError("pose() must return an (x, y) pair. It returned %r." % (answer,))
+          tx, ty = _truth(t)
+          errors.append(math.hypot(x - tx, y - ty))
+      return errors
+
+  def _rms(values):
+      return math.sqrt(sum(v * v for v in values) / len(values))
+
+  def report(case):
+      """The three numbers each run is judged on."""
+      errors = play(case)
+      settled = [e for i, e in enumerate(errors)
+                 if 1.0 <= i * DT < _SLIP_AT or _SLIP_AT + 2.0 <= i * DT]
+      late = max(e for i, e in enumerate(errors) if i * DT >= 8.0)
+      recover = 99.0
+      for i, e in enumerate(errors):
+          if i * DT > _SLIP_AT + _SLIP_FOR and e < 0.15:
+              recover = i * DT - _SLIP_AT
+              break
+      return {"steady": _rms(settled), "late": late, "recover": recover}
+
+  def check_accuracy(case):
+      got = report(case)["steady"]
+      assert got <= STEADY_LIMIT, (
+          "On %r the estimate was %.3f m out on average once it had settled. It "
+          "has to be within %.2f m. A camera picture is taken up to 0.14 s before "
+          "you get it, and this robot moves at 4.9 m/s, so a picture can be 0.69 m "
+          "out of date by the time it reaches you."
+          % (case["name"], got, STEADY_LIMIT))
+
+  def check_outliers(case):
+      got = report(case)["late"]
+      assert got <= OUTLIER_LIMIT, (
+          "On %r the estimate was %.2f m out at its worst, late in the run, when "
+          "nothing else was happening. Some of the pictures put the robot metres "
+          "from where it is. It has to stay within %.2f m."
+          % (case["name"], got, OUTLIER_LIMIT))
+
+  def check_recovery(case):
+      got = report(case)["recover"]
+      assert got <= RECOVER_LIMIT, (
+          "On %r a defender shoved the robot at %.0f s and the wheels did not "
+          "notice. The estimate took %s to get back within 0.15 m. It has to take "
+          "%.1f s or less. The camera is the only thing that knows."
+          % (case["name"], _SLIP_AT,
+             "longer than the run" if got > 90 else "%.2f s" % got, RECOVER_LIMIT))
+starter: |
+  class PoseEstimator:
+      """Keep track of where the robot is.
+
+      update()     runs every 20 ms with what the wheels say, in metres a second
+      add_vision() runs when a camera picture arrives, with the time it was TAKEN
+      pose()       returns your best (x, y) right now
+      """
+
+      def __init__(self, x, y):
+          self.x = x
+          self.y = y
+
+      def update(self, dt, vx, vy):
+          self.x += vx * dt
+          self.y += vy * dt
+
+      def add_vision(self, timestamp, x, y):
+          # The obvious answer: believe the camera.
+          self.x = x
+          self.y = y
+
+      def pose(self):
+          return self.x, self.y
+tests:
+  - name: Your code has a PoseEstimator with the three methods
+    code: |
+        assert "PoseEstimator" in dir(), "There is no class called PoseEstimator in your code."
+        est = PoseEstimator(1.0, 2.0)
+        for method in ("update", "add_vision", "pose"):
+            assert hasattr(est, method), "PoseEstimator needs a %s method." % method
+        answer = est.pose()
+        assert answer is not None and len(answer) == 2, "pose() must return an (x, y) pair. It returned %r." % (answer,)
+  - name: It stays close on a normal match
+    code: |
+        check_accuracy(CASES[0])
+  - name: It stays close on a slow camera
+    code: |
+        check_accuracy(CASES[1])
+  - name: It stays close on a quarter of the tags misread
+    code: |
+        check_accuracy(CASES[2])
+  - name: A misread tag does not move it on a normal match
+    code: |
+        check_outliers(CASES[0])
+  - name: A misread tag does not move it on a slow camera
+    code: |
+        check_outliers(CASES[1])
+  - name: A misread tag does not move it on a quarter of the tags misread
+    code: |
+        check_outliers(CASES[2])
+  - name: It recovers from the shove on a normal match
+    code: |
+        check_recovery(CASES[0])
+  - name: It recovers from the shove on a slow camera
+    code: |
+        check_recovery(CASES[1])
+  - name: It recovers from the shove on a quarter of the tags misread
+    code: |
+        check_recovery(CASES[2])
+hints:
+  - Do not compare the picture with where you are now. Compare it with where you thought you were when the picture was taken.
+  - So keep a history: the time and the pose, every update. A second of it is plenty.
+  - Hold the estimate as two parts: what the wheels have added up, plus a correction. The camera changes the correction, not the wheels.
+  - That is why the history helps. The correction you work out for a moment 0.14 s ago is just as true now, because the wheels have been counting the whole time.
+  - Move only part of the way towards each picture, not all of it. Somewhere near half is good.
+  - Throw away a picture that disagrees by more than a couple of metres. Do not make that limit tight: after the shove, the camera is right and you are wrong, and you still have to believe it.
+solution: |
+  import math
+
+  class PoseEstimator:
+      GAIN = 0.45     # how much of each disagreement to believe
+      GATE = 2.0      # a picture further out than this is a misread tag
+      KEEP = 1.0      # seconds of history to hold on to
+
+      def __init__(self, x, y):
+          self.t = 0.0
+          self.ox, self.oy = x, y        # where the wheels alone say we are
+          self.cx, self.cy = 0.0, 0.0    # the correction the camera has taught us
+          self.past = [(0.0, x, y)]
+
+      def update(self, dt, vx, vy):
+          self.t += dt
+          self.ox += vx * dt
+          self.oy += vy * dt
+          self.past.append((self.t, self.ox, self.oy))
+          while self.past and self.past[0][0] < self.t - self.KEEP:
+              self.past.pop(0)
+
+      def _odometry_at(self, when):
+          """Where the wheels said we were at that moment."""
+          best = self.past[0]
+          for row in self.past:
+              if abs(row[0] - when) < abs(best[0] - when):
+                  best = row
+          return best[1], best[2]
+
+      def add_vision(self, timestamp, x, y):
+          # Compare the picture with where we thought we were WHEN IT WAS TAKEN,
+          # not with where we are now.
+          hx, hy = self._odometry_at(timestamp)
+          ex = x - (hx + self.cx)
+          ey = y - (hy + self.cy)
+
+          # A misread tag is metres out. Throw it away, but keep the gate loose
+          # enough to still believe the camera after the robot is shoved.
+          if math.hypot(ex, ey) > self.GATE:
+              return
+
+          # The correction applies to every pose, past and present, so the
+          # current estimate improves by the same amount.
+          self.cx += self.GAIN * ex
+          self.cy += self.GAIN * ey
+
+      def pose(self):
+          return self.ox + self.cx, self.oy + self.cy

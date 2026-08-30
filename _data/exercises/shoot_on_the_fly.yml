@@ -1,0 +1,181 @@
+title: Shoot while you are moving
+prompt: |
+  A robot that stops to shoot wastes the whole match. Good teams shoot while they
+  drive. That is much harder than it sounds.
+
+  A game piece leaving a moving robot **keeps the speed of the robot**. Throw it
+  forwards at 6 m/s from a robot doing 3 m/s, and it travels at 9 m/s. Drive
+  sideways and it goes sideways too.
+
+  So do not aim at the goal. Aim at the place that puts the goal under the game
+  piece when it lands.
+
+  Write `aim(px, py, vx, vy)`. Return two things:
+
+  - the **heading** to point the shooter, in radians
+  - the **distance** to look up in the shot table
+
+  `flight_time(distance)` tells you how long a shot of that distance is in the
+  air. `shot(distance)` gives you the speed and the time together. The table
+  covers 2 m to 14 m.
+
+  The game piece must land within 0.20 m of the goal in all nine cases. The robot
+  moves at up to 4 m/s, and a shot can be in the air for over a second, so the
+  robot travels several metres while the game piece flies.
+
+  Here is the part that makes this hard. To know where to aim, you need the
+  flight time. To know the flight time, you need the distance. To know the
+  distance, you need to know where to aim. **The answer depends on itself.**
+setup: |
+  import math
+
+  GOAL = (16.40, 4.03)          # the middle of the goal, in metres
+  TOLERANCE = 0.20              # how close the game piece has to land
+
+  # What the shooter can do, measured on the practice field: for a distance, the
+  # horizontal speed the game piece leaves at and how long it stays in the air.
+  # Between two rows, interpolate. The table stops at 2 m and at 14 m.
+  TABLE = [(2.0, 0.68), (4.0, 0.86), (6.0, 1.04), (8.0, 1.22),
+           (10.0, 1.40), (12.0, 1.58), (14.0, 1.76)]
+
+  _lookups = [0]
+
+  def flight_time(distance):
+      """How long the game piece is in the air for a shot of this distance."""
+      _lookups[0] += 1
+      assert _lookups[0] < 500, (
+          "aim() asked the table 500 times for one shot. It is not settling on "
+          "an answer. A robot has 20 ms for the whole loop.")
+      d = max(TABLE[0][0], min(TABLE[-1][0], distance))
+      for (d0, t0), (d1, t1) in zip(TABLE, TABLE[1:]):
+          if d <= d1:
+              return t0 + (t1 - t0) * (d - d0) / (d1 - d0)
+      return TABLE[-1][1]
+
+  def shot(distance):
+      """The horizontal speed and the flight time for a shot of this distance."""
+      t = flight_time(distance)
+      return distance / t, t
+
+  CASES = [
+    {"name": "standing still",                 "pose": (11.0, 4.03), "speed": (0.0, 0.0)},
+    {"name": "driving at the goal",            "pose": (11.0, 4.03), "speed": (2.5, 0.0)},
+    {"name": "driving away from the goal",     "pose": (11.0, 4.03), "speed": (-3.0, 0.0)},
+    {"name": "crossing the field",             "pose": (10.5, 2.00), "speed": (0.0, 3.5)},
+    {"name": "crossing and closing",           "pose": (9.00, 6.50), "speed": (3.0, -2.5)},
+    {"name": "crossing and retreating",        "pose": (8.00, 1.50), "speed": (-2.0, 3.0)},
+    {"name": "moving fast, close in",          "pose": (12.5, 5.20), "speed": (4.0, 1.5)},
+    {"name": "far out, retreating",            "pose": (7.00, 4.03), "speed": (-2.5, -0.5)},
+    {"name": "far out, retreating and crossing", "pose": (8.50, 6.50), "speed": (-3.2, -1.0)},
+  ]
+
+  def fire(case):
+      """Take the shot your aim() asks for, and see where it lands."""
+      if "aim" not in globals():
+          raise AssertionError("There is no function called aim in your code.")
+      _lookups[0] = 0
+      px, py = case["pose"]
+      vx, vy = case["speed"]
+      answer = aim(px, py, vx, vy)
+      try:
+          heading, distance = answer
+      except (TypeError, ValueError):
+          raise AssertionError(
+              "aim() must return two things: the heading in radians and the "
+              "distance to look up. On %r it returned %r." % (case["name"], answer))
+      speed, tof = shot(distance)
+      # The game piece keeps the speed of the robot that threw it.
+      x = px + (vx + speed * math.cos(heading)) * tof
+      y = py + (vy + speed * math.sin(heading)) * tof
+      return (x, y), math.hypot(x - GOAL[0], y - GOAL[1])
+
+  def check(case):
+      """Grade one shot, and say where it went."""
+      (x, y), missed = fire(case)
+      px, py = case["pose"]
+      vx, vy = case["speed"]
+      assert missed <= TOLERANCE, (
+          "The shot for %r missed by %.2f m. The robot was at (%.1f, %.1f) moving "
+          "at (%.1f, %.1f) m/s, and the game piece landed at (%.2f, %.2f) instead "
+          "of (%.2f, %.2f). It has to land within %.2f m."
+          % (case["name"], missed, px, py, vx, vy, x, y, GOAL[0], GOAL[1], TOLERANCE))
+starter: |
+  import math
+
+  def aim(px, py, vx, vy):
+      """Where to point, and what distance to look up in the table.
+
+      px, py  where the robot is, in metres
+      vx, vy  how fast the robot is moving, in metres per second
+
+      Return (heading_in_radians, distance_in_metres).
+      """
+      # Point straight at the goal. This is right only when the robot is still.
+      dx = GOAL[0] - px
+      dy = GOAL[1] - py
+      return math.atan2(dy, dx), math.hypot(dx, dy)
+tests:
+  - name: Your code has an aim function that returns two numbers
+    code: |
+        assert "aim" in dir(), "There is no function called aim in your code."
+        answer = aim(11.0, 4.03, 0.0, 0.0)
+        assert answer is not None and len(answer) == 2, "aim() must return (heading, distance). It returned %r." % (answer,)
+        heading, distance = answer
+        assert 2.0 <= distance <= 14.0, "aim() returned a distance of %.2f m. The shot table only covers 2 m to 14 m." % distance
+  - name: It scores while standing still
+    code: |
+        check(CASES[0])
+  - name: It scores while driving at the goal
+    code: |
+        check(CASES[1])
+  - name: It scores while driving away from the goal
+    code: |
+        check(CASES[2])
+  - name: It scores while crossing the field
+    code: |
+        check(CASES[3])
+  - name: It scores while crossing and closing
+    code: |
+        check(CASES[4])
+  - name: It scores while crossing and retreating
+    code: |
+        check(CASES[5])
+  - name: It scores while moving fast, close in
+    code: |
+        check(CASES[6])
+  - name: It scores while far out, retreating
+    code: |
+        check(CASES[7])
+  - name: It scores while far out, retreating and crossing
+    code: |
+        check(CASES[8])
+hints:
+  - Aiming straight at the goal misses by metres. Work out how far the robot travels while the game piece is in the air, and move the aim point back by that much.
+  - That gives a new aim point, which is a new distance, which is a new flight time. Your first correction used the wrong flight time.
+  - So do it again, with the flight time for the new distance. And again.
+  - Stop when the distance stops changing. Two rounds are not enough; the worst case is still 0.37 m out.
+  - Guard the loop. Stop after a fixed number of rounds even if it never settles, or a bad number would hang the robot.
+solution: |
+  import math
+
+  def aim(px, py, vx, vy):
+      dx = GOAL[0] - px
+      dy = GOAL[1] - py
+
+      # Start with the distance to the real goal, then move the aim point back
+      # by however far the robot travels while the game piece is in the air.
+      # That changes the distance, which changes the flight time, so do it again
+      # until the answer stops moving.
+      distance = math.hypot(dx, dy)
+      heading = math.atan2(dy, dx)
+      for _ in range(20):
+          tof = flight_time(distance)
+          rx = dx - vx * tof
+          ry = dy - vy * tof
+          settled = math.hypot(rx, ry)
+          heading = math.atan2(ry, rx)
+          if abs(settled - distance) < 0.001:
+              distance = settled
+              break
+          distance = settled
+      return heading, distance

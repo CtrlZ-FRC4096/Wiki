@@ -24,3 +24,6 @@ tools/e2e/.cache/
 # Playwright output if the tests are run from the wrong directory
 test-results/
 playwright-report/
+
+# Python bytecode from the validators
+__pycache__/

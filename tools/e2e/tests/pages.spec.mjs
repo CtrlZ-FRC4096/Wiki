@@ -16,7 +16,12 @@ const PAGES = [
   { path: "/docs/Code/Controls/tuning-arm/", widgets: 1 },
   { path: "/docs/Code/Controls/tuning-elevator/", widgets: 1 },
   { path: "/docs/Code/Controls/operator-interface/", widgets: 1 },
-  { path: "/docs/Code/Autonomous/planning-an-auto/", widgets: 1 }
+  { path: "/docs/Code/Autonomous/planning-an-auto/", widgets: 1 },
+  { path: "/docs/Code/Challenges/challenges/", widgets: 0 },
+  { path: "/docs/Code/Challenges/jam-detector/", widgets: 1 },
+  { path: "/docs/Code/Challenges/shoot-on-the-fly/", widgets: 1 },
+  { path: "/docs/Code/Challenges/vision-latency/", widgets: 1 },
+  { path: "/docs/Code/Challenges/second-order-swerve/", widgets: 1 }
 ];
 
 for (const { path, widgets } of PAGES) {

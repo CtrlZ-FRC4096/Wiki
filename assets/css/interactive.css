@@ -1440,3 +1440,55 @@
   font-weight: 600;
   color: var(--cz-muted);
 }
+
+/* ------------------------------------------------------------------ *
+ * On a phone, put the robot next to the button that moves it.
+ *
+ * Every widget is written with its picture first and its controls under it,
+ * which reads well on a wide screen. On a phone the picture is off the top of
+ * the screen by the time you reach Play, so you press it and see nothing.
+ * Below 740px the picture moves down to sit directly above the toolbar. The
+ * source order is left alone, so screen readers and wide screens are as they
+ * were.
+ * ------------------------------------------------------------------ */
+@media (max-width: 740px) {
+  .cz-exercise {
+    display: flex;
+    flex-direction: column;
+  }
+
+  /* Everything keeps its place unless it is named below. */
+  .cz-exercise > * { order: 0; }
+
+  .cz-basic__scene,
+  .cz-sim__stage,
+  .cz-auto__stage,
+  .cz-oi__stage { order: 1; }
+
+  .cz-exercise__toolbar { order: 2; }
+
+  /* What belongs under the button stays under it. */
+  .cz-exercise__output,
+  .cz-exercise__hints,
+  .cz-exercise__help,
+  .cz-basic__output,
+  .cz-basic__peek,
+  .cz-sim__modebar,
+  .cz-sim__modes,
+  .cz-sim__output,
+  .cz-oi__hud,
+  .cz-oi__log,
+  .cz-oi__focus-hint,
+  .cz-oi__output,
+  .cz-auto__limits,
+  .cz-auto__steps,
+  .cz-auto__export,
+  .cz-auto__output { order: 3; }
+
+  /* The picture has just moved away from the heading, so give it a little
+     air of its own. */
+  .cz-basic__scene,
+  .cz-sim__stage,
+  .cz-auto__stage,
+  .cz-oi__stage { margin-top: 0.9rem; }
+}

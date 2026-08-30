@@ -26,7 +26,7 @@ var HARNESS = [
   "        tb = tb.tb_next  # hide this harness's own frame",
   "    return ''.join(traceback.format_exception(etype, evalue, tb)).rstrip()",
   "",
-  "def _cz_run(user_code, tests_json):",
+  "def _cz_run(user_code, tests_json, setup_code=''):",
   "    tests = json.loads(tests_json)",
   "    result = {'stdout': '', 'error': None, 'tests': []}",
   "    ns = {'__name__': '__main__'}",
@@ -38,6 +38,16 @@ var HARNESS = [
   "        result['stdout'] = out.getvalue()",
   "        result['error'] = _cz_trace()",
   "        return json.dumps(result)",
+  "    # Anything the checks share goes in after the student's code, so that",
+  "    # the checks always get the harness the exercise intended.",
+  "    if setup_code:",
+  "        try:",
+  "            with contextlib.redirect_stdout(out), contextlib.redirect_stderr(out):",
+  "                exec(compile(setup_code, 'the checks', 'exec'), ns)",
+  "        except BaseException:",
+  "            result['stdout'] = out.getvalue()",
+  "            result['error'] = _cz_trace()",
+  "            return json.dumps(result)",
   "    for test in tests:",
   "        entry = {'name': test.get('name', 'check'), 'passed': True, 'message': ''}",
   "        label = 'check: ' + entry['name']",
@@ -77,7 +87,7 @@ self.onmessage = function (event) {
     var runner = pyodide.globals.get("_cz_run");
     var raw;
     try {
-      raw = runner(msg.code || "", JSON.stringify(msg.tests || []));
+      raw = runner(msg.code || "", JSON.stringify(msg.tests || []), msg.setup || "");
     } finally {
       runner.destroy();
     }

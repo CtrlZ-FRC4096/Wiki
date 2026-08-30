@@ -52,7 +52,7 @@
     }
   }
 
-  function runPython(src, code, tests, handlers) {
+  function runPython(src, code, tests, setup, handlers) {
     var id = nextRunId++;
     pending[id] = {
       onStatus: handlers.onStatus,
@@ -67,7 +67,7 @@
         );
       }, RUN_TIMEOUT_MS)
     };
-    getWorker(src).postMessage({ id: id, code: code, tests: tests });
+    getWorker(src).postMessage({ id: id, code: code, tests: tests, setup: setup });
   }
 
   /* ------------------------------------------------------------------ */
@@ -230,7 +230,7 @@
       output.innerHTML = "";
       status.textContent = "Starting…";
 
-      runPython(workerUrl, textarea.value, data.tests || [], {
+      runPython(workerUrl, textarea.value, data.tests || [], data.setup || "", {
         onStatus: function (message) { status.textContent = message; },
         onResult: function (payload) {
           runBtn.disabled = false;

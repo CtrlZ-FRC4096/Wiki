@@ -1,0 +1,200 @@
+title: Find the game piece with the motor current alone
+prompt: |
+  You did this before with one number. On a real robot one number is not enough.
+
+  The indexer motor tells you when a game piece arrives, because a motor that
+  works harder pulls more current. The current is not a clean signal:
+
+  - **The motor starts.** For the first fifth of a second it pulls about 70 A
+    whatever is happening. This is inrush current.
+  - **Every robot idles differently.** A cold, full, stiff indexer pulls 30 A with
+    nothing in it. A loose one on a weak battery pulls 5 A. Your code must work on
+    both, so it cannot contain the number 20.
+  - **The battery matters.** The same mechanism on a tired battery pulls a fifth
+    less current for the same work.
+  - **The signal is noisy**, and the battery sags slowly through the match.
+  - **A game piece can brush past** without going in.
+
+  `update(amps, dt)` runs every 20 ms. Return `True` once, at the moment the
+  indexer must stop. Return `False` the rest of the time.
+
+  The game piece is inside the robot between 18 cm and 5 cm. Stop too early and it
+  falls back out. Stop too late and it is against the Jamomatic.
+
+  There are seven runs. Get all seven.
+
+  You can call `play(run)` and read `RUNS` from your own code to see what the
+  seven runs give you.
+setup: |
+  DT = 0.02
+  IN_AT, JAM_AT, START_AT = 18.0, 5.0, 40.0
+  SAMPLES = 450                       # nine seconds
+
+  def _wobble(seed, i):
+      """Repeatable noise, so a run is the same every time you try it."""
+      x = (seed * 1103515245 + i * 12345 + 7919) & 0x7FFFFFFF
+      x ^= (x >> 13)
+      x = (x * 1103515245) & 0x7FFFFFFF
+      return ((x >> 7) % 2001) / 1000.0 - 1.0
+
+  def _load(pos):
+      """How hard the game piece pushes on the indexer wheel, 0 to 1.6."""
+      if pos >= 30.0:   return 0.0
+      if pos <= JAM_AT: return 1.6
+      if pos >= IN_AT:  return 0.15 * (30.0 - pos) / 12.0
+      return 0.15 + 0.85 * (IN_AT - pos) / (IN_AT - JAM_AT)
+
+  def _at(path, t):
+      if t <= path[0][0]:
+          return path[0][1]
+      for (t0, p0), (t1, p1) in zip(path, path[1:]):
+          if t <= t1:
+              return p0 + (p1 - p0) * (t - t0) / (t1 - t0) if t1 > t0 else p1
+      return path[-1][1]
+
+  def _amps(run, i, pos):
+      t = i * DT
+      a = run["base"] + run.get("drift", 0.0) * t + run["rise"] * _load(pos)
+      if t < 0.25:
+          a += 70.0 * (2.718281828 ** (-t / 0.05))     # the motor starting up
+      return max(0.0, a * run.get("battery", 1.0) + 2.0 * _wobble(run["seed"], i))
+
+  _INWARD = [(0, 40), (1.0, 40), (5.2, 2), (9, 2)]
+
+  RUNS = [
+    {"name": "an empty hopper on a fresh battery", "seed": 1, "base": 6, "rise": 24,
+     "piece": True, "path": _INWARD},
+    {"name": "a stiff, cold, full indexer", "seed": 2, "base": 30, "rise": 21,
+     "piece": True, "path": _INWARD},
+    {"name": "a tired battery", "seed": 3, "base": 9, "rise": 26,
+     "piece": True, "path": _INWARD, "battery": 0.80},
+    {"name": "a weak motor on a low battery", "seed": 7, "base": 5, "rise": 16,
+     "piece": True, "path": _INWARD, "battery": 0.85},
+    {"name": "a game piece that arrives late", "seed": 5, "base": 11, "rise": 23,
+     "piece": True, "path": [(0, 40), (3.4, 40), (7.6, 2), (9, 2)]},
+    {"name": "a brush past, then the real game piece", "seed": 4, "base": 8, "rise": 25,
+     "piece": True,
+     "path": [(0, 40), (1.2, 40), (2.0, 21), (2.5, 21), (3.2, 40), (4.2, 40), (8.0, 2), (9, 2)]},
+    {"name": "no game piece, and the battery sagging", "seed": 6, "base": 14, "rise": 24,
+     "piece": False, "drift": 0.6, "path": [(0, 40), (9, 40)]},
+  ]
+
+  def play(run):
+      """Play one run through your detector.
+
+      Returns (when_it_fired, where_the_piece_ended_up). The indexer stops the
+      moment update() returns True. A game piece that was not going inwards at
+      that moment falls back out of the robot.
+      """
+      if "JamDetector" not in globals():
+          raise AssertionError("There is no class called JamDetector in your code.")
+      detector = JamDetector()
+      for i in range(SAMPLES):
+          t = i * DT
+          pos = _at(run["path"], t)
+          going_in = pos - _at(run["path"], t + DT) > 0
+          answer = detector.update(_amps(run, i, pos), DT)
+          if answer is True:
+              return t, (pos if going_in else START_AT)
+          if answer is not False and answer is not None:
+              raise AssertionError(
+                  "update() must return True or False. On the run %r it returned %r."
+                  % (run["name"], answer))
+      return None, _at(run["path"], SAMPLES * DT)
+
+  def check(run):
+      """Grade one run, and say what the robot did when it failed."""
+      fired, ended = play(run)
+      if not run["piece"]:
+          assert fired is None, (
+              "On the run %r there was no game piece at all, but your detector "
+              "stopped the indexer at %.2f s. Only noise and the sagging battery "
+              "moved the current." % (run["name"], fired))
+          return
+      assert fired is not None, (
+          "On the run %r your detector never stopped the indexer, so the game "
+          "piece went all the way to the Jamomatic." % run["name"])
+      assert ended <= IN_AT, (
+          "On the run %r your detector stopped the indexer at %.2f s, when the game "
+          "piece was still %.0f cm away. It has to be %.0f cm or less to be inside, "
+          "so the piece fell back out." % (run["name"], fired, ended, IN_AT))
+      assert ended > JAM_AT, (
+          "On the run %r your detector stopped the indexer at %.2f s. By then the "
+          "game piece was at %.0f cm, hard against the Jamomatic."
+          % (run["name"], fired, ended))
+starter: |
+  class JamDetector:
+      """Decide when the game piece is inside the robot.
+
+      update() is called every 20 ms with the current the indexer motor pulls.
+      Return True once, at the moment the indexer must stop.
+      """
+
+      def __init__(self):
+          pass
+
+      def update(self, amps, dt):
+          # The obvious answer. It is also wrong on most of the runs.
+          return amps > 20.0
+tests:
+  - name: Your code has a JamDetector with an update method
+    code: |
+        assert "JamDetector" in dir(), "There is no class called JamDetector in your code."
+        detector = JamDetector()
+        assert hasattr(detector, "update"), "JamDetector needs an update(self, amps, dt) method."
+        answer = detector.update(8.0, DT)
+        assert answer in (True, False), "update() must return True or False. It returned %r." % (answer,)
+  - name: It works on an empty hopper on a fresh battery
+    code: |
+        check(RUNS[0])
+  - name: It works on a stiff, cold, full indexer
+    code: |
+        check(RUNS[1])
+  - name: It works on a tired battery
+    code: |
+        check(RUNS[2])
+  - name: It works on a weak motor on a low battery
+    code: |
+        check(RUNS[3])
+  - name: It works on a game piece that arrives late
+    code: |
+        check(RUNS[4])
+  - name: It works on a brush past, then the real game piece
+    code: |
+        check(RUNS[5])
+  - name: It works on no game piece, and the battery sagging
+    code: |
+        check(RUNS[6])
+hints:
+  - You cannot know the idle current in advance, so measure it. The indexer is empty at the start of every run.
+  - Do not measure during the first fifth of a second. That is the motor starting, not the mechanism.
+  - The middle value of your samples is safer than the average. One odd sample cannot move the middle value.
+  - Look for a rise above the value you measured, not for a fixed number of amps.
+  - Noise crosses any line for a single sample. A game piece keeps pushing. Make the rise last several samples in a row.
+solution: |
+  class JamDetector:
+      BLANK = 0.30      # let the starting current die away first
+      MEASURE = 0.40    # then watch the empty indexer for this long
+      MARGIN = 8.0      # a real game piece pushes at least this much harder
+      HOLD = 0.16       # and it keeps pushing, which noise does not
+
+      def __init__(self):
+          self.t = 0.0
+          self.seen = []
+          self.base = None
+          self.above = 0.0
+
+      def update(self, amps, dt):
+          self.t += dt
+          if self.t < self.BLANK:
+              return False
+          if self.t < self.BLANK + self.MEASURE:
+              self.seen.append(amps)
+              return False
+          if self.base is None:
+              # The middle value, not the average. One strange sample cannot
+              # move the middle value.
+              self.seen.sort()
+              self.base = self.seen[len(self.seen) // 2]
+          self.above = self.above + dt if amps > self.base + self.MARGIN else 0.0
+          return self.above >= self.HOLD

@@ -26,7 +26,11 @@ function solutionOf(id) {
 const PAGES = {
   "/docs/Code/Tutorials/joystick-deadband/": ["deadband", "deadband_scaled"],
   "/docs/Code/Tutorials/unit-conversions/": ["falcon_rpm", "falcon_mps", "cancoder_roundtrip"],
-  "/docs/Code/Tutorials/swerve-module-optimization/": ["angle_wrap", "swerve_optimize"]
+  "/docs/Code/Tutorials/swerve-module-optimization/": ["angle_wrap", "swerve_optimize"],
+  "/docs/Code/Challenges/jam-detector/": ["jam_detector"],
+  "/docs/Code/Challenges/shoot-on-the-fly/": ["shoot_on_the_fly"],
+  "/docs/Code/Challenges/vision-latency/": ["vision_latency"],
+  "/docs/Code/Challenges/second-order-swerve/": ["second_order_swerve"]
 };
 
 test("every exercise file has a page that grades it", () => {
@@ -37,6 +41,7 @@ test("every exercise file has a page that grades it", () => {
 
 for (const [path, ids] of Object.entries(PAGES)) {
   test(`exercises are graded: ${path}`, async ({ page }) => {
+    test.setTimeout(300_000);   // a challenge grades against a whole simulator
     const errors = watchForErrors(page);
     await page.goto(path, { waitUntil: "networkidle" });
 
@@ -58,6 +63,52 @@ for (const [path, ids] of Object.entries(PAGES)) {
       const accepted = await runExercise(exercise, solutionOf(ids[i]));
       expect(accepted, `${ids[i]} rejected its own solution`).toContain("All the checks passed");
       await expect(exercise).toHaveClass(/is-solved/);
+    }
+
+    await expectNoErrors(errors);
+  });
+}
+
+/* A challenge is only a challenge if the obvious answer it ships with really
+ * fails, and says something a student can act on. The Python validators prove
+ * this too; this proves it in the browser the students actually use. */
+const CHALLENGES = {
+  "/docs/Code/Challenges/jam-detector/": "jam_detector",
+  "/docs/Code/Challenges/shoot-on-the-fly/": "shoot_on_the_fly",
+  "/docs/Code/Challenges/vision-latency/": "vision_latency",
+  "/docs/Code/Challenges/second-order-swerve/": "second_order_swerve"
+};
+
+function starterOf(id) {
+  const text = readFileSync(join(DATA, id + ".yml"), "utf8");
+  const start = text.indexOf("\nstarter: |");
+  if (start === -1) throw new Error("no starter block in " + id);
+  const body = text.slice(text.indexOf("\n", start + 1) + 1);
+  const lines = [];
+  for (const line of body.split("\n")) {
+    if (line.trim() && !line.startsWith("  ")) break;
+    lines.push(line.replace(/^ {2}/, ""));
+  }
+  return lines.join("\n").trimEnd();
+}
+
+for (const [path, id] of Object.entries(CHALLENGES)) {
+  test(`the obvious answer fails, and explains itself: ${id}`, async ({ page }) => {
+    test.setTimeout(300_000);
+    const errors = watchForErrors(page);
+    await page.goto(path, { waitUntil: "networkidle" });
+    const exercise = page.locator(".cz-pyex").first();
+
+    const verdict = await runExercise(exercise, starterOf(id));
+    expect(verdict, `${id} accepts the answer it ships with`).toContain("failed");
+
+    // Every failure has to tell the student what the robot did, not only that
+    // the answer was wrong.
+    const messages = await exercise
+      .locator(".cz-exercise__check.is-fail .cz-exercise__check-message").allTextContents();
+    expect(messages.length, `${id} failed with no explanation`).toBeGreaterThan(0);
+    for (const message of messages) {
+      expect(message.trim().length, `${id} has a bare failure: "${message}"`).toBeGreaterThan(40);
     }
 
     await expectNoErrors(errors);

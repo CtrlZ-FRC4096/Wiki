@@ -110,7 +110,12 @@ const DEFAULT = [
   "docs/Code/Controls/tuning-arm.md",
   "docs/Code/Controls/tuning-elevator.md",
   "docs/Code/Controls/operator-interface.md",
-  "docs/Code/Autonomous/planning-an-auto.md"
+  "docs/Code/Autonomous/planning-an-auto.md",
+  "docs/Code/Challenges/challenges.md",
+  "docs/Code/Challenges/jam-detector.md",
+  "docs/Code/Challenges/shoot-on-the-fly.md",
+  "docs/Code/Challenges/vision-latency.md",
+  "docs/Code/Challenges/second-order-swerve.md"
 ].map((f) => path.join(__dirname, "..", f));
 
 const files = process.argv.length > 2 ? process.argv.slice(2) : DEFAULT;

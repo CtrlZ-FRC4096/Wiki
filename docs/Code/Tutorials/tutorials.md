@@ -102,6 +102,13 @@ student writes. A check passes if it raises no exception.
 **Put a message on every `assert`.** The student sees only that message.
 Therefore the message must give the expected value and the actual value.
 
+
+## When these are too easy
+
+The [Challenges](../../Challenges/challenges) are the same ideas without the
+training wheels. Every one of them is a problem this team has really had, and
+in every one the obvious answer fails.
+
 ## How to check your work
 
 Run these before you open a pull request. They need no installation except
@@ -114,6 +121,10 @@ PyYAML for the first one.
 | `node tools/validate-auto-task.js` | The autonomous task is possible, and a routine with its actions in series is not |
 | `node tools/validate-swerve.js` | The swerve maths on the wiki agrees with `ctre_module_state.py` on the robot |
 | `node tools/validate-rule.js` | Every rule a student can build in tutorial 3. Each sensor that can work has an unbroken band of values that pass, and every failure gives a reason |
+| `python3 tools/validate-jam.py` | The jam-detector challenge. No fixed threshold can pass it, and the intended answer can |
+| `python3 tools/validate-shoot.py` | The shoot-on-the-fly challenge. Measures how close each number of corrections gets |
+| `python3 tools/validate-vision.py` | The vision challenge. Only an answer that rewinds to the moment of the picture passes |
+| `python3 tools/validate-swerve2.py` | The second-order swerve challenge, including the case that divides by zero |
 | `node tools/check-ste.js` | Sentence length, paragraph length and word use on the tutorial pages |
 
 If you change the JavaScript in `assets/js/interactive/`, also run the browser
