@@ -31,9 +31,13 @@ the one before it.
 Think about what must be true before each step:
 
 - The intake must be **down** before it can touch a game piece on the floor.
-- The robot must be **at** the game piece before the intake can collect it.
 - The robot must be **holding** a game piece before it can shoot.
 - The robot must be **near** the goal before a shot can go in.
+
+More than one order works. The intake keeps running after you start it. You
+can start it first, then drive to the game piece. A real routine does this. It
+starts the intake and drives through the piece, because that is faster than
+stopping to collect.
 
 If a step happens too early, watch what the robot does. It does not stop and
 tell you. It carries on and fails.

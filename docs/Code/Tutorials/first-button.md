@@ -17,9 +17,6 @@ A robot does what you tell it. It does nothing else.
 A driver holds a controller. The controller has buttons. Your job is to decide
 what each button does.
 
-This is the first thing you will write on the team, and it lives in a file
-called `oi.py`.
-
 ## Two ways a button can work
 
 There are two ways to connect a button to a job.
@@ -31,10 +28,12 @@ There are two ways to connect a button to a job.
 
 Both are correct for some jobs. Only one is correct for an intake.
 
-## Your task
+## Your tasks
 
-Make the intake run while you hold the left trigger. It must stop when you let
-go.
+There are three. Do them in order. The widget shows which one you are on.
+
+**Task 1.** Make the intake run while you hold the left trigger. It must stop
+when you let go.
 
 1. Tap **Left trigger**.
 2. For **Do this**, tap **Run the intake**.
@@ -42,6 +41,17 @@ go.
 4. Press and hold the **Left trigger** pad. Watch the roller turn.
 5. Let go. The roller must stop.
 6. Tap **Check my answer**.
+
+**Task 2.** Make the A button start the shooter. A shooter needs about a second
+to reach speed, thus the driver must not hold a button for the whole match.
+Use **Once when I press it**.
+
+**Task 3.** The shooter now has no way to stop. Give the B button the job
+**Stop the shooter**.
+
+Task 3 is the important one. An action that starts with **Once when I press
+it** needs a second button to undo it. **While I hold it** writes both halves
+for you.
 
 {% include interactive/first-bindings.html title="Give a button a job" %}
 

@@ -24,10 +24,24 @@
     <canvas role="img" aria-label="A robot collecting a game piece with its intake"></canvas>
   </div>
 
-  <div class="cz-rule__meter" aria-hidden="true">
-    <span class="cz-rule__meter-label">sensor</span>
-    <span class="cz-rule__meter-track"><span class="cz-rule__meter-fill"></span></span>
-    <span class="cz-rule__reading">40 cm</span>
+  <div class="cz-rule__meter">
+    <div class="cz-rule__meter-head">
+      <span class="cz-rule__meter-label">intake sensor</span>
+      <span class="cz-rule__reading">40 cm</span>
+    </div>
+    <div class="cz-rule__scale" aria-hidden="true">
+      <span class="cz-rule__zone is-jam"></span>
+      <span class="cz-rule__zone is-good"></span>
+      <span class="cz-rule__zone is-out"></span>
+      <span class="cz-rule__mark"></span>
+      <span class="cz-rule__now"></span>
+    </div>
+    <div class="cz-rule__legend" aria-hidden="true">
+      <span class="cz-rule__key is-jam">jams</span>
+      <span class="cz-rule__key is-good">piece is inside</span>
+      <span class="cz-rule__key">not in yet</span>
+    </div>
+    <p class="cz-rule__status"></p>
   </div>
 
   <div class="cz-rule__builder"></div>
@@ -38,8 +52,8 @@
 
   <div class="cz-basic__output cz-exercise__output"></div>
 
-  <details class="cz-basic__peek" markdown="0">
-    <summary>See the code you just made</summary>
+  <div class="cz-basic__peek">
+    <span class="cz-basic__code-label">The code you just made</span>
     <pre class="cz-basic__code"></pre>
-  </details>
+  </div>
 </div>

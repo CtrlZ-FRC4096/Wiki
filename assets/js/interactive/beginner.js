@@ -130,8 +130,49 @@
   var JOBS = [
     { id: "none", label: "Nothing" },
     { id: "intake", label: "Run the intake" },
-    { id: "shooter", label: "Spin up the shooter" },
+    { id: "shooter", label: "Start the shooter" },
+    { id: "shooterOff", label: "Stop the shooter" },
     { id: "arm", label: "Lower the arm" }
+  ];
+
+  /* Three tasks, in order. Each one teaches a different reason to choose
+   * between "while I hold it" and "once when I press it". */
+  var BIND_TASKS = [
+    {
+      id: "intake-hold",
+      text: "Make the intake run while you hold the left trigger. It must stop when you let go.",
+      check: function (b, world, tried) {
+        var t = b.LEFT_TRIGGER_AS_BUTTON;
+        if (t.job !== "intake") return { why: "Tap Left trigger above, then tap “Run the intake”." };
+        if (t.when !== "hold") return { why: "Tap “While I hold it”. With “Once when I press it” nothing stops the intake." };
+        if (!tried.LEFT_TRIGGER_AS_BUTTON) return { why: "Press and hold the Left trigger pad, then let it go." };
+        if (world.intakeOn) return { why: "The intake is still running. Let go of the button." };
+        return { ok: true };
+      }
+    },
+    {
+      id: "shooter-press",
+      text: "Make the A button start the shooter. It must keep running after you let go, because a shooter needs about a second to reach speed.",
+      check: function (b, world, tried) {
+        var a = b.A;
+        if (a.job !== "shooter") return { why: "Tap A above, then tap “Start the shooter”." };
+        if (a.when !== "press") return { why: "Tap “Once when I press it”. With “While I hold it” the driver must hold the button for the whole match." };
+        if (!tried.A) return { why: "Press the A pad and let it go." };
+        if (world.shooterSpeed < 0.05) return { why: "The shooter is not running. Press A again." };
+        return { ok: true };
+      }
+    },
+    {
+      id: "shooter-stop",
+      text: "The shooter has no way to stop. Make the B button stop it.",
+      check: function (b, world, tried) {
+        var btn = b.B;
+        if (btn.job !== "shooterOff") return { why: "Tap B above, then tap “Stop the shooter”." };
+        if (!tried.B) return { why: "Start the shooter with A, then press B." };
+        if (world.shooterOn) return { why: "The shooter is still on. Press B." };
+        return { ok: true };
+      }
+    }
   ];
 
   var WHENS = [
@@ -154,7 +195,8 @@
     });
     var selected = BUTTONS[0].id;
     var held = {};
-    var tried = false;
+    var tried = {};
+    var done = (saved && saved.done) || {};
 
     var world = window.CZScene.createWorld({ pieceOnFloor: false });
     world.targetX = 0.3;
@@ -186,7 +228,7 @@
       });
     }
 
-    function persist() { save("bind", { bindings: bindings }); }
+    function persist() { save("bind", { bindings: bindings, done: done }); }
 
     function apply(buttonId, down) {
       var binding = bindings[buttonId];
@@ -195,10 +237,12 @@
         if (!down) return;                       // nothing happens on release
         if (binding.job === "intake") world.intakeOn = true;
         if (binding.job === "shooter") world.shooterOn = true;
+        if (binding.job === "shooterOff") world.shooterOn = false;
         if (binding.job === "arm") world.armDown = !world.armDown;
       } else {
         if (binding.job === "intake") world.intakeOn = down;
         if (binding.job === "shooter") world.shooterOn = down;
+        if (binding.job === "shooterOff") { if (down) world.shooterOn = false; }
         if (binding.job === "arm") world.armDown = down;
       }
     }
@@ -216,7 +260,7 @@
         if (!held[b.id]) return;
         pad.classList.remove("is-down");
         held[b.id] = false;
-        tried = true;
+        tried[b.id] = true;
         apply(b.id, false);
       };
       pad.addEventListener("pointerup", release);
@@ -231,7 +275,16 @@
         var binding = bindings[b.id];
         if (binding.job === "none") return;
         var flag = binding.job === "intake" ? "robot.intake_running"
-          : binding.job === "shooter" ? "robot.shooter_spinning" : "robot.arm_down";
+          : binding.job === "shooter" || binding.job === "shooterOff" ? "robot.shooter_spinning"
+          : "robot.arm_down";
+        var value = binding.job === "shooterOff" ? "False" : "True";
+        if (binding.job === "shooterOff") {
+          lines.push("@driver." + b.id + ".whenPressed");
+          lines.push("def _():");
+          lines.push("    " + flag + " = " + value);
+          lines.push("");
+          return;
+        }
         if (binding.when === "hold") {
           lines.push("@driver." + b.id + ".whenHeld");
           lines.push("def _():");
@@ -251,36 +304,62 @@
       codeBox.textContent = lines.length ? lines.join("\n").trim() : "# Give a button a job to see the code.";
     }
 
+    function currentTask() {
+      for (var i = 0; i < BIND_TASKS.length; i++) {
+        if (!done[BIND_TASKS[i].id]) return BIND_TASKS[i];
+      }
+      return null;
+    }
+
+    function renderTasks() {
+      var box = root.querySelector(".cz-bind__tasks");
+      box.innerHTML = "";
+      var current = currentTask();
+      BIND_TASKS.forEach(function (task, index) {
+        var isDone = Boolean(done[task.id]);
+        var isNow = current && current.id === task.id;
+        var row = el("div", "cz-bind__task" + (isDone ? " is-done" : "") + (isNow ? " is-now" : ""));
+        row.appendChild(el("span", "cz-bind__task-mark", isDone ? "✓" : String(index + 1)));
+        row.appendChild(el("span", "cz-bind__task-text", task.text));
+        box.appendChild(row);
+      });
+      if (!current) {
+        box.appendChild(el("p", "cz-exercise__verdict is-pass",
+          "All three done. You can now start something, stop it, and hold it."));
+      }
+      root.classList.toggle("is-solved", !current);
+    }
+
     root.querySelector('[data-action="check"]').addEventListener("click", function () {
-      var trigger = bindings.LEFT_TRIGGER_AS_BUTTON;
-      var checks = [
-        { label: "The left trigger runs the intake", ok: trigger.job === "intake",
-          why: "Select the Left trigger above, then choose “Run the intake”." },
-        { label: "It runs only while you hold the button", ok: trigger.when === "hold",
-          why: "Choose “While I hold it”. With “Once when I press it” nothing ever stops the intake." },
-        { label: "You pressed the button and let it go", ok: tried,
-          why: "Press and hold the Left trigger pad below, then let it go." },
-        { label: "The intake is stopped now", ok: !world.intakeOn,
-          why: "The intake is still running. Let go of the button, or change when it runs." }
-      ];
-      var passed = checks.every(function (c) { return c.ok; });
-      verdict(output, passed, checks,
-        "Correct. The robot does what you told it, and it stops when you stop telling it.",
-        "Not correct yet. Read the first failed line above.");
-      root.classList.toggle("is-solved", passed);
+      var task = currentTask();
+      output.innerHTML = "";
+      if (!task) return;
+      var result = task.check(bindings, world, tried);
+      if (result.ok) {
+        done[task.id] = true;
+        persist();
+        renderTasks();
+        var next = currentTask();
+        output.appendChild(el("p", "cz-exercise__verdict is-pass",
+          next ? "Correct. Now do the next one." : "Correct. That is all three."));
+      } else {
+        output.appendChild(el("p", "cz-exercise__verdict is-fail", result.why));
+      }
     });
 
     root.querySelector('[data-action="reset"]').addEventListener("click", function () {
       BUTTONS.forEach(function (b) { bindings[b.id] = { job: "none", when: "hold" }; });
       world.intakeOn = false; world.shooterOn = false; world.armDown = false;
-      tried = false;
-      persist(); renderConfig(); renderCode();
+      tried = {};
+      done = {};
+      persist(); renderConfig(); renderCode(); renderTasks();
       output.innerHTML = "";
       root.classList.remove("is-solved");
     });
 
     renderConfig();
     renderCode();
+    renderTasks();
 
     animate(canvas, function (dt) {
       var anyHeld = Object.keys(held).some(function (k) { return held[k]; });
@@ -407,9 +486,16 @@
 
     function stepDone(state) {
       if (state.id === "lower") return world.armAngle > 0.98;
-      if (state.id === "drive_piece") return Math.abs(world.x - window.CZScene.PIECE_AT) < 0.004;
+      if (state.id === "drive_piece") {
+        var there = Math.abs(world.x - window.CZScene.PIECE_AT) < 0.004;
+        if (!there) return false;
+        // If the intake is already running, wait at the piece long enough to
+        // pick it up. That is what lets the intake step come first.
+        if (world.intakeOn && world.pieceOnFloor && state.t < 3) return false;
+        return true;
+      }
       if (state.id === "drive_goal") return Math.abs(world.x - window.CZScene.GOAL_AT) < 0.004;
-      if (state.id === "intake") return state.t > 1.4;
+      if (state.id === "intake") return state.t > 0.8;
       if (state.id === "shoot") return state.t > 1.0;
       return true;
     }
@@ -462,7 +548,6 @@
         status.textContent = "Step " + (running.index + 1) + ": " + stepById(running.id).label;
         status.classList.add("is-on");
         if (stepDone(running)) {
-          if (running.id === "intake") world.intakeOn = false;
           var next = running.index + 1;
           if (next < routine.length) beginStep(next);
           else { status.textContent = ""; status.classList.remove("is-on"); finish(); }
@@ -482,8 +567,10 @@
   function setupRule(root) {
     var canvas = root.querySelector("canvas");
     var builder = root.querySelector(".cz-rule__builder");
-    var meter = root.querySelector(".cz-rule__meter-fill");
+    var mark = root.querySelector(".cz-rule__mark");
+    var now = root.querySelector(".cz-rule__now");
     var reading = root.querySelector(".cz-rule__reading");
+    var status = root.querySelector(".cz-rule__status");
     var codeBox = root.querySelector(".cz-basic__code");
     var output = root.querySelector(".cz-basic__output");
     var playBtn = root.querySelector('[data-action="play"]');
@@ -503,34 +590,34 @@
     choiceRow(builder, "IF", [
       { id: "intake", label: "the intake sensor" },
       { id: "battery", label: "the battery voltage" }
-    ], rule.sensor, function (v) { rule.sensor = v; persist(); renderCode(); });
+    ], rule.sensor, function (v) { rule.sensor = v; persist(); refresh(); });
 
     choiceRow(builder, "IS", [
       { id: "below", label: "below" },
       { id: "above", label: "above" }
-    ], rule.compare, function (v) { rule.compare = v; persist(); renderCode(); });
+    ], rule.compare, function (v) { rule.compare = v; persist(); refresh(); });
 
-    var slider = el("div", "cz-basic__choice");
-    slider.appendChild(el("div", "cz-basic__choice-label", "THIS VALUE"));
+    var sliderRow = el("div", "cz-basic__choice");
+    sliderRow.appendChild(el("div", "cz-basic__choice-label", "THIS VALUE"));
     var input = document.createElement("input");
     input.type = "range";
     input.className = "cz-rule__slider";
     input.min = 2; input.max = 40; input.step = 1; input.value = rule.value;
-    input.setAttribute("aria-label", "Rule threshold in centimetres");
+    input.setAttribute("aria-label", "Rule value in centimetres");
     var readout = el("span", "cz-rule__value", rule.value + " cm");
     input.addEventListener("input", function () {
       rule.value = parseInt(input.value, 10);
       readout.textContent = rule.value + " cm";
-      persist(); renderCode();
+      persist(); refresh();
     });
-    slider.appendChild(input);
-    slider.appendChild(readout);
-    builder.appendChild(slider);
+    sliderRow.appendChild(input);
+    sliderRow.appendChild(readout);
+    builder.appendChild(sliderRow);
 
     choiceRow(builder, "THEN", [
       { id: "stop", label: "stop the intake" },
       { id: "start", label: "start the intake" }
-    ], rule.then, function (v) { rule.then = v; persist(); renderCode(); });
+    ], rule.then, function (v) { rule.then = v; persist(); refresh(); });
 
     function persist() { save("rule", rule); }
 
@@ -547,61 +634,75 @@
       ].join("\n");
     }
 
-    function sensorValue() {
-      return rule.sensor === "intake" ? world.sensor : 12.4;
+    /* Where the rule sits on the scale, before anything is played. This is
+     * the part that makes the exercise readable: you can see the marker is
+     * outside the green band without pressing Play. */
+    function refresh() {
+      renderCode();
+      mark.style.left = (rule.value / 40) * 100 + "%";
+      mark.style.display = rule.sensor === "intake" ? "" : "none";
+      if (!run) {
+        status.textContent = rule.sensor !== "intake"
+          ? "The battery voltage does not change when a game piece arrives."
+          : rule.value > IN_AT
+            ? "The rule is set to happen before the piece is inside."
+            : rule.value <= JAM_AT
+              ? "The rule is set to happen after the piece has jammed."
+              : "The rule is set to happen while the piece is inside. Press Play.";
+      }
     }
+
+    function sensorValue() { return rule.sensor === "intake" ? world.sensor : 12.4; }
 
     function ruleIsTrue() {
       var value = sensorValue();
       return rule.compare === "below" ? value < rule.value : value > rule.value;
     }
 
+    /* Play always starts again from the beginning. */
     playBtn.addEventListener("click", function () {
-      if (run) { stop(); return; }
       world = window.CZScene.createWorld();
-      world.targetX = window.CZScene.PIECE_AT;
       world.x = window.CZScene.PIECE_AT;
+      world.targetX = window.CZScene.PIECE_AT;
       world.armDown = true;
       world.armAngle = 1;
       world.intakeOn = true;
       run = { t: 0, fired: false, firedAt: null, jammed: false };
       output.innerHTML = "";
-      playBtn.textContent = "Stop";
+      root.classList.remove("is-solved");
+      status.textContent = "The intake is running. The game piece is coming in.";
     });
-
-    function stop() {
-      run = null;
-      playBtn.textContent = "Play";
-    }
 
     function finish(result) {
       var checks = [
         { label: "The rule reads the intake sensor", ok: rule.sensor === "intake",
-          why: "The battery voltage does not change when a game piece arrives." },
-        { label: "The robot collected the game piece", ok: result.collected,
-          why: result.collectedWhy },
+          why: "The battery voltage stays at 12.4 V whatever the intake is doing, so a rule about it can never notice a game piece." },
+        { label: "The robot collected the game piece", ok: result.collected, why: result.collectedWhy },
         { label: "The intake stopped", ok: result.stopped, why: result.stoppedWhy }
       ];
       var passed = checks.every(function (c) { return c.ok; });
       verdict(output, passed, checks,
         "Correct. The robot read a sensor and decided for itself.",
-        "Not correct yet. Change one part of the rule and play it again.");
+        "Not correct yet. Change one part of the rule, then press Play again.");
       root.classList.toggle("is-solved", passed);
-      stop();
+      status.textContent = result.summary;
+      run = null;
     }
 
-    renderCode();
+    refresh();
 
     animate(canvas, function (dt) {
       if (run) {
         run.t += dt;
+
         if (!run.fired && ruleIsTrue()) {
           run.fired = true;
           run.firedAt = world.sensor;
           world.intakeOn = rule.then === "start";
-          if (run.firedAt <= IN_AT && rule.then === "stop") {
-            // Far enough in to be held. Say so, or the picture contradicts
-            // the verdict the student is about to read.
+          if (rule.sensor === "intake") {
+            status.textContent = "The rule happened at " + run.firedAt.toFixed(0) + " cm.";
+          }
+          if (run.firedAt <= IN_AT && run.firedAt > JAM_AT && rule.then === "stop") {
             world.hasPiece = true;
             world.pieceOnFloor = false;
           }
@@ -612,30 +713,43 @@
         if (run.jammed) {
           finish({
             collected: false, stopped: false,
-            collectedWhy: "The intake never stopped, so the game piece jammed.",
-            stoppedWhy: "Lower the value, or use “below”, so the rule happens before the piece jams."
+            summary: "The game piece jammed at " + JAM_AT + " cm.",
+            collectedWhy: rule.then === "start"
+              ? "THEN is set to start the intake, so the rule never stops it."
+              : "The intake never stopped, so it pulled the game piece in until it jammed. The rule must happen above " + JAM_AT + " cm.",
+            stoppedWhy: rule.compare === "above"
+              ? "IS is set to above. The reading gets smaller as the piece comes in, so use below."
+              : rule.sensor !== "intake"
+                ? "Read the intake sensor instead."
+                : "Raise the value. Anything from " + (JAM_AT + 1) + " to " + IN_AT + " cm works."
           });
         } else if (run.fired && !world.intakeOn) {
-          var seated = run.firedAt <= IN_AT;
+          var seated = run.firedAt <= IN_AT && run.firedAt > JAM_AT;
           finish({
             collected: seated, stopped: true,
+            summary: seated
+              ? "The intake stopped at " + run.firedAt.toFixed(0) + " cm, with the piece inside."
+              : "The intake stopped at " + run.firedAt.toFixed(0) + " cm, too early.",
             collectedWhy: "The rule happened at " + run.firedAt.toFixed(0) +
-              " cm, before the piece was inside. It needs to be " + IN_AT + " cm or less.",
+              " cm. The piece is not inside the robot until " + IN_AT +
+              " cm. Lower the value to " + IN_AT + " or less.",
             stoppedWhy: ""
           });
         } else if (run.t > 6) {
           finish({
-            collected: !world.pieceOnFloor, stopped: false,
-            collectedWhy: "The rule never happened.",
-            stoppedWhy: "The rule never happened, so nothing stopped the intake."
+            collected: false, stopped: false,
+            summary: "Nothing happened in six seconds.",
+            collectedWhy: "The rule never happened, so the intake never stopped.",
+            stoppedWhy: rule.sensor !== "intake"
+              ? "The battery voltage is 12.4 V and does not change. Read the intake sensor."
+              : "The rule never became true. Check IS and the value."
           });
         }
       }
 
       var value = sensorValue();
       reading.textContent = value.toFixed(0) + (rule.sensor === "intake" ? " cm" : " V");
-      meter.style.width = Math.max(2, Math.min(100, (value / 40) * 100)) + "%";
-      meter.classList.toggle("is-on", ruleIsTrue());
+      now.style.left = Math.max(0, Math.min(100, (value / 40) * 100)) + "%";
       return window.CZScene.step(world, dt);
     });
   }

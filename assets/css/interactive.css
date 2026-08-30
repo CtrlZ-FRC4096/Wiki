@@ -1070,13 +1070,13 @@
   margin-top: 0.9rem;
 }
 
-.cz-basic__peek summary {
-  min-height: 44px;
-  display: flex;
-  align-items: center;
-  cursor: pointer;
-  font-size: 0.85rem;
-  color: var(--cz-team-orange);
+.cz-basic__code-label {
+  display: block;
+  font-size: 0.7rem;
+  font-weight: 700;
+  letter-spacing: 0.08em;
+  text-transform: uppercase;
+  color: var(--cz-muted);
 }
 
 .cz-exercise .cz-basic__code {
@@ -1092,6 +1092,56 @@
 }
 
 /* ---- 1. give a button a job ---- */
+
+/* The three tasks, in order. The task you are on is bright, the tasks you
+   finished go dim with a tick, and the tasks after it stay quiet. */
+.cz-bind__tasks {
+  margin: 0.9rem 0 0;
+}
+
+.cz-bind__task {
+  display: flex;
+  gap: 0.55rem;
+  align-items: flex-start;
+  padding: 0.3rem 0;
+  font-size: 0.88rem;
+  color: rgba(255, 255, 255, 0.45);
+}
+
+.cz-bind__task-mark {
+  flex: 0 0 1.45rem;
+  height: 1.45rem;
+  border: 1px solid var(--cz-border);
+  border-radius: 50%;
+  font-size: 0.75rem;
+  font-weight: 700;
+  line-height: 1.35rem;
+  text-align: center;
+}
+
+.cz-bind__task-text {
+  flex: 1 1 auto;
+  padding-top: 0.1rem;
+}
+
+.cz-bind__task.is-now {
+  color: inherit;
+  font-weight: 600;
+}
+
+.cz-bind__task.is-now .cz-bind__task-mark {
+  border-color: var(--cz-team-orange);
+  color: var(--cz-team-orange);
+}
+
+.cz-bind__task.is-done .cz-bind__task-mark {
+  border-color: var(--cz-pass);
+  color: var(--cz-pass);
+}
+
+.cz-bind__task.is-done .cz-bind__task-text {
+  text-decoration: line-through;
+}
 
 .cz-bind__buttons {
   display: flex;
@@ -1204,41 +1254,6 @@
 
 /* ---- 3. one sensor rule ---- */
 
-.cz-rule__meter {
-  display: flex;
-  align-items: center;
-  gap: 0.5rem;
-  margin-top: 0.7rem;
-  font-size: 0.75rem;
-  color: var(--cz-muted);
-}
-
-.cz-rule__meter-track {
-  flex: 1 1 auto;
-  height: 14px;
-  border: 1px solid var(--cz-border);
-  border-radius: 7px;
-  overflow: hidden;
-  background: rgba(0, 0, 0, 0.35);
-}
-
-.cz-rule__meter-fill {
-  display: block;
-  height: 100%;
-  width: 100%;
-  background: var(--cz-plot-actual);
-  transition: width 0.06s linear;
-}
-
-.cz-rule__meter-fill.is-on { background: var(--cz-pass); }
-
-.cz-rule__reading {
-  flex: 0 0 62px;
-  text-align: right;
-  font-family: ui-monospace, SFMono-Regular, Menlo, Consolas, monospace;
-  font-variant-numeric: tabular-nums;
-}
-
 /* Slider and its value on one line. The value keeps a fixed width so the
    number does not shift the slider as it changes. */
 .cz-rule__slider {
@@ -1278,4 +1293,111 @@
   .cz-seq__card { flex-basis: 100%; }
   .cz-exercise .cz-exercise__toolbar { flex-direction: column; }
   .cz-exercise .cz-exercise__toolbar .cz-exercise__btn { width: 100%; min-height: 44px; }
+}
+
+/* ---- the sensor scale on tutorial 3 ----
+ *
+ * The bar is the whole problem drawn out: where the piece jams, where it is
+ * safely inside, and where the rule is set to happen. A student can see that
+ * the marker has to sit in the green band before they press Play.
+ */
+.cz-rule__meter {
+  display: block;
+  margin-top: 0.8rem;
+}
+
+.cz-rule__meter-head {
+  display: flex;
+  justify-content: space-between;
+  align-items: baseline;
+  font-size: 0.72rem;
+  color: var(--cz-muted);
+}
+
+.cz-rule__reading {
+  font-family: ui-monospace, SFMono-Regular, Menlo, Consolas, monospace;
+  font-variant-numeric: tabular-nums;
+  font-size: 0.85rem;
+  font-weight: 700;
+  color: var(--cz-plot-actual);
+}
+
+/* The rule marker carries a caption above the bar, so the scale must not clip
+   its own children. The end zones get the corner radii instead. */
+.cz-rule__scale {
+  position: relative;
+  display: flex;
+  height: 26px;
+  margin-top: 1.05rem;
+  border: 1px solid var(--cz-border);
+  border-radius: 5px;
+}
+
+.cz-rule__zone:first-child { border-radius: 4px 0 0 4px; }
+.cz-rule__zone:nth-child(3) { border-radius: 0 4px 4px 0; }
+
+/* 0 to 40 cm, left to right. Jam below 5, inside below 18. */
+.cz-rule__zone.is-jam { width: 12.5%; background: rgba(242, 119, 122, 0.35); }
+.cz-rule__zone.is-good { width: 32.5%; background: rgba(76, 195, 138, 0.32); }
+.cz-rule__zone.is-out { width: 55%; background: rgba(255, 255, 255, 0.05); }
+
+/* Where the rule will happen. */
+.cz-rule__mark {
+  position: absolute;
+  top: -3px;
+  bottom: -3px;
+  width: 3px;
+  margin-left: -1px;
+  background: var(--cz-team-orange);
+  left: 0;
+}
+
+.cz-rule__mark::after {
+  content: "rule";
+  position: absolute;
+  top: -14px;
+  left: 50%;
+  transform: translateX(-50%);
+  font-size: 0.6rem;
+  font-weight: 700;
+  letter-spacing: 0.04em;
+  color: var(--cz-team-orange);
+}
+
+/* Where the sensor is reading right now. */
+.cz-rule__now {
+  position: absolute;
+  top: 50%;
+  width: 12px;
+  height: 12px;
+  margin: -6px 0 0 -6px;
+  border-radius: 50%;
+  border: 2px solid rgba(0, 0, 0, 0.6);
+  background: var(--cz-plot-actual);
+  left: 100%;
+  transition: left 0.06s linear;
+}
+
+.cz-rule__legend {
+  display: flex;
+  margin-top: 0.2rem;
+  font-size: 0.62rem;
+  color: var(--cz-muted);
+}
+
+.cz-rule__key {
+  overflow: hidden;
+  white-space: nowrap;
+  text-overflow: ellipsis;
+}
+
+.cz-rule__key.is-jam { width: 12.5%; color: var(--cz-fail); }
+.cz-rule__key.is-good { width: 32.5%; color: var(--cz-pass); }
+
+.cz-rule__status {
+  margin: 0.5rem 0 0;
+  min-height: 1.3rem;
+  font-size: 0.82rem;
+  font-weight: 600;
+  color: var(--cz-muted);
 }

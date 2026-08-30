@@ -23,8 +23,12 @@ centimetres.
 | 18 cm | The game piece is inside the robot |
 | 5 cm | The game piece is jammed against the back |
 
-The reading gets smaller as the game piece comes in. Watch the bar move while
-the robot collects.
+The reading gets smaller as the game piece comes in.
+
+The bar under the robot is the whole problem. The red part on the left is where
+the piece jams. The green part is where the piece is safely inside. The orange
+line is where your rule will happen. **Put the orange line in the green part.**
+The blue dot is the reading right now.
 
 ## The rule
 
@@ -53,9 +57,11 @@ The value on the slider decides everything.
 - **Too small.** The rule never happens in time. The intake keeps pulling and
   the game piece jams.
 
-There is a range of values that work. Find one end of the range, then the
-other, then use a value in the middle. This is how you tune anything on a
-robot.
+There is a range of values that work, and the green part of the bar shows it.
+Find one end of the range, then the other, then use a value in the middle. This
+is how you tune anything on a robot.
+
+Press **Play** at any time. It always starts again from the beginning.
 
 {: .note }
 > Try **the battery voltage** instead of the intake sensor. The rule never
