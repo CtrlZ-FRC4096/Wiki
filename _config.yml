@@ -123,6 +123,11 @@ exclude:
   - .vscode
   - .DS_Store
   - vendor
+  # Checking tools and their dependencies. Not wiki content, and Jekyll would
+  # otherwise copy them into the site and try to read the Markdown inside
+  # tools/e2e/node_modules. The plain "node_modules" line above only matches a
+  # directory at the top level.
+  - tools
 
 plugins:
   - jekyll-seo-tag
