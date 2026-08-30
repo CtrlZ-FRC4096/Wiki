@@ -113,6 +113,7 @@ PyYAML for the first one.
 | `node tools/validate-tuning.js` | Every gain quoted on a tuning page. Each one must be reachable on its slider and must pass at every setpoint |
 | `node tools/validate-auto-task.js` | The autonomous task is possible, and a routine with its actions in series is not |
 | `node tools/validate-swerve.js` | The swerve maths on the wiki agrees with `ctre_module_state.py` on the robot |
+| `node tools/validate-rule.js` | Every rule a student can build in tutorial 3. Each sensor that can work has an unbroken band of values that pass, and every failure gives a reason |
 | `node tools/check-ste.js` | Sentence length, paragraph length and word use on the tutorial pages |
 
 If you change the JavaScript in `assets/js/interactive/`, also run the browser

@@ -182,7 +182,7 @@ test("put the steps in order: the right order scores, a wrong order does not", a
   await expectNoErrors(errors);
 });
 
-test("teach the robot to decide: the scale shows the answer, and Play restarts", async ({ page }) => {
+test("teach the robot to decide: the indexer motor finds the game piece", async ({ page }) => {
   test.setTimeout(240_000);
   const errors = watchForErrors(page);
   await page.goto(RULE, { waitUntil: "networkidle" });
@@ -201,32 +201,26 @@ test("teach the robot to decide: the scale shows the answer, and Play restarts",
     return (await widget.locator(".cz-exercise__verdict").textContent()).trim();
   };
 
-  // Too large: the intake stops before the piece is inside.
-  await setThreshold(35);
+  // The indexer motor is the sensor the tutorial starts on.
+  expect(await widget.locator(".cz-rule__status").textContent()).toContain("indexer motor");
+  expect(await widget.locator(".cz-basic__code").textContent()).toContain("get_stator_current");
+
+  // Too small: the indexer stops while the piece is still outside.
+  await setThreshold(10);
   expect(await play()).toContain("Not correct");
 
-  // Too small: the rule never happens and the piece jams.
-  await setThreshold(2);
+  // Too large: the rule never happens and the piece reaches the Jamomatic.
+  await setThreshold(50);
   expect(await play()).toContain("Not correct");
 
   // In range.
-  await setThreshold(12);
+  await setThreshold(30);
   expect(await play()).toContain("Correct");
   await expect(widget).toHaveClass(/is-solved/);
 
   // A sensor that never changes cannot decide anything.
   await widget.locator(".cz-basic__opt", { hasText: "the battery voltage" }).tap();
   expect(await play()).toContain("Not correct");
-
-  expect(await widget.locator(".cz-basic__code").textContent()).toContain("def periodic(self):");
-
-  // The rule marker moves with the slider, so the answer is visible before
-  // anything is played.
-  const markAt = () => widget.locator(".cz-rule__mark").evaluate((n) => n.style.left);
-  await setThreshold(20);
-  const high = await markAt();
-  await setThreshold(8);
-  expect(await markAt(), "the rule marker does not follow the slider").not.toBe(high);
 
   // Play always starts again, whatever happened last time.
   await widget.locator('[data-action="play"]').tap();
@@ -235,6 +229,155 @@ test("teach the robot to decide: the scale shows the answer, and Play restarts",
     "Play should not turn into Stop").toContain("Play");
   expect(await widget.locator(".cz-exercise__verdict").count(),
     "the previous result was not cleared").toBe(0);
+
+  await expectNoErrors(errors);
+});
+
+test("teach the robot to decide: each sensor brings its own comparison", async ({ page }) => {
+  test.setTimeout(120_000);
+  const errors = watchForErrors(page);
+  await page.goto(RULE, { waitUntil: "networkidle" });
+  const widget = page.locator(".cz-rule");
+  const word = widget.locator(".cz-basic__choice-label", { hasText: "GOES" });
+  await page.waitForTimeout(500);
+
+  // The student never picks "under" or "over": the sensor decides, because a
+  // current rises as the piece arrives and a distance falls.
+  expect(await word.textContent()).toContain("OVER");
+  expect(await widget.locator(".cz-rule__value").textContent()).toContain("A");
+
+  await widget.locator(".cz-basic__opt", { hasText: "the distance sensor" }).tap();
+  expect(await word.textContent()).toContain("UNDER");
+  expect(await widget.locator(".cz-rule__value").textContent()).toContain("cm");
+  expect(await widget.locator(".cz-basic__code").textContent()).toContain("getDistance");
+
+  // The rule marker on the bar follows the slider for the distance sensor.
+  const markAt = () => widget.locator(".cz-rule__mark").evaluate((n) => n.style.left);
+  await widget.locator(".cz-rule__slider").evaluate((n) => {
+    n.value = "20"; n.dispatchEvent(new Event("input", { bubbles: true }));
+  });
+  const high = await markAt();
+  await widget.locator(".cz-rule__slider").evaluate((n) => {
+    n.value = "8"; n.dispatchEvent(new Event("input", { bubbles: true }));
+  });
+  expect(await markAt(), "the rule marker does not follow the slider").not.toBe(high);
+
+  // And the distance sensor solves the same task.
+  await widget.locator('[data-action="play"]').tap();
+  await widget.locator(".cz-exercise__verdict").waitFor({ timeout: 60_000 });
+  expect(await widget.locator(".cz-exercise__verdict").textContent()).toContain("Correct");
+
+  await expectNoErrors(errors);
+});
+
+test("teach the robot to decide: every Play drives the robot out again", async ({ page }) => {
+  test.setTimeout(120_000);
+  const errors = watchForErrors(page);
+  await page.goto(RULE, { waitUntil: "networkidle" });
+  const widget = page.locator(".cz-rule");
+  const status = widget.locator(".cz-rule__status");
+  await page.waitForTimeout(500);
+
+  // The run starts with the robot away from the game piece, so the first
+  // thing that happens is a drive. The reading only falls after it arrives.
+  // The distance readout is the plainest proof that the run has not started
+  // to take the piece in yet, whichever sensor the rule uses.
+  const reading = () =>
+    widget.locator(".cz-rule__reading").textContent().then((t) => parseInt(t, 10));
+
+  await widget.locator('[data-action="play"]').tap();
+  await page.waitForTimeout(120);
+  expect(await status.textContent(), "the run does not start with a drive").toContain("driving");
+  expect(await reading(), "the piece came in before the robot arrived").toBe(40);
+
+  await widget.locator(".cz-exercise__verdict").waitFor({ timeout: 60_000 });
+  expect(await reading(), "the reading never fell").toBeLessThan(40);
+
+  // The second Play is a whole new run, not a continuation of the last one.
+  await widget.locator('[data-action="play"]').tap();
+  await page.waitForTimeout(120);
+  expect(await status.textContent(), "the second Play did not drive out again").toContain("driving");
+  expect(await reading()).toBe(40);
+
+  await expectNoErrors(errors);
+});
+
+test("teach the robot to decide: the current graph is drawn", async ({ page }) => {
+  test.setTimeout(120_000);
+  const errors = watchForErrors(page);
+  await page.goto(RULE, { waitUntil: "networkidle" });
+  const widget = page.locator(".cz-rule");
+  await page.waitForTimeout(500);
+
+  await widget.locator('[data-action="play"]').tap();
+  await widget.locator(".cz-exercise__verdict").waitFor({ timeout: 60_000 });
+
+  const drawn = await widget.locator(".cz-rule__graph").evaluate((c) => {
+    const ctx = c.getContext("2d");
+    const data = ctx.getImageData(0, 0, c.width, c.height).data;
+    let lit = 0;
+    for (let i = 3; i < data.length; i += 4) if (data[i] > 8) lit++;
+    return lit;
+  });
+  expect(drawn, "the current graph is blank").toBeGreaterThan(200);
+
+  await expectNoErrors(errors);
+});
+
+test("teach the robot to decide: the ball travels the indexer", async ({ page }) => {
+  test.setTimeout(120_000);
+  const errors = watchForErrors(page);
+  await page.goto(RULE, { waitUntil: "networkidle" });
+  const widget = page.locator(".cz-rule");
+  await page.waitForTimeout(500);
+
+  /* Where the game piece is drawn, found by looking for its colour in the
+   * scene. The piece is the only orange round thing in the picture, so its
+   * centre of mass is a good enough position. */
+  const piecePosition = () =>
+    widget.locator(".cz-basic__scene canvas").evaluate((canvas) => {
+      const ctx = canvas.getContext("2d");
+      const { data, width, height } = ctx.getImageData(0, 0, canvas.width, canvas.height);
+      let sx = 0, sy = 0, n = 0;
+      for (let i = 0; i < data.length; i += 4) {
+        const r = data[i], g = data[i + 1], b = data[i + 2];
+        if (r > 190 && g > 110 && g < 190 && b < 90) {
+          const p = i / 4;
+          sx += p % width; sy += Math.floor(p / width); n++;
+        }
+      }
+      return n ? { x: sx / n, y: sy / n, n, width, height } : null;
+    });
+
+  // A value that works, so the piece travels most of the path before it stops.
+  await widget.locator(".cz-rule__slider").evaluate((node) => {
+    node.value = "30";
+    node.dispatchEvent(new Event("input", { bubbles: true }));
+  });
+
+  const start = await piecePosition();
+  expect(start, "the game piece is not drawn before the run").not.toBeNull();
+
+  await widget.locator('[data-action="play"]').tap();
+  await page.waitForTimeout(1600);
+  const middle = await piecePosition();
+  expect(middle, "the game piece disappeared during the run").not.toBeNull();
+
+  await widget.locator(".cz-exercise__verdict").waitFor({ timeout: 60_000 });
+  await page.waitForTimeout(200);
+  const end = await piecePosition();
+  expect(end, "the game piece is gone at the end of the run").not.toBeNull();
+
+  // It ended inside the robot: off the floor, and within the robot's body.
+  // The robot stops with its middle over where the piece was, so the body is
+  // around that x. The floor is drawn at 0.78 of the picture.
+  expect(end.y, "the piece never rose off the floor").toBeLessThan(end.height * 0.78 - 4);
+  expect(Math.abs(end.x - end.width * 0.4648), "the piece is not inside the robot")
+    .toBeLessThan(end.width * 0.10);
+
+  // And it got there by travelling, not by jumping at the end.
+  expect(Math.abs(middle.x - start.x) + Math.abs(middle.y - start.y),
+    "the piece did not move while the run was going").toBeGreaterThan(3);
 
   await expectNoErrors(errors);
 });

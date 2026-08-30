@@ -37,7 +37,10 @@
       body2: read("--cz-plot-actual", "#57a8ff"),
       arm: read("--cz-scene-arm", "#9aa4b8"),
       piece: read("--cz-scene-piece", "#f0932b"),
-      pass: read("--cz-pass", "#4cc38a")
+      pass: read("--cz-pass", "#4cc38a"),
+      mark: read("--cz-team-orange", "#cb5f01"),
+      fail: read("--cz-fail", "#f2777a"),
+      muted: read("--cz-muted", "rgba(255,255,255,0.6)")
     };
   }
 
@@ -198,7 +201,7 @@
     var tried = {};
     var done = (saved && saved.done) || {};
 
-    var world = window.CZScene.createWorld({ pieceOnFloor: false });
+    var world = window.CZScene.createWorld({ pieceOnFloor: false, showIndexer: false });
     world.targetX = 0.3;
 
     var tabs = {};
@@ -559,198 +562,272 @@
 
   /* ================================================================== *
    * 3. Teach the robot to decide
+   *
+   * What each sensor reads, when the rule happens and what the result means
+   * all live in rule-core.js, so `node tools/validate-rule.js` can try every
+   * rule a student can build.
    * ================================================================== */
 
-  var IN_AT = 18;    // the piece is inside the robot at this reading
-  var JAM_AT = 5;    // below this, a running intake jams the piece
+  /* The reading falls this fast in this tutorial. It is slower than the other
+   * tutorials on purpose: the student has to read the number while it moves. */
+  var RULE_INTAKE_RATE = 17;
 
   function setupRule(root) {
-    var canvas = root.querySelector("canvas");
+    var R = window.CZRule;
+    var canvas = root.querySelector(".cz-basic__scene canvas");
+    var graph = root.querySelector(".cz-rule__graph");
     var builder = root.querySelector(".cz-rule__builder");
     var mark = root.querySelector(".cz-rule__mark");
     var now = root.querySelector(".cz-rule__now");
     var reading = root.querySelector(".cz-rule__reading");
+    var amps = root.querySelector(".cz-rule__amps");
     var status = root.querySelector(".cz-rule__status");
     var codeBox = root.querySelector(".cz-basic__code");
     var output = root.querySelector(".cz-basic__output");
     var playBtn = root.querySelector('[data-action="play"]');
 
+    /* One saved value for each sensor. A student who tries the motor current
+     * and goes back to the intake sensor gets their old value again. */
     var saved = load("rule") || {};
-    var rule = {
-      sensor: saved.sensor || "intake",
-      compare: saved.compare || "below",
-      value: typeof saved.value === "number" ? saved.value : 30,
-      then: saved.then || "stop"
-    };
+    var values = saved.values || {};
+    Object.keys(R.SENSORS).forEach(function (id) {
+      if (typeof values[id] !== "number") values[id] = R.SENSORS[id].start;
+    });
 
-    var world = window.CZScene.createWorld();
+    var rule = {
+      sensor: R.SENSORS[saved.sensor] ? saved.sensor : "current",
+      then: saved.then || "stop",
+      value: 0
+    };
+    rule.value = values[rule.sensor];
+
+    var world = window.CZScene.createWorld({ intakeRate: RULE_INTAKE_RATE });
     var run = null;
+    var lastRun = null;      // kept so the graph can still mark the last run
+    var trace = [];          // the current graph, newest last
+    var TRACE_SECONDS = 6;
 
     builder.appendChild(el("p", "cz-basic__prompt", "Build one rule:"));
     choiceRow(builder, "IF", [
-      { id: "intake", label: "the intake sensor" },
-      { id: "battery", label: "the battery voltage" }
-    ], rule.sensor, function (v) { rule.sensor = v; persist(); refresh(); });
+      { id: "current", label: R.SENSORS.current.label },
+      { id: "intake", label: R.SENSORS.intake.label },
+      { id: "battery", label: R.SENSORS.battery.label }
+    ], rule.sensor, function (v) {
+      rule.sensor = v;
+      rule.value = values[v];
+      applySensor();
+      persist(); refresh();
+    });
 
-    choiceRow(builder, "IS", [
-      { id: "below", label: "below" },
-      { id: "above", label: "above" }
-    ], rule.compare, function (v) { rule.compare = v; persist(); refresh(); });
-
+    /* The comparison is not a choice. A distance gets smaller as the game
+     * piece arrives and a current gets larger, so each sensor has only one
+     * comparison that can make sense. The widget says which one it is. */
     var sliderRow = el("div", "cz-basic__choice");
-    sliderRow.appendChild(el("div", "cz-basic__choice-label", "THIS VALUE"));
+    var sliderLabel = el("div", "cz-basic__choice-label", "GOES UNDER");
+    sliderRow.appendChild(sliderLabel);
     var input = document.createElement("input");
     input.type = "range";
     input.className = "cz-rule__slider";
-    input.min = 2; input.max = 40; input.step = 1; input.value = rule.value;
-    input.setAttribute("aria-label", "Rule value in centimetres");
-    var readout = el("span", "cz-rule__value", rule.value + " cm");
+    input.setAttribute("aria-label", "Rule value");
+    var readout = el("span", "cz-rule__value", "");
     input.addEventListener("input", function () {
       rule.value = parseInt(input.value, 10);
-      readout.textContent = rule.value + " cm";
+      values[rule.sensor] = rule.value;
+      readout.textContent = rule.value + " " + R.unit(rule);
       persist(); refresh();
     });
     sliderRow.appendChild(input);
     sliderRow.appendChild(readout);
     builder.appendChild(sliderRow);
 
+    /* Point the slider at the sensor the student picked. Centimetres, amps
+     * and volts are different sizes, so the ends of the slider move too. */
+    function applySensor() {
+      var spec = R.SENSORS[rule.sensor];
+      input.min = spec.min;
+      input.max = spec.max;
+      input.step = spec.step;
+      input.value = rule.value;
+      readout.textContent = rule.value + " " + spec.unit;
+      sliderLabel.textContent = "GOES " + spec.word.toUpperCase();
+    }
+
     choiceRow(builder, "THEN", [
-      { id: "stop", label: "stop the intake" },
-      { id: "start", label: "start the intake" }
+      { id: "stop", label: "stop the indexer" },
+      { id: "start", label: "start the indexer" }
     ], rule.then, function (v) { rule.then = v; persist(); refresh(); });
 
-    function persist() { save("rule", rule); }
+    function persist() {
+      save("rule", { sensor: rule.sensor, then: rule.then, values: values });
+    }
 
+    /* The reading goes into a name of its own. It is shorter to read on a
+     * phone, and it is how the reading should be written in real code. */
     function renderCode() {
-      var read = rule.sensor === "intake"
-        ? "self.intake_sensor.getDistance()" : "self.battery.getVoltage()";
-      var op = rule.compare === "below" ? "<" : ">";
+      var spec = R.SENSORS[rule.sensor];
       var body = rule.then === "stop"
-        ? "self.robot.intake_running = False" : "self.robot.intake_running = True";
+        ? "self.robot.indexer_running = False" : "self.robot.indexer_running = True";
       codeBox.textContent = [
         "def periodic(self):",
-        "    if " + read + " " + op + " " + rule.value + ":",
+        "    " + spec.variable + " = " + spec.code,
+        "    if " + spec.variable + " " + spec.op + " " + rule.value + ":",
         "        " + body
       ].join("\n");
     }
 
-    /* Where the rule sits on the scale, before anything is played. This is
-     * the part that makes the exercise readable: you can see the marker is
-     * outside the green band without pressing Play. */
+    /* Where the rule sits, before anything is played. This is the part that
+     * makes the exercise readable: the marker is visibly outside the band
+     * before the student presses Play. */
     function refresh() {
       renderCode();
-      mark.style.left = (rule.value / 40) * 100 + "%";
-      mark.style.display = rule.sensor === "intake" ? "" : "none";
-      if (!run) {
-        status.textContent = rule.sensor !== "intake"
-          ? "The battery voltage does not change when a game piece arrives."
-          : rule.value > IN_AT
-            ? "The rule is set to happen before the piece is inside."
-            : rule.value <= JAM_AT
-              ? "The rule is set to happen after the piece has jammed."
-              : "The rule is set to happen while the piece is inside. Press Play.";
-      }
+      var onDistance = rule.sensor === "intake";
+      mark.style.left = (rule.value / R.SENSORS.intake.max) * 100 + "%";
+      mark.style.display = onDistance ? "" : "none";
+      root.classList.toggle("is-on-current", rule.sensor === "current");
+      if (run) return;
+
+      var why = R.hint(rule);
+      status.textContent = why || R.sentence(rule);
     }
 
-    function sensorValue() { return rule.sensor === "intake" ? world.sensor : 12.4; }
-
-    function ruleIsTrue() {
-      var value = sensorValue();
-      return rule.compare === "below" ? value < rule.value : value > rule.value;
-    }
-
-    /* Play always starts again from the beginning. */
+    /* Play always starts a whole run again, from the left wall. The robot
+     * drives out, puts the arm down and starts the intake. Only then can the
+     * rule happen, so every run looks the same up to the part the student
+     * controls. */
     playBtn.addEventListener("click", function () {
-      world = window.CZScene.createWorld();
-      world.x = window.CZScene.PIECE_AT;
+      world = window.CZScene.createWorld({ intakeRate: RULE_INTAKE_RATE });
       world.targetX = window.CZScene.PIECE_AT;
       world.armDown = true;
-      world.armAngle = 1;
       world.intakeOn = true;
-      run = { t: 0, fired: false, firedAt: null, jammed: false };
+      run = { t: 0, driving: true, fired: false, firedValue: null, firedAt: null, jammed: false };
+      trace = [];
+      lastRun = null;
       output.innerHTML = "";
       root.classList.remove("is-solved");
-      status.textContent = "The intake is running. The game piece is coming in.";
+      status.textContent = "The robot is driving to the game piece.";
     });
 
-    function finish(result) {
-      var checks = [
-        { label: "The rule reads the intake sensor", ok: rule.sensor === "intake",
-          why: "The battery voltage stays at 12.4 V whatever the intake is doing, so a rule about it can never notice a game piece." },
-        { label: "The robot collected the game piece", ok: result.collected, why: result.collectedWhy },
-        { label: "The intake stopped", ok: result.stopped, why: result.stoppedWhy }
-      ];
-      var passed = checks.every(function (c) { return c.ok; });
-      verdict(output, passed, checks,
+    function finish() {
+      var result = R.judge(rule, run);
+      verdict(output, result.passed, result.checks,
         "Correct. The robot read a sensor and decided for itself.",
         "Not correct yet. Change one part of the rule, then press Play again.");
-      root.classList.toggle("is-solved", passed);
+      root.classList.toggle("is-solved", result.passed);
       status.textContent = result.summary;
+      lastRun = run;
       run = null;
     }
 
+    /* The current graph. Time runs left to right. The orange line is the rule,
+     * and it only appears when the rule is about the current. */
+    function drawGraph() {
+      if (!graph) return;
+      var ctx = graph.getContext("2d");
+      var ratio = window.devicePixelRatio || 1;
+      var w = graph.clientWidth, h = graph.clientHeight;
+      if (!w || !h) return;
+      if (graph.width !== Math.round(w * ratio)) {
+        graph.width = Math.round(w * ratio);
+        graph.height = Math.round(h * ratio);
+      }
+      ctx.setTransform(ratio, 0, 0, ratio, 0, 0);
+      ctx.clearRect(0, 0, w, h);
+
+      var c = colours(graph);
+      var top = 4, bottom = h - 4;
+      var maxAmps = R.SENSORS.current.max;
+      var y = function (a) { return bottom - (a / maxAmps) * (bottom - top); };
+
+      ctx.strokeStyle = c.line || "rgba(255,255,255,0.35)";
+      ctx.lineWidth = 1;
+      ctx.beginPath();
+      ctx.moveTo(0, bottom);
+      ctx.lineTo(w, bottom);
+      ctx.stroke();
+
+      if (rule.sensor === "current") {
+        ctx.strokeStyle = c.mark || "#cb5f01";
+        ctx.lineWidth = 2;
+        ctx.setLineDash([5, 4]);
+        ctx.beginPath();
+        ctx.moveTo(0, y(rule.value));
+        ctx.lineTo(w, y(rule.value));
+        ctx.stroke();
+        ctx.setLineDash([]);
+      }
+
+      if (trace.length > 1) {
+        ctx.strokeStyle = c.body2 || "#57a8ff";
+        ctx.lineWidth = 2;
+        ctx.lineJoin = "round";
+        ctx.beginPath();
+        trace.forEach(function (point, i) {
+          var px = (point.t / TRACE_SECONDS) * w;
+          if (i === 0) ctx.moveTo(px, y(point.a));
+          else ctx.lineTo(px, y(point.a));
+        });
+        ctx.stroke();
+      }
+
+      // A dot where the rule happened, so the student can see the moment.
+      var shown = run || lastRun;
+      if (shown && shown.fired && rule.sensor === "current") {
+        ctx.fillStyle = c.mark || "#cb5f01";
+        ctx.beginPath();
+        ctx.arc((Math.min(TRACE_SECONDS, shown.firedTime) / TRACE_SECONDS) * w,
+          y(shown.firedValue), 4, 0, Math.PI * 2);
+        ctx.fill();
+      }
+    }
+
+    applySensor();
     refresh();
 
     animate(canvas, function (dt) {
-      if (run) {
+      if (run && run.driving) {
+        // Wait for the robot to arrive with the arm down. The piece only
+        // starts to come in then, so that is when the rule can matter.
+        if (window.CZScene.atPiece(world) && world.armAngle > 0.8) {
+          run.driving = false;
+          status.textContent = "The indexer is running. The game piece is coming in.";
+        }
+        run.t += dt;
+      } else if (run) {
         run.t += dt;
 
-        if (!run.fired && ruleIsTrue()) {
+        if (!run.fired && R.isTrue(world, rule)) {
           run.fired = true;
+          run.firedValue = R.read(world, rule);
           run.firedAt = world.sensor;
-          world.intakeOn = rule.then === "start";
-          if (rule.sensor === "intake") {
-            status.textContent = "The rule happened at " + run.firedAt.toFixed(0) + " cm.";
-          }
-          if (run.firedAt <= IN_AT && run.firedAt > JAM_AT && rule.then === "stop") {
+          run.firedTime = run.t;
+          world.indexerOn = rule.then === "start";
+          status.textContent = "The rule happened at " +
+            run.firedValue.toFixed(0) + " " + R.unit(rule) + ".";
+          if (run.firedAt <= R.IN_AT && run.firedAt > R.JAM_AT && rule.then === "stop") {
             world.hasPiece = true;
             world.pieceOnFloor = false;
           }
         }
 
-        if (world.intakeOn && world.sensor <= JAM_AT) run.jammed = true;
-
-        if (run.jammed) {
-          finish({
-            collected: false, stopped: false,
-            summary: "The game piece jammed at " + JAM_AT + " cm.",
-            collectedWhy: rule.then === "start"
-              ? "THEN is set to start the intake, so the rule never stops it."
-              : "The intake never stopped, so it pulled the game piece in until it jammed. The rule must happen above " + JAM_AT + " cm.",
-            stoppedWhy: rule.compare === "above"
-              ? "IS is set to above. The reading gets smaller as the piece comes in, so use below."
-              : rule.sensor !== "intake"
-                ? "Read the intake sensor instead."
-                : "Raise the value. Anything from " + (JAM_AT + 1) + " to " + IN_AT + " cm works."
-          });
-        } else if (run.fired && !world.intakeOn) {
-          var seated = run.firedAt <= IN_AT && run.firedAt > JAM_AT;
-          finish({
-            collected: seated, stopped: true,
-            summary: seated
-              ? "The intake stopped at " + run.firedAt.toFixed(0) + " cm, with the piece inside."
-              : "The intake stopped at " + run.firedAt.toFixed(0) + " cm, too early.",
-            collectedWhy: "The rule happened at " + run.firedAt.toFixed(0) +
-              " cm. The piece is not inside the robot until " + IN_AT +
-              " cm. Lower the value to " + IN_AT + " or less.",
-            stoppedWhy: ""
-          });
-        } else if (run.t > 6) {
-          finish({
-            collected: false, stopped: false,
-            summary: "Nothing happened in six seconds.",
-            collectedWhy: "The rule never happened, so the intake never stopped.",
-            stoppedWhy: rule.sensor !== "intake"
-              ? "The battery voltage is 12.4 V and does not change. Read the intake sensor."
-              : "The rule never became true. Check IS and the value."
-          });
+        if (world.indexerOn && world.sensor <= R.JAM_AT) {
+          run.jammed = true;
+          world.jam = true;      // the Jamomatic turns red
         }
+
+        if (run.jammed || (run.fired && !world.indexerOn) || run.t > 6) finish();
       }
 
-      var value = sensorValue();
-      reading.textContent = value.toFixed(0) + (rule.sensor === "intake" ? " cm" : " V");
-      now.style.left = Math.max(0, Math.min(100, (value / 40) * 100)) + "%";
-      return window.CZScene.step(world, dt);
+      if (run) trace.push({ t: Math.min(TRACE_SECONDS, run.t), a: world.current });
+
+      reading.textContent = world.sensor.toFixed(0) + " cm";
+      amps.textContent = world.current.toFixed(0) + " A";
+      now.style.left = Math.max(0, Math.min(100, (world.sensor / R.SENSORS.intake.max) * 100)) + "%";
+      drawGraph();
+
+      /* Hold the last frame of a finished run. Without this the intake sensor
+       * goes back to 40 cm as soon as the intake stops, and the picture no
+       * longer agrees with the result the student is reading. */
+      return window.CZScene.step(world, run || !lastRun ? dt : 0);
     });
   }
 

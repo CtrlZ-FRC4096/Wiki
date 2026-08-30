@@ -99,7 +99,12 @@ function check(file) {
 
 const DEFAULT = [
   "docs/Code/Tutorials/tutorials.md",
+  "docs/Code/Tutorials/first-button.md",
+  "docs/Code/Tutorials/first-sequence.md",
+  "docs/Code/Tutorials/first-rule.md",
   "docs/Code/Tutorials/joystick-deadband.md",
+  "docs/Code/Tutorials/unit-conversions.md",
+  "docs/Code/Tutorials/swerve-module-optimization.md",
   "docs/Code/Controls/tuning.md",
   "docs/Code/Controls/tuning-flywheel.md",
   "docs/Code/Controls/tuning-arm.md",
