@@ -14,6 +14,7 @@
 </div>
 {%- else -%}
 
+{% include interactive/answer-lock.html %}
 {%- unless cz_interactive_css -%}
   <link rel="stylesheet" href="{{ '/assets/css/interactive.css' | relative_url }}">
   {%- assign cz_interactive_css = true -%}
@@ -77,7 +78,20 @@
 
   <div class="cz-oi__output cz-exercise__output"></div>
 
-  <script type="application/json" class="cz-oi__data">{{ task | jsonify | replace: '</', '<\/' }}</script>
+  {%- comment -%}
+    The working bindings are left out and shipped encrypted below, so the
+    answer is not in the page for anyone who opens the developer tools.
+  {%- endcomment -%}
+  <script type="application/json" class="cz-oi__data">{
+    "title": {{ task.title | jsonify }},
+    "starter": {{ task.starter | jsonify }},
+    "hints": {{ task.hints | jsonify }}
+  }</script>
+  {%- assign locked_id = "oi." | append: include.id -%}
+  {%- assign locked = site.data.locked.answers[locked_id] -%}
+  {%- if locked -%}
+  <script type="application/json" class="cz-oi__locked">{"iv": {{ locked.iv | jsonify }}, "data": {{ locked.data | jsonify }}}</script>
+  {%- endif -%}
 </div>
 
 {%- endif -%}

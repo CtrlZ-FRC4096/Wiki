@@ -17,6 +17,7 @@
 </div>
 {%- else -%}
 
+{% include interactive/answer-lock.html %}
 {%- unless cz_interactive_css -%}
   <link rel="stylesheet" href="{{ '/assets/css/interactive.css' | relative_url }}">
   {%- assign cz_interactive_css = true -%}
@@ -70,7 +71,24 @@
   <div class="cz-exercise__hints" hidden></div>
   <div class="cz-exercise__output"></div>
 
-  <script type="application/json" class="cz-exercise__data">{{ ex | jsonify | replace: '</', '<\/' }}</script>
+  {%- comment -%}
+    Everything the page needs, and nothing it does not. The solution is left
+    out on purpose: it goes in encrypted below, so the answer is not sitting in
+    the page for anyone who opens the developer tools.
+  {%- endcomment -%}
+  <script type="application/json" class="cz-exercise__data">{
+    "title": {{ ex.title | jsonify }},
+    "starter": {{ ex.starter | jsonify }},
+    "setup": {{ ex.setup | default: "" | jsonify }},
+    "tests": {{ ex.tests | jsonify }},
+    "hints": {{ ex.hints | jsonify }},
+    "hasSolution": {% if ex.solution %}true{% else %}false{% endif %}
+  }</script>
+  {%- assign locked_id = "exercise." | append: include.id -%}
+  {%- assign locked = site.data.locked.answers[locked_id] -%}
+  {%- if locked -%}
+  <script type="application/json" class="cz-exercise__locked">{"iv": {{ locked.iv | jsonify }}, "data": {{ locked.data | jsonify }}}</script>
+  {%- endif -%}
 </div>
 
 {%- endif -%}

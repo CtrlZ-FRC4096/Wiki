@@ -230,12 +230,30 @@
       });
     }
 
+    /* The bindings are not in the page. They are encrypted, and only the team
+     * password turns them back into code. */
     if (solutionBtn) {
       solutionBtn.addEventListener("click", function () {
         if (!window.confirm("Show working bindings? Try the hints first.")) return;
-        textarea.value = data.solution;
-        store(textarea.value);
+
+        var node = root.querySelector(".cz-oi__locked");
+        var blob = null;
+        try {
+          blob = node ? JSON.parse(node.textContent) : null;
+        } catch (err) {
+          blob = null;
+        }
+        if (!blob || !window.CZLock) return;
+
         solutionBtn.disabled = true;
+        window.CZLock.reveal(blob, "working bindings").then(function (solution) {
+          if (!solution) {
+            solutionBtn.disabled = false;
+            return;
+          }
+          textarea.value = solution;
+          store(textarea.value);
+        });
       });
     }
 

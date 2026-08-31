@@ -286,13 +286,34 @@
       });
     }
 
+    /* The answer is not in the page. It is encrypted, and it only becomes text
+     * once somebody types the team password. */
     if (solutionBtn) {
       solutionBtn.addEventListener("click", function () {
         if (!window.confirm("Show one working solution? Try the hints first — you learn more from a failed attempt than from reading an answer.")) return;
-        textarea.value = data.solution;
-        store(storageKey, textarea.value);
-        autoSize(textarea);
+
+        var node = root.querySelector(".cz-exercise__locked");
+        var blob = null;
+        try {
+          blob = node ? JSON.parse(node.textContent) : null;
+        } catch (err) {
+          blob = null;
+        }
+        if (!blob || !window.CZLock) {
+          status.textContent = "The answer is not on this page.";
+          return;
+        }
+
         solutionBtn.disabled = true;
+        window.CZLock.reveal(blob, "one working solution").then(function (solution) {
+          if (!solution) {
+            solutionBtn.disabled = false;   // wrong password, or they changed their mind
+            return;
+          }
+          textarea.value = solution;
+          store(storageKey, textarea.value);
+          autoSize(textarea);
+        });
       });
     }
   }

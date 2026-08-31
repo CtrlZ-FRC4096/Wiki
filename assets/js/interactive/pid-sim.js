@@ -531,8 +531,23 @@
     if (answerBtn) {
       answerBtn.addEventListener("click", function () {
         if (!window.confirm("Load a known-good tuning? Do the steps above first to learn more.")) return;
-        applyGains(plant.reference);
+
+        /* Unlike the code answers, these gains cannot be encrypted: the widget
+         * grades your tuning against them, so they have to be in the page. The
+         * password here stops the button, not a determined reader. */
+        if (!window.CZLock || !window.CZLock.locked()) {
+          applyGains(plant.reference);
+          answerBtn.disabled = true;
+          return;
+        }
         answerBtn.disabled = true;
+        window.CZLock.unlock("a known-good tuning").then(function (key) {
+          if (!key) {
+            answerBtn.disabled = false;
+            return;
+          }
+          applyGains(plant.reference);
+        });
       });
     }
 

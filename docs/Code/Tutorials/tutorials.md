@@ -103,6 +103,30 @@ student writes. A check passes if it raises no exception.
 Therefore the message must give the expected value and the actual value.
 
 
+
+## The answers are locked
+
+The **Show solution** buttons ask for a password. The answers are not in the
+page: they are encrypted, and the password decrypts them in your browser. A
+button that only hides the answer is not a lock, because the answer is still in
+the page for anybody who opens the developer tools.
+
+Ask a mentor for the password. A browser remembers it after the first time.
+
+If you change a solution, encrypt it again:
+
+```
+CZ_ANSWER_PASSWORD='the password' node tools/lock-answers.js
+```
+
+`node tools/lock-answers.js --check` tells you whether you need to. It needs no
+password.
+
+{: .note }
+> This keeps the answers off the website. It does not keep them off GitHub: the
+> exercise files in `_data/exercises/` still hold them, because the checking
+> tools grade with them, and this repository is public.
+
 ## When these are too easy
 
 The [Challenges](../../Challenges/challenges) are the same ideas without the
@@ -126,6 +150,8 @@ PyYAML for the first one.
 | `python3 tools/validate-vision.py` | The vision challenge. Only an answer that rewinds to the moment of the picture passes |
 | `python3 tools/validate-swerve2.py` | The second-order swerve challenge, including the case that divides by zero |
 | `node tools/check-ste.js` | Sentence length, paragraph length and word use on the tutorial pages |
+| `node tools/lock-answers.js --check` | Every answer has an up-to-date encrypted copy |
+| `node tools/lock-answers.js --audit` | No answer reached the built site. Build first |
 
 If you change the JavaScript in `assets/js/interactive/`, also run the browser
 tests. They open the widgets in a real browser and use them. They need

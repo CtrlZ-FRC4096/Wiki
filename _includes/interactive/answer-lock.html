@@ -1,0 +1,16 @@
+{%- comment -%}
+  The lock the answer buttons use. Include it before any widget that can show
+  an answer. It emits the salt and the proof phrase, never an answer.
+{%- endcomment -%}
+{%- unless cz_answer_lock -%}
+  {%- if site.data.locked -%}
+  <script type="application/json" id="cz-answer-lock">{
+    "salt": {{ site.data.locked.salt | jsonify }},
+    "iterations": {{ site.data.locked.iterations }},
+    "phrase": {{ site.data.locked.phrase | jsonify }},
+    "check": {"iv": {{ site.data.locked.check.iv | jsonify }}, "data": {{ site.data.locked.check.data | jsonify }}}
+  }</script>
+  <script src="{{ '/assets/js/interactive/answer-lock.js' | relative_url }}" defer></script>
+  {%- endif -%}
+  {%- assign cz_answer_lock = true -%}
+{%- endunless -%}
