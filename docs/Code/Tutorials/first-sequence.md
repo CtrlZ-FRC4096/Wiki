@@ -16,8 +16,8 @@ You write the list. The robot does the steps in the order you write them.
 
 Get the game piece into the goal.
 
-You have five steps. Tap a step to add it to the routine. Use the arrows to
-move a step. Use ✕ to remove it.
+You have five steps. They are not in order. Tap a step to add it to the
+routine. Use the arrows to move a step. Use ✕ to remove it.
 
 Then tap **Play** and watch.
 

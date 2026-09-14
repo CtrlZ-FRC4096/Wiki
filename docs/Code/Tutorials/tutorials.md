@@ -144,6 +144,7 @@ PyYAML for the first one.
 | `node tools/validate-tuning.js` | Every gain quoted on a tuning page. Each one must be reachable on its slider and must pass at every setpoint |
 | `node tools/validate-auto-task.js` | The autonomous task is possible, and a routine with its actions in series is not |
 | `node tools/validate-swerve.js` | The swerve maths on the wiki agrees with `ctre_module_state.py` on the robot |
+| `node tools/validate-sequence.js` | Every order a student can build in tutorial 2. The list of orders that score is complete, so the shuffled step cards can never be tapped from left to right for the answer |
 | `node tools/validate-rule.js` | Every rule a student can build in tutorial 3. Each sensor that can work has an unbroken band of values that pass, and every failure gives a reason |
 | `python3 tools/validate-jam.py` | The jam-detector challenge. No fixed threshold can pass it, and the intended answer can |
 | `python3 tools/validate-shoot.py` | The shoot-on-the-fly challenge. Measures how close each number of corrections gets |
