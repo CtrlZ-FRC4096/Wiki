@@ -387,8 +387,57 @@
     { id: "shoot", label: "Shoot", python: "self.robot.coroutines.shoot" }
   ];
 
+  /* Every order that scores. The intake keeps running once it starts, so the
+   * robot can collect the game piece as it drives through, and that gives more
+   * than one answer. `node tools/validate-sequence.js` replays all 120 orders
+   * against the same rules the widget uses and checks this list is still the
+   * whole set.
+   */
+  var WORKING_ORDERS = [
+    "lower drive_piece intake drive_goal shoot",
+    "lower intake drive_piece drive_goal shoot",
+    "drive_piece lower intake drive_goal shoot",
+    "intake lower drive_piece drive_goal shoot"
+  ];
+
+  function isWorkingOrder(ids) {
+    return WORKING_ORDERS.indexOf(ids.join(" ")) !== -1;
+  }
+
   function stepById(id) {
     return STEPS.filter(function (s) { return s.id === id; })[0];
+  }
+
+  /* The order the cards are shown in. STEPS is written in an order that works,
+   * because that is the order a person reads it in, and the widget must not
+   * hand that answer to a student. So shuffle the cards, and never show them
+   * in an order that would score if the student tapped straight along the row.
+   */
+  function shuffledIds() {
+    var ids = STEPS.map(function (s) { return s.id; });
+    do {
+      for (var i = ids.length - 1; i > 0; i--) {
+        var j = Math.floor(Math.random() * (i + 1));
+        var tmp = ids[i];
+        ids[i] = ids[j];
+        ids[j] = tmp;
+      }
+    } while (isWorkingOrder(ids));
+    return ids;
+  }
+
+  /* Keep one student on one shuffle. The routine is saved, so a bank that
+   * rearranged itself on every visit would not agree with the routine below
+   * it. A saved order from an older list of steps is thrown away.
+   */
+  function bankOrder() {
+    var saved = load("sequence.bank");
+    var whole = Array.isArray(saved) && saved.length === STEPS.length &&
+      STEPS.every(function (s) { return saved.indexOf(s.id) !== -1; });
+    if (whole && !isWorkingOrder(saved)) return saved;
+    var fresh = shuffledIds();
+    save("sequence.bank", fresh);
+    return fresh;
   }
 
   function setupSequence(root) {
@@ -404,7 +453,8 @@
     var world = window.CZScene.createWorld();
     var running = null;
 
-    STEPS.forEach(function (step) {
+    bankOrder().forEach(function (id) {
+      var step = stepById(id);
       var card = el("button", "cz-seq__card", step.label);
       card.type = "button";
       card.addEventListener("click", function () {
