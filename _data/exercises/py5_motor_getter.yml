@@ -1,0 +1,55 @@
+title: "Add get() and status()"
+prompt: |
+  `FakeMotor` already stores `name` and `speed`, and has `set`.
+
+  **PART A:** add a method `get(self)`. It returns `self.speed`.
+
+  **PART B:** add a method `status(self)`. It returns an f-string like `'deploy at -0.35'`.
+starter: |
+  class FakeMotor:
+      def __init__(self, name):
+          self.name = name
+          self.speed = 0.0
+
+      def set(self, speed):
+          self.speed = speed
+
+      # PART A: add get(self). Return self.speed.
+
+      # PART B: add status(self). Return an f-string: 'deploy at -0.35'
+tests:
+  - name: "get returns the speed that was set"
+    code: |
+      m = FakeMotor('deploy')
+      m.set(-0.35)
+      got = m.get()
+      assert got == -0.35, f"get() returned {got}. Expected -0.35" 
+  - name: "status has the name and the speed"
+    code: |
+      m = FakeMotor('deploy')
+      m.set(-0.35)
+      got = m.status()
+      assert got == 'deploy at -0.35', f"status() returned {got!r}. Expected 'deploy at -0.35'" 
+  - name: "get reflects the latest set"
+    code: |
+      m = FakeMotor('deploy')
+      m.set(0.5)
+      m.set(-0.9)
+      assert m.get() == -0.9, f"After set(-0.9), get() returned {m.get()}" 
+hints:
+  - 'Both are methods: def get(self): inside the class, indented.'
+  - 'status uses self.name and self.speed in one f-string.'
+solution: |
+  class FakeMotor:
+      def __init__(self, name):
+          self.name = name
+          self.speed = 0.0
+
+      def set(self, speed):
+          self.speed = speed
+
+      def get(self):
+          return self.speed
+
+      def status(self):
+          return f'{self.name} at {self.speed}'

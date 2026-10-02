@@ -1,0 +1,11 @@
+title: "Try it: for and enumerate"
+prompt: |
+  Run the code. Add `'climber'` to the list. Run again.
+starter: |
+  subsystems = ['drivetrain', 'shooter', 'intake', 'hopper']
+
+  for s in subsystems:
+      print(f'registering {s}')
+
+  for i, s in enumerate(subsystems):
+      print(f'module {i}: {s}')

@@ -1,0 +1,35 @@
+title: "Find the module with the most current"
+prompt: |
+  A swerve module that draws much more current than the others often has a mechanical problem. Find it.
+
+  **PART A:** set `best_index` to the index of the module with the most current.
+
+  **PART B:** set `best_current` to that module's value.
+starter: |
+  currents = [38.2, 41.0, 39.5, 31.4]
+
+  # PART A: the index of the biggest current
+  best_index = -1
+
+  # PART B: the biggest current
+  best_current = 0.0
+tests:
+  - name: "the hot module is index 1"
+    code: |
+      assert best_index == 1, f"best_index is {best_index}. currents[1] is 41.0, the biggest" 
+  - name: "its value is 41.0 amps"
+    code: |
+      assert abs(best_current - 41.0) < 0.001, (
+          f"best_current is {best_current}. Read currents[best_index]")
+hints:
+  - 'Start with best_index = 0, then loop with enumerate.'
+  - 'When a current beats currents[best_index], save that index.'
+solution: |
+  currents = [38.2, 41.0, 39.5, 31.4]
+
+  best_index = 0
+  for i, c in enumerate(currents):
+      if c > currents[best_index]:
+          best_index = i
+
+  best_current = currents[best_index]

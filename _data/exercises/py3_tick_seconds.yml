@@ -1,0 +1,32 @@
+title: "Count robot frames"
+prompt: |
+  One robot frame is 20 ms.
+
+  **PART A:** count `tick` up to 100 with a while loop.
+
+  **PART B:** set `seconds` to `tick * 0.02`.
+starter: |
+  # One robot frame is 20 ms.
+  tick = 0
+
+  # PART A: count tick up to 100 with a while loop
+
+
+  # PART B: set seconds to tick * 0.02
+  seconds = 0.0
+tests:
+  - name: "tick stops at exactly 100"
+    code: |
+      assert tick == 100, f"tick is {tick}. The loop condition must stop at 100" 
+  - name: "100 frames is 2 seconds"
+    code: |
+      assert abs(seconds - 2.0) < 0.001, f"seconds is {seconds}. 100 * 0.02 = 2.0" 
+hints:
+  - 'while tick < 100: then tick += 1 inside the loop.'
+  - 'PART B is one multiply, after the loop.'
+solution: |
+  tick = 0
+  while tick < 100:
+      tick += 1
+
+  seconds = tick * 0.02

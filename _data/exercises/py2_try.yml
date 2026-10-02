@@ -1,0 +1,14 @@
+title: "Try it: if, elif, else"
+prompt: |
+  Run the code. Then change `match_time` to `5` and to `130`. Run again each time.
+starter: |
+  match_time = 75
+
+  if match_time <= 10:
+      shift = 'TRANSITION'
+  elif match_time <= 110:
+      shift = 'SHIFT'
+  else:
+      shift = 'ENDGAME'
+
+  print(f't={match_time}, shift = {shift}')

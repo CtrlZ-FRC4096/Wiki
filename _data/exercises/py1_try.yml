@@ -1,0 +1,8 @@
+title: "Try it: variables and f-strings"
+prompt: |
+  Run the code. Then change `speed` to `0` and run again. Add your own f-string that prints your name and your team number.
+starter: |
+  team = 4096
+  name = 'Ctrl-Z'
+  speed = 3.2  # meters per second
+  print(f'Team {team} ({name}) drives at {speed} m/s')

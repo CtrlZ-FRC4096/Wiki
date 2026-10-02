@@ -1,0 +1,59 @@
+title: "The intake state machine"
+prompt: |
+  `periodic()` in `robot/subsystems/intake.py` is a chain of flags. The order sets the priority.
+
+  The four states are: `'stowed'`, `'reversing'`, `'intaking'`, `'stopped'`.
+
+  **SCENARIO A:** `at_default` False, `clear_jam` True, `is_intaking` False. Fill in `state_a` with an if/elif/else chain.
+
+  **SCENARIO B:** all three flags are True. Write the same chain for `state_b`.
+starter: |
+  # Keep this order the same as periodic() in robot/subsystems/intake.py.
+
+  # SCENARIO A
+  at_default = False
+  clear_jam = True
+  is_intaking = False
+  state_a = ''  # write the if / elif / else chain here
+
+  # SCENARIO B: all flags are True. Which branch wins?
+  at_default = True
+  clear_jam = True
+  is_intaking = True
+  state_b = ''  # write the same chain here
+tests:
+  - name: "a jam means reversing"
+    code: |
+      assert state_a == 'reversing', (
+          f"state_a is {state_a!r}. clear_jam is True, the second branch runs")
+  - name: "default wins when every flag is true"
+    code: |
+      assert state_b == 'stowed', (
+          f"state_b is {state_b!r}. at_default comes first, so it decides")
+hints:
+  - 'Match the order in intake.py: default first, then jam, then intaking, else stopped.'
+  - 'For scenario B, ask which if line the code reaches first.'
+solution: |
+  at_default = False
+  clear_jam = True
+  is_intaking = False
+  if at_default:
+      state_a = 'stowed'
+  elif clear_jam:
+      state_a = 'reversing'
+  elif is_intaking:
+      state_a = 'intaking'
+  else:
+      state_a = 'stopped'
+
+  at_default = True
+  clear_jam = True
+  is_intaking = True
+  if at_default:
+      state_b = 'stowed'
+  elif clear_jam:
+      state_b = 'reversing'
+  elif is_intaking:
+      state_b = 'intaking'
+  else:
+      state_b = 'stopped'

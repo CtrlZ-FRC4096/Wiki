@@ -59,71 +59,20 @@ self.fly_speed = 50
 
 ## Try it
 
-<iframe src="{{ '/assets/python-runner.html' | relative_url }}#b64:dGVhbSA9IDQwOTYKbmFtZSA9ICdDdHJsLVonCnNwZWVkID0gMy4yICAjIG1ldGVycyBwZXIgc2Vjb25kCnByaW50KGYnVGVhbSB7dGVhbX0gKHtuYW1lfSkgZHJpdmVzIGF0IHtzcGVlZH0gbS9zJyk=" width="100%" height="300px" style="border:1px solid #d1d5db;border-radius:8px;"></iframe>
+{% include interactive/python-exercise.html id="py1_try" %}
 
 ## Exercises
 
-Every exercise ends with tests. Run the code until every line prints **PASS**.
-
 ### 1.1 Inches to meters
 
-<iframe src="{{ '/assets/python-runner.html' | relative_url }}#b64:IyBUaGUgcm9ib3QgdXNlcyBtZXRlcnMuIFdlIGJ1aWxkIGluIGluY2hlcy4gMSBpbmNoID0gMC4wMjU0IG0uCmluY2hlcyA9IDI4LjUKCiMgUEFSVCBBOiBzZXQgbWV0ZXJzIHRvIGluY2hlcyAqIDAuMDI1NAptZXRlcnMgPSAwLjAgICMgRklYIFRISVMKCiMgUEFSVCBCOiBzZXQgbWVzc2FnZSB0byBhbiBmLXN0cmluZzogJzI4LjUgaW5jaGVzID0gMC43MiBtZXRlcnMnCiMgKHR3byBkZWNpbWFsIHBsYWNlcyBmb3IgbWV0ZXJzKQptZXNzYWdlID0gJycgICMgRklYIFRISVMKCgojIC0tLS0tIFRFU1RTIChkbyBub3QgY2hhbmdlKSAtLS0tLQpkZWYgY2hlY2sobmFtZSwgZm4pOgogICAgdHJ5OgogICAgICAgIG9rID0gYm9vbChmbigpKQogICAgZXhjZXB0IEV4Y2VwdGlvbjoKICAgICAgICBvayA9IEZhbHNlCiAgICBwcmludCgoJ1BBU1MnIGlmIG9rIGVsc2UgJ0ZBSUwnKSArICcgLSAnICsgbmFtZSkKICAgIHJldHVybiBvawoKc2NvcmUgPSBzdW0oWwogICAgY2hlY2soJ21ldGVycyBoYXMgdGhlIHJpZ2h0IHZhbHVlJywgbGFtYmRhOiBhYnMobWV0ZXJzIC0gMC43MjM5KSA8IDAuMDAwMSksCiAgICBjaGVjaygnbWV0ZXJzIGlzIGEgZmxvYXQnLCBsYW1iZGE6IHR5cGUobWV0ZXJzKSBpcyBmbG9hdCksCiAgICBjaGVjaygnbWVzc2FnZSBoYXMgYm90aCBudW1iZXJzJywgbGFtYmRhOiAnMjguNScgaW4gbWVzc2FnZSBhbmQgJzAuNzInIGluIG1lc3NhZ2UpCl0pCnByaW50KGYnU0NPUkU6IHtzY29yZX0vMycp" width="100%" height="460px" style="border:1px solid #d1d5db;border-radius:8px;"></iframe>
+{% include interactive/python-exercise.html id="py1_inches_meters" %}
 
-<details markdown="block">
-<summary>Hint</summary>
+### 1.2 Clamp joystick values
 
-PART A is one multiply. PART B: look at the f-string examples in the summary, especially the `:.2f` format.
-</details>
-
-<details markdown="block">
-<summary>Solution</summary>
-
-```python
-meters = inches * 0.0254
-message = f'{inches} inches = {meters:.2f} meters'
-```
-</details>
-
-### 1.2 Clamp a joystick value
-
-<iframe src="{{ '/assets/python-runner.html' | relative_url }}#b64:IyBKb3lzdGlja3MgY2FuIHJlcG9ydCBtb3JlIHRoYW4gMS4wLiBDbGFtcCBjb21tYW5kcyBpbnRvIFstMSwgMV0uCgpzdGlja19oaWdoID0gMS40CiMgUEFSVCBBOiBjbGFtcCBzdGlja19oaWdoIGludG8gY2xhbXBlZF9oaWdoLiBVc2UgbWluKCkgYW5kIG1heCgpLgpjbGFtcGVkX2hpZ2ggPSAwLjAgICMgRklYIFRISVMKCnN0aWNrX2xvdyA9IC0yLjUKIyBQQVJUIEI6IGNsYW1wIHN0aWNrX2xvdyBpbnRvIGNsYW1wZWRfbG93CmNsYW1wZWRfbG93ID0gMC4wICAjIEZJWCBUSElTCgoKIyAtLS0tLSBURVNUUyAoZG8gbm90IGNoYW5nZSkgLS0tLS0KZGVmIGNoZWNrKG5hbWUsIGZuKToKICAgIHRyeToKICAgICAgICBvayA9IGJvb2woZm4oKSkKICAgIGV4Y2VwdCBFeGNlcHRpb246CiAgICAgICAgb2sgPSBGYWxzZQogICAgcHJpbnQoKCdQQVNTJyBpZiBvayBlbHNlICdGQUlMJykgKyAnIC0gJyArIG5hbWUpCiAgICByZXR1cm4gb2sKCnNjb3JlID0gc3VtKFsKICAgIGNoZWNrKCdzdGlja19oaWdoIGNsYW1wcyB0byAxJywgbGFtYmRhOiBhYnMoY2xhbXBlZF9oaWdoIC0gMSkgPCAwLjAwMDEpLAogICAgY2hlY2soJ3N0aWNrX2xvdyBjbGFtcHMgdG8gLTEnLCBsYW1iZGE6IGFicyhjbGFtcGVkX2xvdyAtICgtMSkpIDwgMC4wMDAxKQpdKQpwcmludChmJ1NDT1JFOiB7c2NvcmV9LzInKQ==" width="100%" height="440px" style="border:1px solid #d1d5db;border-radius:8px;"></iframe>
-
-<details markdown="block">
-<summary>Hint</summary>
-
-`min(a, b)` picks the smaller of two values. `max(a, b)` picks the bigger. Which one keeps 1.4 from going above 1?
-</details>
-
-<details markdown="block">
-<summary>Solution</summary>
-
-```python
-clamped_high = max(-1, min(1, stick_high))
-clamped_low = max(-1, min(1, stick_low))
-```
-
-`min(1, stick)` sets the maximum. `max(-1, ...)` sets the minimum. This two-function idiom appears all over robot code.
-</details>
+{% include interactive/python-exercise.html id="py1_clamp" %}
 
 ### 1.3 Battery flags
 
-<iframe src="{{ '/assets/python-runner.html' | relative_url }}#b64:dm9sdGFnZSA9IDExLjgKCiMgUEFSVCBBOiBzZXQgaXNfbG93IHRvIFRydWUgd2hlbiB2b2x0YWdlIDwgMTIuMAppc19sb3cgPSBGYWxzZSAgIyBGSVggVEhJUwoKIyBQQVJUIEI6IHNldCBpc19jcml0aWNhbCB0byBUcnVlIHdoZW4gdm9sdGFnZSA8IDExLjAKaXNfY3JpdGljYWwgPSBUcnVlICAjIEZJWCBUSElTCgoKIyAtLS0tLSBURVNUUyAoZG8gbm90IGNoYW5nZSkgLS0tLS0KZGVmIGNoZWNrKG5hbWUsIGZuKToKICAgIHRyeToKICAgICAgICBvayA9IGJvb2woZm4oKSkKICAgIGV4Y2VwdCBFeGNlcHRpb246CiAgICAgICAgb2sgPSBGYWxzZQogICAgcHJpbnQoKCdQQVNTJyBpZiBvayBlbHNlICdGQUlMJykgKyAnIC0gJyArIG5hbWUpCiAgICByZXR1cm4gb2sKCnNjb3JlID0gc3VtKFsKICAgIGNoZWNrKCcxMS44IFYgY291bnRzIGFzIGxvdycsIGxhbWJkYTogaXNfbG93IGlzIFRydWUpLAogICAgY2hlY2soJ2lzX2xvdyBpcyBhIHJlYWwgYm9vbCcsIGxhbWJkYTogdHlwZShpc19sb3cpIGlzIGJvb2wpLAogICAgY2hlY2soJzExLjggViBpcyBub3QgY3JpdGljYWwnLCBsYW1iZGE6IGlzX2NyaXRpY2FsIGlzIEZhbHNlKQpdKQpwcmludChmJ1NDT1JFOiB7c2NvcmV9LzMnKQ==" width="100%" height="420px" style="border:1px solid #d1d5db;border-radius:8px;"></iframe>
-
-<details markdown="block">
-<summary>Hint</summary>
-
-A comparison like `voltage < 12.0` is itself a value: True or False. You can store it directly.
-</details>
-
-<details markdown="block">
-<summary>Solution</summary>
-
-```python
-is_low = voltage < 12.0
-is_critical = voltage < 11.0
-```
-
-Most flags in `robot.py` are computed this way. One test also checks the type: a comparison always gives a real bool.
-</details>
+{% include interactive/python-exercise.html id="py1_battery_flags" %}
 
 Next lesson: **2. Conditionals and Logic**.

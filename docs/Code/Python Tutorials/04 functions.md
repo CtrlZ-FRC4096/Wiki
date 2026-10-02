@@ -63,73 +63,20 @@ def flip_X_coord(self, x):
 
 ## Try it
 
-<iframe src="{{ '/assets/python-runner.html' | relative_url }}#b64:ZGVmIHJvdGF0ZV9kaXN0YW5jZShyb3RhdGlvbnMsIGdlYXJfcmF0aW8sIHdoZWVsX2NpcmMpOgogICAgd2hlZWxfdHVybnMgPSByb3RhdGlvbnMgLyBnZWFyX3JhdGlvCiAgICByZXR1cm4gd2hlZWxfdHVybnMgKiB3aGVlbF9jaXJjCgpkID0gcm90YXRlX2Rpc3RhbmNlKDU2LjgsIGdlYXJfcmF0aW89NS42OCwgd2hlZWxfY2lyYz0wLjMxOSkKcHJpbnQoZidyb2JvdCBkcm92ZSB7ZDouMWZ9IG1ldGVycycp" width="100%" height="320px" style="border:1px solid #d1d5db;border-radius:8px;"></iframe>
+{% include interactive/python-exercise.html id="py4_try" %}
 
 ## Exercises
 
-Every exercise ends with tests. Run the code until every line prints **PASS**.
-
 ### 4.1 Write clamp
 
-<iframe src="{{ '/assets/python-runner.html' | relative_url }}#b64:ZGVmIGNsYW1wKHgsIGxvdywgaGlnaCk6CiAgICAjIHJldHVybiB4LCBidXQgaG9sZCBpdCBpbiBbbG93LCBoaWdoXQogICAgcGFzcwoKCiMgLS0tLS0gVEVTVFMgKGRvIG5vdCBjaGFuZ2UpIC0tLS0tCmRlZiBjaGVjayhuYW1lLCBmbik6CiAgICB0cnk6CiAgICAgICAgb2sgPSBib29sKGZuKCkpCiAgICBleGNlcHQgRXhjZXB0aW9uOgogICAgICAgIG9rID0gRmFsc2UKICAgIHByaW50KCgnUEFTUycgaWYgb2sgZWxzZSAnRkFJTCcpICsgJyAtICcgKyBuYW1lKQogICAgcmV0dXJuIG9rCgpzY29yZSA9IHN1bShbCiAgICBjaGVjaygnY2xhbXAoMS40LCAtMSwgMSkgaXMgMScsIGxhbWJkYTogYWJzKGNsYW1wKDEuNCwgLTEsIDEpIC0gMSkgPCAwLjAwMDEpLAogICAgY2hlY2soJ2NsYW1wKC0yLjUsIC0xLCAxKSBpcyAtMScsIGxhbWJkYTogYWJzKGNsYW1wKC0yLjUsIC0xLCAxKSAtICgtMSkpIDwgMC4wMDAxKSwKICAgIGNoZWNrKCdjbGFtcCgwLjMsIC0xLCAxKSBpcyAwLjMnLCBsYW1iZGE6IGFicyhjbGFtcCgwLjMsIC0xLCAxKSAtIDAuMykgPCAwLjAwMDEpLAogICAgY2hlY2soJ2NsYW1wKDUsIDAsIDEwKSBpcyA1JywgbGFtYmRhOiBhYnMoY2xhbXAoNSwgMCwgMTApIC0gNSkgPCAwLjAwMDEpLAogICAgY2hlY2soJ2NsYW1wKC0xLCAtMSwgMSkgaXMgLTEnLCBsYW1iZGE6IGFicyhjbGFtcCgtMSwgLTEsIDEpIC0gKC0xKSkgPCAwLjAwMDEpCl0pCnByaW50KGYnU0NPUkU6IHtzY29yZX0vNScp" width="100%" height="400px" style="border:1px solid #d1d5db;border-radius:8px;"></iframe>
+{% include interactive/python-exercise.html id="py4_clamp" %}
 
-<details markdown="block">
-<summary>Hint</summary>
+### 4.2 Config with defaults
 
-One line with `min` and `max` is enough. Which of the two should wrap the other?
-</details>
-
-<details markdown="block">
-<summary>Solution</summary>
-
-```python
-def clamp(x, low, high):
-    return max(low, min(high, x))
-```
-
-The tests include a boundary case: when x is exactly the limit, clamp returns the limit.
-</details>
-
-### 4.2 Default arguments
-
-<iframe src="{{ '/assets/python-runner.html' | relative_url }}#b64:ZGVmIGdldF9tb3Rvcl9jb25maWcoa19wPTAuMCwgY3VycmVudF9saW1pdD00MCk6CiAgICAjIHJldHVybiB0aGUgdHVwbGUgKGtfcCwgY3VycmVudF9saW1pdCkKICAgIHBhc3MKCgojIC0tLS0tIFRFU1RTIChkbyBub3QgY2hhbmdlKSAtLS0tLQpkZWYgY2hlY2sobmFtZSwgZm4pOgogICAgdHJ5OgogICAgICAgIG9rID0gYm9vbChmbigpKQogICAgZXhjZXB0IEV4Y2VwdGlvbjoKICAgICAgICBvayA9IEZhbHNlCiAgICBwcmludCgoJ1BBU1MnIGlmIG9rIGVsc2UgJ0ZBSUwnKSArICcgLSAnICsgbmFtZSkKICAgIHJldHVybiBvawoKc2NvcmUgPSBzdW0oWwogICAgY2hlY2soJ2RlZmF1bHRzIGdpdmUgKDAuMCwgNDApJywgbGFtYmRhOiBnZXRfbW90b3JfY29uZmlnKCkgPT0gKDAuMCwgNDApKSwKICAgIGNoZWNrKCdrX3AgYnkgbmFtZScsIGxhbWJkYTogZ2V0X21vdG9yX2NvbmZpZyhrX3A9OCkgPT0gKDgsIDQwKSksCiAgICBjaGVjaygnY3VycmVudF9saW1pdCBieSBuYW1lJywgbGFtYmRhOiBnZXRfbW90b3JfY29uZmlnKGN1cnJlbnRfbGltaXQ9MzApID09ICgwLjAsIDMwKSkKXSkKcHJpbnQoZidTQ09SRToge3Njb3JlfS8zJyk=" width="100%" height="400px" style="border:1px solid #d1d5db;border-radius:8px;"></iframe>
-
-<details markdown="block">
-<summary>Hint</summary>
-
-The tuple is the two parameters in parentheses. Nothing else is needed.
-</details>
-
-<details markdown="block">
-<summary>Solution</summary>
-
-```python
-def get_motor_config(k_p=0.0, current_limit=40):
-    return (k_p, current_limit)
-```
-
-A tuple is a fixed group of values. You can index it (`cfg[0]`) or unpack it (`k_p, limit = cfg`).
-</details>
+{% include interactive/python-exercise.html id="py4_motor_config" %}
 
 ### 4.3 Alliance flip
 
-<iframe src="{{ '/assets/python-runner.html' | relative_url }}#b64:ZmllbGRfbGVuZ3RoID0gMTYuNTQgICMgbWV0ZXJzCgpkZWYgZmxpcF94KHgpOgogICAgIyByZXR1cm4gdGhlIHJlZC1hbGxpYW5jZSBtaXJyb3Igb2YgeCAobGlrZSBmbGlwX1hfY29vcmQgaW4gcm9ib3QucHkpCiAgICBwYXNzCgoKIyAtLS0tLSBURVNUUyAoZG8gbm90IGNoYW5nZSkgLS0tLS0KZGVmIGNoZWNrKG5hbWUsIGZuKToKICAgIHRyeToKICAgICAgICBvayA9IGJvb2woZm4oKSkKICAgIGV4Y2VwdCBFeGNlcHRpb246CiAgICAgICAgb2sgPSBGYWxzZQogICAgcHJpbnQoKCdQQVNTJyBpZiBvayBlbHNlICdGQUlMJykgKyAnIC0gJyArIG5hbWUpCiAgICByZXR1cm4gb2sKCnNjb3JlID0gc3VtKFsKICAgIGNoZWNrKCdmbGlwX3goMi4wKSBpcyAxNC41NCcsIGxhbWJkYTogYWJzKGZsaXBfeCgyLjApIC0gMTQuNTQpIDwgMC4wMDEpLAogICAgY2hlY2soJ2ZsaXBfeCgxNC41NCkgaXMgMi4wJywgbGFtYmRhOiBhYnMoZmxpcF94KDE0LjU0KSAtIDIuMCkgPCAwLjAwMSksCiAgICBjaGVjaygnZmxpcCB0d2ljZSByZXR1cm5zIHRoZSBzdGFydCcsIGxhbWJkYTogYWJzKGZsaXBfeChmbGlwX3goMy4wKSkgLSAzLjApIDwgMC4wMDEpCl0pCnByaW50KGYnU0NPUkU6IHtzY29yZX0vMycp" width="100%" height="420px" style="border:1px solid #d1d5db;border-radius:8px;"></iframe>
-
-<details markdown="block">
-<summary>Hint</summary>
-
-Mirroring across the field: `x` plus its mirror always adds up to the field length.
-</details>
-
-<details markdown="block">
-<summary>Solution</summary>
-
-```python
-def flip_x(x):
-    return field_length - x
-```
-
-The last test flips twice and demands the original value back. A mirror that fails this test would slowly drift poses across the field.
-</details>
+{% include interactive/python-exercise.html id="py4_flip_x" %}
 
 Next lesson: **5. Classes and Objects**.

@@ -1,0 +1,15 @@
+title: "Try it: a class"
+prompt: |
+  Run the code. Then make a second motor, set it to `-0.6`, and print its name and speed.
+starter: |
+  class FakeMotor:
+      def __init__(self, name):
+          self.name = name
+          self.speed = 0.0
+
+      def set(self, speed):        # like motor.set_control(...)
+          self.speed = speed
+
+  m = FakeMotor('left intake')
+  m.set(0.8)
+  print(f'{m.name} runs at {m.speed}')

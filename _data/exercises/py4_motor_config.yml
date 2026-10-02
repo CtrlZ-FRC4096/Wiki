@@ -1,0 +1,27 @@
+title: "Config with defaults"
+prompt: |
+  This is the shape of `get_motor_config` in `robot/robot.py`. Both parameters have defaults.
+
+  Write the body: return the tuple `(k_p, current_limit)`.
+starter: |
+  def get_motor_config(k_p=0.0, current_limit=40):
+      # return the tuple (k_p, current_limit)
+      pass
+tests:
+  - name: "defaults give (0.0, 40)"
+    code: |
+      assert get_motor_config() == (0.0, 40), (
+          f"get_motor_config() returned {get_motor_config()}. The defaults must apply")
+  - name: "k_p can be set by name"
+    code: |
+      assert get_motor_config(k_p=8) == (8, 40), (
+          f"get_motor_config(k_p=8) returned {get_motor_config(k_p=8)}")
+  - name: "current_limit can be set by name"
+    code: |
+      assert get_motor_config(current_limit=30) == (0.0, 30), (
+          f"get_motor_config(current_limit=30) returned {get_motor_config(current_limit=30)}")
+hints:
+  - 'The tuple is the two parameters in parentheses. Nothing more is needed.'
+solution: |
+  def get_motor_config(k_p=0.0, current_limit=40):
+      return (k_p, current_limit)

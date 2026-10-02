@@ -6,34 +6,26 @@ nav_order: 1.5
 
 # Python Tutorials
 
-Learn the Python used in our robot code, one small piece at a time. Each lesson has a short summary, an example from our real code, and exercises you run in your browser.
+Learn the Python used in our robot code, one small piece at a time. Each lesson has a short summary, an example from our real code, and graded exercises that run in your browser.
 
 ## How to do the lessons
 
 1. Read the summary.
-2. Look at the example from our real code.
-3. Do the exercises in the embedded runners.
+2. Look at the example from our robot code.
+3. Do the exercises.
 4. Do the lessons in order. Each lesson takes about 15 to 30 minutes.
 
-For every exercise:
+## How the exercises work
 
-- The starter code has comments that say `FIX THIS` or `YOUR CODE HERE`.
-- At the bottom there is a test section marked **do not change**. It checks your work and prints one `PASS` or `FAIL` line per test, plus a score like `SCORE: 3/3`.
-- Your goal for every exercise: every line prints **PASS**.
-- Stuck after a few tries? Open the **Hint**. Still stuck? Open the **Solution**, read it, close it, and write it yourself.
-- A starter always runs without a crash. Before you fix it, all or most tests print FAIL. That is normal.
-
-## The code runner
-
-The runner on each page runs real Python in your browser. Your code stays on your computer.
-
-- Press **Run** (or Ctrl+Enter) to run the code. The output shows in the dark pane.
-- Press **Reset code** to get the starter code back.
-- The first run on a page downloads the Python interpreter (about 10 MB). Later runs start at once.
-- An error prints a traceback. Read the last line first. It names the problem and the line number.
+- Press **Run checks** (or Ctrl+Enter). The page runs your code in the browser. Nothing leaves your computer.
+- Each exercise has a list of checks. A check shows ✓ when your code passes it and ✗ with a message when it does not.
+- Pass every check before you move on.
+- The **Hint** button shows one hint at a time.
+- The **Show solution** button asks for the team password. A mentor has it.
+- Your work is saved on this computer, even if you leave the page.
 
 {: .note }
-The runner needs the internet for the first load on each computer. The robot libraries (WPILib, REV, Phoenix) are not in the runner. This is why the exercises use plain Python and fake motors.
+The robot libraries (WPILib, REV, Phoenix) are not available in the browser. This is why the exercises use plain Python and fake motors.
 
 ## The lessons
 

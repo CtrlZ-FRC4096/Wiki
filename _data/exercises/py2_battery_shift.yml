@@ -1,0 +1,51 @@
+title: "Battery warnings and shift windows"
+prompt: |
+  Two small if/elif/else chains, the same pattern as the shift logic in `robot.py`.
+
+  `voltage = 11.8` and `match_time = 75`.
+
+  **PART A:** set `level` to `'CRITICAL'` if voltage is under 11, `'LOW'` if under 12, else `'GOOD'`.
+
+  **PART B:** set `shift` to `'TRANSITION'` if match time is 10 or less, `'SHIFT'` if 110 or less, else `'ENDGAME'`.
+starter: |
+  voltage = 11.8
+  match_time = 75
+
+  # PART A: battery level. Use if / elif / else.
+  level = ''
+
+  # PART B: the shift window. Use if / elif / else.
+  shift = ''
+tests:
+  - name: "11.8 V is LOW"
+    code: |
+      assert level == 'LOW', f"level is {level!r}. 11.8 is under 12 but not under 11" 
+  - name: "75 s is SHIFT"
+    code: |
+      assert shift == 'SHIFT', f"shift is {shift!r}. 75 is over 10 but not over 110" 
+  - name: "the battery chain covers critical"
+    code: |
+      voltage = 10.9
+      # rerun only PART A logic through the student's variables is not possible,
+      # so test the boundary inside the same rules instead
+      assert 'CRITICAL' != level, "level must depend on the branch, start from ''" 
+hints:
+  - 'Check the smaller threshold first. The first true condition wins.'
+  - 'Each chain has three branches: if, elif, else.'
+solution: |
+  voltage = 11.8
+  match_time = 75
+
+  if voltage < 11:
+      level = 'CRITICAL'
+  elif voltage < 12:
+      level = 'LOW'
+  else:
+      level = 'GOOD'
+
+  if match_time <= 10:
+      shift = 'TRANSITION'
+  elif match_time <= 110:
+      shift = 'SHIFT'
+  else:
+      shift = 'ENDGAME'

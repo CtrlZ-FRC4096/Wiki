@@ -1,0 +1,63 @@
+title: "Step a generator until it ends"
+prompt: |
+  A function with `yield` is a generator. The scheduler advances it one `yield` per frame with `next()`, and it ends with `StopIteration`.
+
+  Write `count_frames(gen)`. Step the generator until it ends, and return how many times `next()` succeeded.
+starter: |
+  def rumble_for_three_frames():
+      frame = 0
+      print('rumble ON')
+      while frame < 3:
+          frame += 1
+          yield            # wait for next() from the scheduler
+      print('rumble OFF')
+
+  def count_frames(gen):
+      n = 0
+      # step with next(gen) until StopIteration, then return n
+      return n
+tests:
+  - name: "the rumble runs three frames"
+    code: |
+      got = count_frames(rumble_for_three_frames())
+      assert got == 3, f"count_frames returned {got}. The generator yields 3 times, then returns" 
+  - name: "a generator with no yield runs zero frames"
+    code: |
+      def empty():
+          return
+          yield
+
+      got = count_frames(empty())
+      assert got == 0, f"count_frames(empty()) returned {got}. Expected 0" 
+  - name: "one yield is one frame"
+    code: |
+      def once():
+          yield
+
+      got = count_frames(once())
+      assert got == 1, f"count_frames(once()) returned {got}. Expected 1" 
+  - name: "it counts after the work is visible"
+    code: |
+      frames = count_frames(rumble_for_three_frames())
+      # 'rumble OFF' must have printed during that call, which proves the generator ended
+      assert frames == 3
+hints:
+  - 'Loop while True and call next(gen), adding 1 each time.'
+  - 'The generator ending raises StopIteration. Catch it with try / except, return the count.'
+solution: |
+  def rumble_for_three_frames():
+      frame = 0
+      print('rumble ON')
+      while frame < 3:
+          frame += 1
+          yield
+      print('rumble OFF')
+
+  def count_frames(gen):
+      n = 0
+      try:
+          while True:
+              next(gen)
+              n += 1
+      except StopIteration:
+          return n

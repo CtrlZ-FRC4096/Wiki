@@ -1,0 +1,30 @@
+title: "Write clamp"
+prompt: |
+  Write the body of `clamp(x, low, high)`. It returns `x`, but never smaller than `low` and never bigger than `high`.
+starter: |
+  def clamp(x, low, high):
+      # return x, but hold it in [low, high]
+      return x
+tests:
+  - name: "a big value clamps to the top"
+    code: |
+      assert abs(clamp(1.4, -1, 1) - 1) < 0.0001, f"clamp(1.4, -1, 1) returned {clamp(1.4, -1, 1)}" 
+  - name: "a small value clamps to the bottom"
+    code: |
+      assert abs(clamp(-2.5, -1, 1) - (-1)) < 0.0001, f"clamp(-2.5, -1, 1) returned {clamp(-2.5, -1, 1)}" 
+  - name: "a value in range passes through"
+    code: |
+      assert abs(clamp(0.3, -1, 1) - 0.3) < 0.0001, f"clamp(0.3, -1, 1) returned {clamp(0.3, -1, 1)}" 
+  - name: "other ranges work too"
+    code: |
+      assert abs(clamp(5, 0, 10) - 5) < 0.0001, f"clamp(5, 0, 10) returned {clamp(5, 0, 10)}" 
+  - name: "the boundary itself is allowed"
+    code: |
+      assert abs(clamp(-1, -1, 1) - (-1)) < 0.0001, (
+          f"clamp(-1, -1, 1) returned {clamp(-1, -1, 1)}. Low must be returned, not moved")
+hints:
+  - 'One line with min and max is enough.'
+  - 'Ask: which one stops x from growing past high?'
+solution: |
+  def clamp(x, low, high):
+      return max(low, min(high, x))

@@ -1,0 +1,55 @@
+title: "Lambdas read the live value"
+prompt: |
+  A lambda re-reads its variables every time it is called. That is why `Button(lambda: ...)` works: the button asks a fresh question every frame.
+
+  **PART A:** make a lambda `status`. It returns `'spinning'` when `motor_speed > 0.1`, else `'stopped'`.
+
+  **PART B:** make a lambda `healthy`. It returns True when `-60 < motor_speed < 60`, else False.
+starter: |
+  motor_speed = 0.0
+
+  # a lambda reads the value again each time it is called
+  get_speed = lambda: motor_speed
+  print(get_speed())   # 0.0
+  motor_speed = 5.2
+  print(get_speed())   # 5.2
+
+  # PART A: lambda status returns 'spinning' or 'stopped'
+  status = lambda: ''
+
+  # PART B: lambda healthy returns True or False
+  healthy = lambda: False
+tests:
+  - name: "a fast motor is spinning"
+    code: |
+      motor_speed = 5.2
+      got = status()
+      assert got == 'spinning', f"With motor_speed = 5.2, status() returned {got!r}" 
+  - name: "a slow motor is stopped"
+    code: |
+      motor_speed = 0.05
+      got = status()
+      assert got == 'stopped', f"With motor_speed = 0.05, status() returned {got!r}" 
+  - name: "a normal speed is healthy"
+    code: |
+      motor_speed = 5.2
+      got = healthy()
+      assert got is True, f"With motor_speed = 5.2, healthy() returned {got!r}" 
+  - name: "a runaway speed is not healthy"
+    code: |
+      motor_speed = 100.0
+      got = healthy()
+      assert got is False, f"With motor_speed = 100.0, healthy() returned {got!r}" 
+hints:
+  - 'X if condition else Y is an if/else on one line.'
+  - 'Chained comparisons work inside a lambda: lo < value < hi.'
+solution: |
+  motor_speed = 0.0
+
+  get_speed = lambda: motor_speed
+  print(get_speed())
+  motor_speed = 5.2
+  print(get_speed())
+
+  status = lambda: 'spinning' if motor_speed > 0.1 else 'stopped'
+  healthy = lambda: -60 < motor_speed < 60

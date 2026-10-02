@@ -1,0 +1,24 @@
+title: "Try it: what a decorator does"
+prompt: |
+  Run the code. Then add a second decorated function that prints something else, and call `a_button.press()` again.
+starter: |
+  class TinyButton:
+      # A pretend button. Used to show what a decorator does.
+      def __init__(self):
+          self.handler = None
+
+      def whenPressed(self, fn):
+          self.handler = fn        # store the function
+          return fn
+
+      def press(self):             # the driver pressed the button
+          if self.handler is not None:
+              self.handler()       # call the stored function
+
+  a_button = TinyButton()
+
+  @a_button.whenPressed
+  def _():
+      print('A was pressed!')
+
+  a_button.press()

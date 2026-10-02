@@ -1,0 +1,39 @@
+title: "Inches to meters"
+prompt: |
+  The robot's geometry values are in meters. We build in inches. 1 inch is 0.0254 meters.
+
+  `inches = 28.5` is our drive base width.
+
+  **PART A:** set `meters` to the inches value converted to meters.
+
+  **PART B:** set `message` to an f-string that says `28.5 inches = 0.72 meters`. Print the meters value with two decimal places.
+starter: |
+  inches = 28.5  # drive base width
+
+  # PART A: set meters to inches * 0.0254
+  meters = 0.0
+
+  # PART B: set message to the f-string (meters with two decimal places)
+  message = ''
+tests:
+  - name: "meters is inches times 0.0254"
+    code: |
+      assert abs(meters - 0.7239) < 0.0001, (
+          f"meters is {meters}. Expected 28.5 * 0.0254 = 0.7239")
+  - name: "meters is a float"
+    code: |
+      assert isinstance(meters, float), (
+          f"meters must be a float, not {type(meters).__name__}. "
+          "Multiplication by 0.0254 gives one")
+  - name: "message shows both numbers"
+    code: |
+      assert '28.5' in message, "message must contain the inches value, 28.5"
+      assert '0.72' in message, (
+          "message must contain the meters value with two decimal places, 0.72")
+hints:
+  - 'PART A: multiply inches by 0.0254 once and store the result.'
+  - "PART B: see the summary example. f'{x:.2f}' keeps two decimal places."
+solution: |
+  inches = 28.5
+  meters = inches * 0.0254
+  message = f'{inches} inches = {meters:.2f} meters'

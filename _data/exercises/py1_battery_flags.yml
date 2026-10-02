@@ -1,0 +1,35 @@
+title: "Battery flags"
+prompt: |
+  The driver station warns about a weak battery with booleans.
+
+  `voltage = 11.8`.
+
+  **PART A:** set `is_low` to True when the voltage is under 12.0.
+
+  **PART B:** set `is_critical` to True when the voltage is under 11.0.
+starter: |
+  voltage = 11.8
+
+  # PART A: set is_low to True when voltage < 12.0
+  is_low = False
+
+  # PART B: set is_critical to True when voltage < 11.0
+  is_critical = True
+tests:
+  - name: "11.8 V counts as low"
+    code: |
+      assert is_low is True, f"is_low is {is_low}. 11.8 < 12.0, so it must be True" 
+  - name: "11.8 V is not critical"
+    code: |
+      assert is_critical is False, f"is_critical is {is_critical}. 11.8 >= 11.0, so it must be False" 
+  - name: "both flags are real booleans"
+    code: |
+      assert isinstance(is_low, bool) and isinstance(is_critical, bool), (
+          "Use a comparison (voltage < 12.0), it gives True or False")
+hints:
+  - 'A comparison like voltage < 12.0 is itself a value: True or False.'
+  - 'You can store a comparison directly in a variable, without an if.'
+solution: |
+  voltage = 11.8
+  is_low = voltage < 12.0
+  is_critical = voltage < 11.0

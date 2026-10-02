@@ -1,0 +1,48 @@
+title: "Predict, then measure"
+prompt: |
+  This is the `while ... yield` pattern from the command bodies in `oi.py`.
+
+  **PART A:** change `intake_until_full` so the hopper fills in 100 frames instead of 5.
+
+  **PART B:** set `prediction` to the number of frames a frame counter will report. Make the prediction **before** you run the checks.
+starter: |
+  def intake_until_full():
+      frames = 0
+      while frames < 5:    # the hopper fills in 5 frames right now
+          frames += 1      # one frame of work
+          yield            # give control back to the scheduler
+
+  # PART A: change the loop so it fills in 100 frames.
+
+  # PART B: set prediction to the frame count.
+  prediction = 0
+tests:
+  - name: "the hopper fills in 100 frames"
+    code: |
+      def count_frames(gen):
+          n = 0
+          try:
+              while True:
+                  next(gen)
+                  n += 1
+          except StopIteration:
+              return n
+
+      got = count_frames(intake_until_full())
+      assert got == 100, (
+          f"intake_until_full() finished after {got} frames. "
+          "Expected 100 (about 2 seconds at 20 ms per frame)")
+  - name: "the prediction matches"
+    code: |
+      assert prediction == 100, f"prediction is {prediction}. Change it to the measured number" 
+hints:
+  - 'Only the 5 in the loop condition changes.'
+  - 'Each yield is one successful next() call.'
+solution: |
+  def intake_until_full():
+      frames = 0
+      while frames < 100:
+          frames += 1
+          yield
+
+  prediction = 100

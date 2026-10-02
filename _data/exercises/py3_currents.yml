@@ -1,0 +1,35 @@
+title: "Total current and hot modules"
+prompt: |
+  `currents` holds the amps of the four swerve modules.
+
+  **PART A:** add every current into `total` with a for loop. Do not use `sum()`.
+
+  **PART B:** count the modules that use more than 40 amps into `hot_count`.
+starter: |
+  currents = [38.2, 41.0, 39.5, 31.4]  # amps, one per swerve module
+
+  # PART A: add them up with a for loop
+  total = 0.0
+
+  # PART B: count the modules over 40 amps
+  hot_count = 0
+tests:
+  - name: "the total is about 150.1 amps"
+    code: |
+      assert abs(total - 150.1) < 0.001, f"total is {total}. Add 38.2 + 41.0 + 39.5 + 31.4" 
+  - name: "exactly one module is over 40 amps"
+    code: |
+      assert hot_count == 1, f"hot_count is {hot_count}. Only 41.0 is over 40" 
+hints:
+  - 'Loop with for c in currents:. Add with total += c.'
+  - 'PART B puts an if inside a loop.'
+solution: |
+  currents = [38.2, 41.0, 39.5, 31.4]
+  total = 0.0
+  for c in currents:
+      total += c
+
+  hot_count = 0
+  for c in currents:
+      if c > 40:
+          hot_count += 1

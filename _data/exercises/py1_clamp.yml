@@ -1,0 +1,44 @@
+title: "Clamp joystick values"
+prompt: |
+  A joystick can report a little more than 1.0 when it is pushed hard. Commands to the drivetrain must stay in [-1, 1].
+
+  **PART A:** clamp `stick_high` into `clamped_high`.
+
+  **PART B:** clamp `stick_low` into `clamped_low`.
+
+  **PART C:** clamp `stick_mid` into `clamped_mid`.
+starter: |
+  stick_high = 1.4
+  # PART A: clamp stick_high into clamped_high, use min() and max()
+  clamped_high = 0.0
+
+  stick_low = -2.5
+  # PART B: clamp stick_low into clamped_low
+  clamped_low = 0.0
+
+  stick_mid = 0.3
+  # PART C: clamp stick_mid into clamped_mid
+  clamped_mid = 0.0
+tests:
+  - name: "a value above the range clamps to 1"
+    code: |
+      assert abs(clamped_high - 1) < 0.0001, (
+          f"clamped_high is {clamped_high}. 1.4 is too big, expected 1")
+  - name: "a value below the range clamps to -1"
+    code: |
+      assert abs(clamped_low - (-1)) < 0.0001, (
+          f"clamped_low is {clamped_low}. -2.5 is too small, expected -1")
+  - name: "a value inside the range stays as it is"
+    code: |
+      assert abs(clamped_mid - 0.3) < 0.0001, (
+          f"clamped_mid is {clamped_mid}. 0.3 is in range, it must not change")
+hints:
+  - 'min(a, b) picks the smaller value. max(a, b) picks the bigger value.'
+  - 'min(1, stick) stops 1.4 from growing past 1. max(-1, ...) stops a number below -1.'
+solution: |
+  stick_high = 1.4
+  clamped_high = max(-1, min(1, stick_high))
+  stick_low = -2.5
+  clamped_low = max(-1, min(1, stick_low))
+  stick_mid = 0.3
+  clamped_mid = max(-1, min(1, stick_mid))

@@ -1,0 +1,41 @@
+title: "Label the auto winner"
+prompt: |
+  `robot.py` logs who won autonomous, but until the FMS sends the result there is no answer. That is Python's `None`.
+
+  `auto_win`: None means unknown, True means RED, False means BLUE.
+
+  **PART A:** `auto_win_a = None`. Set `label_a` with if/elif/else.
+
+  **PART B:** `auto_win_b = True`. Set `label_b` the same way.
+starter: |
+  auto_win_a = None
+  label_a = ''  # 'unknown', 'RED', or 'BLUE'
+
+  auto_win_b = True
+  label_b = ''  # same rules
+tests:
+  - name: "None becomes unknown"
+    code: |
+      assert label_a == 'unknown', f"label_a is {label_a!r}. None must become 'unknown'" 
+  - name: "True becomes RED"
+    code: |
+      assert label_b == 'RED', f"label_b is {label_b!r}. True must become 'RED'" 
+hints:
+  - 'Test for the missing value first: auto_win_a is None.'
+  - 'After that, elif auto_win_a: uses the boolean itself.'
+solution: |
+  auto_win_a = None
+  if auto_win_a is None:
+      label_a = 'unknown'
+  elif auto_win_a:
+      label_a = 'RED'
+  else:
+      label_a = 'BLUE'
+
+  auto_win_b = True
+  if auto_win_b is None:
+      label_b = 'unknown'
+  elif auto_win_b:
+      label_b = 'RED'
+  else:
+      label_b = 'BLUE'

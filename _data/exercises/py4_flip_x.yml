@@ -1,0 +1,29 @@
+title: "Alliance flip"
+prompt: |
+  The same `flip_X_coord` helper as `robot.py`. The field is 16.54 meters long.
+
+  Write `flip_x(x)`: return the red-alliance mirror of `x`.
+starter: |
+  field_length = 16.54  # meters
+
+  def flip_x(x):
+      # return the red-alliance mirror of x
+      pass
+tests:
+  - name: "2.0 becomes 14.54"
+    code: |
+      assert abs(flip_x(2.0) - 14.54) < 0.001, f"flip_x(2.0) returned {flip_x(2.0)}" 
+  - name: "the mirror is symmetric"
+    code: |
+      assert abs(flip_x(14.54) - 2.0) < 0.001, f"flip_x(14.54) returned {flip_x(14.54)}" 
+  - name: "flipping twice returns the start"
+    code: |
+      assert abs(flip_x(flip_x(3.0)) - 3.0) < 0.001, (
+          f"flip_x(flip_x(3.0)) returned {flip_x(flip_x(3.0))}. A mirror must undo itself")
+hints:
+  - 'Mirroring across the field: x plus its mirror always adds to the field length.'
+solution: |
+  field_length = 16.54
+
+  def flip_x(x):
+      return field_length - x

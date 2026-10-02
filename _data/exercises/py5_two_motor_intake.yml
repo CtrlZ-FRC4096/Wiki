@@ -1,0 +1,68 @@
+title: "An intake with two motors"
+prompt: |
+  The real intake makes the right motor follow the left one. Here you set both yourself.
+
+  **PART A:** write `set_speed(self, speed)`. It sets both motors to the same speed.
+
+  **PART B:** add a method `stop(self)`. It sets both motors to 0.0.
+starter: |
+  class FakeMotor:
+      def __init__(self, name):
+          self.name = name
+          self.speed = 0.0
+
+      def set(self, speed):
+          self.speed = speed
+
+  class FakeIntake:
+      def __init__(self):
+          self.left = FakeMotor('left')
+          self.right = FakeMotor('right')
+
+      def set_speed(self, speed):
+          # PART A: set both motors
+          pass
+
+      # PART B: add stop(self). Set both motors to 0.0
+tests:
+  - name: "set_speed spins the left motor"
+    code: |
+      i = FakeIntake()
+      i.set_speed(0.85)
+      assert i.left.speed == 0.85, f"left motor speed is {i.left.speed}. Expected 0.85" 
+  - name: "set_speed spins the right motor"
+    code: |
+      i = FakeIntake()
+      i.set_speed(0.85)
+      assert i.right.speed == 0.85, f"right motor speed is {i.right.speed}. Expected 0.85" 
+  - name: "stop halts both motors"
+    code: |
+      i = FakeIntake()
+      i.set_speed(0.85)
+      i.stop()
+      assert i.left.speed == 0.0 and i.right.speed == 0.0, (
+          f"After stop(), speeds are {i.left.speed} and {i.right.speed}. Both must be 0.0")
+hints:
+  - 'Call .set(speed) on self.left and on self.right.'
+  - 'stop works the same way: a speed of 0.0 means stopped.'
+solution: |
+  class FakeMotor:
+      def __init__(self, name):
+          self.name = name
+          self.speed = 0.0
+
+      def set(self, speed):
+          self.speed = speed
+
+  class FakeIntake:
+      def __init__(self):
+          self.left = FakeMotor('left')
+          self.right = FakeMotor('right')
+
+      def set_speed(self, speed):
+          self.left.set(speed)
+          self.right.set(speed)
+
+      def stop(self):
+          self.left.set(0.0)
+          self.right.set(0.0)

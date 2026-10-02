@@ -1,0 +1,10 @@
+title: "Try it: call a function"
+prompt: |
+  Run the code. Then change the gear ratio to `12.1` and run again.
+starter: |
+  def rotate_distance(rotations, gear_ratio, wheel_circ):
+      wheel_turns = rotations / gear_ratio
+      return wheel_turns * wheel_circ
+
+  d = rotate_distance(56.8, gear_ratio=5.68, wheel_circ=0.319)
+  print(f'robot drove {d:.1f} meters')

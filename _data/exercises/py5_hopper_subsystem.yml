@@ -1,0 +1,68 @@
+title: "Inherit from Subsystem"
+prompt: |
+  `Hopper` inherits from `Subsystem`, exactly like every file in `robot/subsystems/`.
+
+  **PART A:** add a method `stop(self)`. It sets `self.running = False`.
+
+  **PART B:** add a method `toggle(self)`. It switches running: True becomes False, False becomes True.
+starter: |
+  class Subsystem:
+      def __init__(self, name):
+          self.name = name
+
+  class Hopper(Subsystem):
+      def __init__(self):
+          super().__init__('hopper')  # run the setup of the parent class
+          self.running = False
+
+      def start(self):
+          self.running = True
+
+      # PART A: add stop(self). Set self.running = False.
+
+      # PART B: add toggle(self). Switch running each time it is called.
+tests:
+  - name: "the name comes from the parent class"
+    code: |
+      h = Hopper()
+      assert h.name == 'hopper', f"h.name is {h.name!r}. super().__init__('hopper') must set it" 
+  - name: "Hopper is a Subsystem"
+    code: |
+      h = Hopper()
+      assert isinstance(h, Subsystem), "class Hopper(Subsystem) creates the link" 
+  - name: "stop sets running to False"
+    code: |
+      h = Hopper()
+      h.start()
+      h.stop()
+      assert h.running is False, f"After start() then stop(), running is {h.running}" 
+  - name: "toggle flips the flag both ways"
+    code: |
+      h = Hopper()
+      h.toggle()
+      first = h.running
+      h.toggle()
+      second = h.running
+      assert first is True and second is False, (
+          f"After two toggles running went {first} then {second}. Expected True then False")
+hints:
+  - 'self.running = not self.running flips a bool in one step.'
+  - "Remember: every method's first parameter is self."
+solution: |
+  class Subsystem:
+      def __init__(self, name):
+          self.name = name
+
+  class Hopper(Subsystem):
+      def __init__(self):
+          super().__init__('hopper')
+          self.running = False
+
+      def start(self):
+          self.running = True
+
+      def stop(self):
+          self.running = False
+
+      def toggle(self):
+          self.running = not self.running
