@@ -11,9 +11,17 @@ Learn the Python used in our robot code, one small piece at a time. Each lesson 
 ## How to do the lessons
 
 1. Read the summary.
-2. Look at the example from our robot code.
-3. Do the exercises in the embedded runners. Try the exercise before you open the solution.
+2. Look at the example from our real code.
+3. Do the exercises in the embedded runners.
 4. Do the lessons in order. Each lesson takes about 15 to 30 minutes.
+
+For every exercise:
+
+- The starter code has comments that say `FIX THIS` or `YOUR CODE HERE`.
+- At the bottom there is a test section marked **do not change**. It checks your work and prints one `PASS` or `FAIL` line per test, plus a score like `SCORE: 3/3`.
+- Your goal for every exercise: every line prints **PASS**.
+- Stuck after a few tries? Open the **Hint**. Still stuck? Open the **Solution**, read it, close it, and write it yourself.
+- A starter always runs without a crash. Before you fix it, all or most tests print FAIL. That is normal.
 
 ## The code runner
 
