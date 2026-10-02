@@ -22,3 +22,4 @@ starter: |
       print('A was pressed!')
 
   a_button.press()
+locked: false

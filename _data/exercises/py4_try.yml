@@ -8,3 +8,4 @@ starter: |
 
   d = rotate_distance(56.8, gear_ratio=5.68, wheel_circ=0.319)
   print(f'robot drove {d:.1f} meters')
+locked: false

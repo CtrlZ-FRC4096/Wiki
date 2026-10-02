@@ -6,3 +6,4 @@ starter: |
   name = 'Ctrl-Z'
   speed = 3.2  # meters per second
   print(f'Team {team} ({name}) drives at {speed} m/s')
+locked: false

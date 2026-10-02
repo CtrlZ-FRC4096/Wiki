@@ -25,3 +25,4 @@ hints:
 solution: |
   def get_motor_config(k_p=0.0, current_limit=40):
       return (k_p, current_limit)
+locked: false

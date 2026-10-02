@@ -37,3 +37,4 @@ solution: |
   inches = 28.5
   meters = inches * 0.0254
   message = f'{inches} inches = {meters:.2f} meters'
+locked: false

@@ -9,3 +9,4 @@ starter: |
 
   for i, s in enumerate(subsystems):
       print(f'module {i}: {s}')
+locked: false

@@ -61,3 +61,4 @@ solution: |
               n += 1
       except StopIteration:
           return n
+locked: false

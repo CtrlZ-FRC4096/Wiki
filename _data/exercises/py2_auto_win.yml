@@ -39,3 +39,4 @@ solution: |
       label_b = 'RED'
   else:
       label_b = 'BLUE'
+locked: false

@@ -66,3 +66,4 @@ solution: |
 
       def toggle(self):
           self.running = not self.running
+locked: false

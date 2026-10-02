@@ -292,6 +292,20 @@
       solutionBtn.addEventListener("click", function () {
         if (!window.confirm("Show one working solution? Try the hints first — you learn more from a failed attempt than from reading an answer.")) return;
 
+        /* An exercise with `locked: false` ships its answer in the page as
+         * plain text. Use it directly; there is no curtain to unlock. */
+        var plain = root.querySelector(".cz-exercise__solution-plain");
+        if (plain) {
+          try {
+            textarea.value = JSON.parse(plain.textContent);
+            store(storageKey, textarea.value);
+            autoSize(textarea);
+          } catch (err) {
+            status.textContent = "The answer on this page is broken.";
+          }
+          return;
+        }
+
         var node = root.querySelector(".cz-exercise__locked");
         var blob = null;
         try {

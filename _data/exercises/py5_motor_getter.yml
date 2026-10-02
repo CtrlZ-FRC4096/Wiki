@@ -53,3 +53,4 @@ solution: |
 
       def status(self):
           return f'{self.name} at {self.speed}'
+locked: false

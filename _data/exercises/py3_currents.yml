@@ -33,3 +33,4 @@ solution: |
   for c in currents:
       if c > 40:
           hot_count += 1
+locked: false

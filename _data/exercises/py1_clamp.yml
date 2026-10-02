@@ -42,3 +42,4 @@ solution: |
   clamped_low = max(-1, min(1, stick_low))
   stick_mid = 0.3
   clamped_mid = max(-1, min(1, stick_mid))
+locked: false

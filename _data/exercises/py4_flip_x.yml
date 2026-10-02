@@ -27,3 +27,4 @@ solution: |
 
   def flip_x(x):
       return field_length - x
+locked: false

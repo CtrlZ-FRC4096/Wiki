@@ -57,3 +57,4 @@ solution: |
       state_b = 'intaking'
   else:
       state_b = 'stopped'
+locked: false

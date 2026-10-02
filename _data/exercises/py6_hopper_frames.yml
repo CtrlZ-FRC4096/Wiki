@@ -46,3 +46,4 @@ solution: |
           yield
 
   prediction = 100
+locked: false

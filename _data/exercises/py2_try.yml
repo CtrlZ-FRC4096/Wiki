@@ -12,3 +12,4 @@ starter: |
       shift = 'ENDGAME'
 
   print(f't={match_time}, shift = {shift}')
+locked: false

@@ -53,3 +53,4 @@ solution: |
 
   status = lambda: 'spinning' if motor_speed > 0.1 else 'stopped'
   healthy = lambda: -60 < motor_speed < 60
+locked: false

@@ -33,3 +33,4 @@ solution: |
           best_index = i
 
   best_current = currents[best_index]
+locked: false

@@ -49,3 +49,4 @@ solution: |
       shift = 'SHIFT'
   else:
       shift = 'ENDGAME'
+locked: false

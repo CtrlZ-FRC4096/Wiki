@@ -66,3 +66,4 @@ solution: |
       def stop(self):
           self.left.set(0.0)
           self.right.set(0.0)
+locked: false

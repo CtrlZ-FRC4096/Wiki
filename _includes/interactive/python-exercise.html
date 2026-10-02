@@ -84,10 +84,20 @@
     "hints": {{ ex.hints | jsonify }},
     "hasSolution": {% if ex.solution %}true{% else %}false{% endif %}
   }</script>
+  {%- comment -%}
+    An exercise can opt out of the password with `locked: false` in its yml.
+    The answer then ships in the page as plain text, and python-exercise.js
+    fills it in without asking. Exercises without the flag keep the
+    encrypted flow below.
+  {%- endcomment -%}
+  {%- if ex.locked == false and ex.solution -%}
+  <script type="application/json" class="cz-exercise__solution-plain">{{ ex.solution | jsonify }}</script>
+  {%- else -%}
   {%- assign locked_id = "exercise." | append: include.id -%}
   {%- assign locked = site.data.locked.answers[locked_id] -%}
   {%- if locked -%}
   <script type="application/json" class="cz-exercise__locked">{"iv": {{ locked.iv | jsonify }}, "data": {{ locked.data | jsonify }}}</script>
+  {%- endif -%}
   {%- endif -%}
 </div>
 

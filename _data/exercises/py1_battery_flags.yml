@@ -33,3 +33,4 @@ solution: |
   voltage = 11.8
   is_low = voltage < 12.0
   is_critical = voltage < 11.0
+locked: false

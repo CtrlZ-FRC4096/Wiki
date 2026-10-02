@@ -13,3 +13,4 @@ starter: |
   m = FakeMotor('left intake')
   m.set(0.8)
   print(f'{m.name} runs at {m.speed}')
+locked: false

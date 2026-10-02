@@ -30,3 +30,4 @@ solution: |
       tick += 1
 
   seconds = tick * 0.02
+locked: false
