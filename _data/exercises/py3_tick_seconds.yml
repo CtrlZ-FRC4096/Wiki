@@ -1,12 +1,15 @@
-title: "Count robot frames"
+title: Count loop steps and calculate nominal time
 prompt: |
-  One robot frame is 20 ms.
+  This is a loop-step model. Assume each real robot cycle has a nominal period of 0.02 seconds (20 ms).
 
-  **PART A:** count `tick` up to 100 with a while loop.
+  PART A: use a while loop to increase tick from 0 to 100.
 
-  **PART B:** set `seconds` to `tick * 0.02`.
+  PART B: set seconds to tick * 0.02. This calculates the nominal time for 100 robot cycles under that assumption.
+
+  The browser loop runs as fast as Python permits. It does not wait 20 ms per step or measure elapsed time. In robot code, use the scheduler and yield to let other work continue. A yield alone does not measure time.
 starter: |
-  # One robot frame is 20 ms.
+  # Model assumption: one real robot cycle has a nominal period of 20 ms.
+  # This browser loop does not wait between steps.
   tick = 0
 
   # PART A: count tick up to 100 with a while loop
@@ -15,15 +18,15 @@ starter: |
   # PART B: set seconds to tick * 0.02
   seconds = 0.0
 tests:
-  - name: "tick stops at exactly 100"
-    code: |
-      assert tick == 100, f"tick is {tick}. The loop condition must stop at 100" 
-  - name: "100 frames is 2 seconds"
-    code: |
-      assert abs(seconds - 2.0) < 0.001, f"seconds is {seconds}. 100 * 0.02 = 2.0" 
+- name: tick stops at exactly 100
+  code: "assert tick == 100, f\"tick is {tick}. The loop condition must stop at 100\"\
+    \ \n"
+- name: 100 modeled cycles give 2 nominal seconds
+  code: "assert abs(seconds - 2.0) < 0.001, f\"seconds is {seconds}. 100 * 0.02 =\
+    \ 2.0\" \n"
 hints:
-  - 'while tick < 100: then tick += 1 inside the loop.'
-  - 'PART B is one multiply, after the loop.'
+- 'while tick < 100: then tick += 1 inside the loop.'
+- PART B is one multiply, after the loop.
 solution: |
   tick = 0
   while tick < 100:

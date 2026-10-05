@@ -86,7 +86,7 @@ for fuel_num in range(1, self.max_fuel_in_hopper + 1):
 
 {% include interactive/python-exercise.html id="py3_hot_module" %}
 
-### 3.3 Count robot frames
+### 3.3 Count loop steps and calculate nominal time
 
 {% include interactive/python-exercise.html id="py3_tick_seconds" %}
 

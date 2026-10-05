@@ -1,6 +1,8 @@
-title: "Try it: what a decorator does"
+title: 'Try it: what a decorator does'
 prompt: |
-  Run the code. Then add a second decorated function that prints something else, and call `a_button.press()` again.
+  Run the code. Then add a second decorated function that prints a different message. Call a_button.press() again.
+
+  TinyButton stores only one handler. The second decoration replaces the first handler. Predict which message the next press prints. This is a teaching model, not the team command scheduler.
 starter: |
   class TinyButton:
       # A pretend button. Used to show what a decorator does.

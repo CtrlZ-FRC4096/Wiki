@@ -28,17 +28,19 @@ Why the lambda? `Button(self.robot.rumble_d1)` would freeze the startup value fo
 ### Decorators: register a function
 
 ```python
-@self.driver1.A.whenPressed
+@self.driver1.POV.DOWN.whenPressed
 def _():
     self.robot.poseEstimator.set_yaw(0.0)
 ```
 
-A line `@x` above a function runs once at startup: it calls `x(your_function)` right away. `whenPressed` **stores** your function. The command scheduler calls it later, when the driver presses A.
+When Python executes the function definition, `@x` calls `x(your_function)`. The team button decorator creates and binds a command. The scheduler runs the command when the driver presses the button. In this example, driver 1 POV DOWN resets yaw. The A button has a different heading binding.
 
 Two details you will see in `oi.py`:
 
 - The function is named `_` on purpose. It means: only the decorator uses this name.
-- `whenHeld` runs the function every frame while the button is down. `whenReleased` runs once when it comes up.
+- The team `whenHeld` wrapper uses `whileTrue`: a press schedules the command, and a release cancels it if it is active. A completed command does not restart while the button remains held.
+- A normal function bound with `whenHeld` runs once. Repeated work needs a generator that continues to yield.
+- `whenReleased` schedules its command when the button changes from pressed to released.
 
 ### Coroutines: a command as a timeline
 
@@ -62,11 +64,32 @@ def _():
 "Rumble for half a second" reads top to bottom, and the robot keeps driving during the wait. Many of our command bodies are `while True: ... yield`: do some work, wait a frame, repeat forever (the drivetrain default command is built this way).
 
 {: .note }
-Do not use `time.sleep()` in robot code. Sleep freezes the whole robot loop. Use `yield` to wait one frame at a time.
+Do not use `time.sleep()` in a command callback or generator on the robot main loop. It blocks other work. Use `yield` to return control to the scheduler. Use a timer to measure elapsed time.
 
 ## Try it
 
 {% include interactive/python-exercise.html id="py6_try" %}
+
+## Tools for these exercises
+
+For exercise 6.1, a conditional expression selects one result:
+
+```python
+status = lambda: 'spinning' if motor_speed > 0.1 else 'stopped'
+```
+
+The lambda reads `motor_speed` when called. The expression returns one of the two strings.
+
+For exercise 6.2, `next(gen)` advances a generator. Use `try` and `except` to handle completion:
+
+```python
+try:
+    next(gen)
+except StopIteration:
+    print('The generator ended.')
+```
+
+`while True` repeats until the function returns or the loop exits. Count only successful `next()` calls. Code after the final `yield` runs on a later call that reaches completion. That call raises `StopIteration`.
 
 ## Exercises
 

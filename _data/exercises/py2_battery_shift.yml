@@ -1,12 +1,14 @@
-title: "Battery warnings and shift windows"
+title: Battery warnings and shift windows
 prompt: |
-  Two small if/elif/else chains, the same pattern as the shift logic in `robot.py`.
+  Use if/elif/else chains to select practice labels. These thresholds are exercise values, not FRC rules or battery operating limits.
 
-  `voltage = 11.8` and `match_time = 75`.
+  PART A: for voltage = 11.8, set level to 'CRITICAL' below 11, 'LOW' below 12, or 'GOOD' otherwise.
 
-  **PART A:** set `level` to `'CRITICAL'` if voltage is under 11, `'LOW'` if under 12, else `'GOOD'`.
+  PART B: for match_time = 75, set shift to 'TRANSITION' at 10 or less, 'SHIFT' at 110 or less, or 'ENDGAME' otherwise.
 
-  **PART B:** set `shift` to `'TRANSITION'` if match time is 10 or less, `'SHIFT'` if 110 or less, else `'ENDGAME'`.
+  PART C: use the same battery rules with critical_voltage = 10.9. Write a separate chain that sets critical_level.
+
+  Select Run checks. Then change an input and run your code again. Discuss the result with a mentor. Battery boundaries: 11.0 gives LOW; 12.0 gives GOOD. Time boundaries: 10 gives TRANSITION; 11 and 110 give SHIFT; 111 gives ENDGAME. The automated checks use the supplied inputs; they do not verify all these boundaries.
 starter: |
   voltage = 11.8
   match_time = 75
@@ -16,22 +18,24 @@ starter: |
 
   # PART B: the shift window. Use if / elif / else.
   shift = ''
+
+  # PART C: check a critical input with a separate chain.
+  critical_voltage = 10.9
+  critical_level = ''
 tests:
-  - name: "11.8 V is LOW"
-    code: |
-      assert level == 'LOW', f"level is {level!r}. 11.8 is under 12 but not under 11" 
-  - name: "75 s is SHIFT"
-    code: |
-      assert shift == 'SHIFT', f"shift is {shift!r}. 75 is over 10 but not over 110" 
-  - name: "the battery chain covers critical"
-    code: |
-      voltage = 10.9
-      # rerun only PART A logic through the student's variables is not possible,
-      # so test the boundary inside the same rules instead
-      assert 'CRITICAL' != level, "level must depend on the branch, start from ''" 
+- name: 11.8 V is LOW
+  code: "assert level == 'LOW', f\"level is {level!r}. 11.8 is under 12 but not under\
+    \ 11\" \n"
+- name: 75 s is SHIFT
+  code: "assert shift == 'SHIFT', f\"shift is {shift!r}. 75 is over 10 but not over\
+    \ 110\" \n"
+- name: 10.9 V selects the critical branch
+  code: |
+    assert critical_voltage == 10.9, "Keep the supplied critical input for Run checks."
+    assert critical_level == "CRITICAL", "Run a separate battery chain with critical_voltage."
 hints:
-  - 'Check the smaller threshold first. The first true condition wins.'
-  - 'Each chain has three branches: if, elif, else.'
+- Check the smaller threshold first. The first true condition wins.
+- 'Each chain has three branches: if, elif, else.'
 solution: |
   voltage = 11.8
   match_time = 75
@@ -49,4 +53,12 @@ solution: |
       shift = 'SHIFT'
   else:
       shift = 'ENDGAME'
+
+  critical_voltage = 10.9
+  if critical_voltage < 11:
+      critical_level = 'CRITICAL'
+  elif critical_voltage < 12:
+      critical_level = 'LOW'
+  else:
+      critical_level = 'GOOD'
 locked: false

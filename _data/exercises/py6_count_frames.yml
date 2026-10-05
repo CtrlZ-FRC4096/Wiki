@@ -1,8 +1,12 @@
-title: "Step a generator until it ends"
+title: Step a generator until it ends
 prompt: |
-  A function with `yield` is a generator. The scheduler advances it one `yield` per frame with `next()`, and it ends with `StopIteration`.
+  Calling a generator function creates a generator object. next(gen) runs its code until the next yield. If the generator ends, next(gen) raises StopIteration.
 
-  Write `count_frames(gen)`. Step the generator until it ends, and return how many times `next()` succeeded.
+  Write count_frames(gen). Use while True to keep stepping. In a try block, call next(gen), then add 1 to the count. In except StopIteration, return the count. The failed completion attempt must not increase the count.
+
+  Three yields require three successful next() calls. A fourth attempt reaches the code after the last yield and reports completion. The checks also verify that this final code runs.
+
+  This browser exercise counts yields, not elapsed time. The robot scheduler advances a command generator during its cycles.
 starter: |
   def rumble_for_three_frames():
       frame = 0
@@ -17,33 +21,30 @@ starter: |
       # step with next(gen) until StopIteration, then return n
       return n
 tests:
-  - name: "the rumble runs three frames"
-    code: |
-      got = count_frames(rumble_for_three_frames())
-      assert got == 3, f"count_frames returned {got}. The generator yields 3 times, then returns" 
-  - name: "a generator with no yield runs zero frames"
-    code: |
-      def empty():
-          return
-          yield
-
-      got = count_frames(empty())
-      assert got == 0, f"count_frames(empty()) returned {got}. Expected 0" 
-  - name: "one yield is one frame"
-    code: |
-      def once():
-          yield
-
-      got = count_frames(once())
-      assert got == 1, f"count_frames(once()) returned {got}. Expected 1" 
-  - name: "it counts after the work is visible"
-    code: |
-      frames = count_frames(rumble_for_three_frames())
-      # 'rumble OFF' must have printed during that call, which proves the generator ended
-      assert frames == 3
+- name: the rumble runs three frames
+  code: "got = count_frames(rumble_for_three_frames())\nassert got == 3, f\"count_frames\
+    \ returned {got}. The generator yields 3 times, then returns\" \n"
+- name: a generator with no yield runs zero frames
+  code: "def empty():\n    return\n    yield\n\ngot = count_frames(empty())\nassert\
+    \ got == 0, f\"count_frames(empty()) returned {got}. Expected 0\" \n"
+- name: one yield is one frame
+  code: "def once():\n    yield\n\ngot = count_frames(once())\nassert got == 1, f\"\
+    count_frames(once()) returned {got}. Expected 1\" \n"
+- name: The code after the final yield runs
+  code: |
+    events = []
+    def observed():
+        events.append("ON")
+        for _ in range(3):
+            yield
+        events.append("OFF")
+    frames = count_frames(observed())
+    assert frames == 3, "Count successful next() calls."
+    assert events == ["ON", "OFF"], "Step once more after the last yield to reach completion."
 hints:
-  - 'Loop while True and call next(gen), adding 1 each time.'
-  - 'The generator ending raises StopIteration. Catch it with try / except, return the count.'
+- Call next(gen) before n += 1. Increment only when next succeeds.
+- The generator ending raises StopIteration. Catch it with try / except, return the
+  count.
 solution: |
   def rumble_for_three_frames():
       frame = 0
