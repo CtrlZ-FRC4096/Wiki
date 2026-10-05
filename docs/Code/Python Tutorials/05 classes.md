@@ -81,4 +81,8 @@ class Intake(Subsystem):
 
 {% include interactive/python-exercise.html id="py5_hopper_subsystem" %}
 
+### 5.4 Extension: keep two objects independent
+
+{% include interactive/python-exercise.html id="py5_independent_intakes" %}
+
 Next lesson: **6. RobotPy Patterns**.

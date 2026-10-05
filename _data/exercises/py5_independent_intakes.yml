@@ -1,0 +1,93 @@
+title: Keep two objects independent
+prompt: |
+  The classes below are supplied. Each fake motor stores a command value. It does not simulate motion.
+
+  1. Create two separate `FakeIntake` objects named `first` and `second`.
+  2. Call `first.set_speed(0.85)`. Leave `second` stopped.
+  3. Store the four motor speeds in `before_stop`, in the order shown in the comment. Use attribute values, not fixed numbers.
+  4. Call `first.stop()`.
+
+  Predict which attributes change. Then select Run checks.
+starter: |
+  class FakeMotor:
+      def __init__(self, name):
+          self.name = name
+          self.speed = 0.0
+
+      def set(self, speed):
+          self.speed = speed
+
+  class FakeIntake:
+      def __init__(self):
+          self.left = FakeMotor('left')
+          self.right = FakeMotor('right')
+
+      def set_speed(self, speed):
+          self.left.set(speed)
+          self.right.set(speed)
+
+      def stop(self):
+          self.left.set(0.0)
+          self.right.set(0.0)
+
+  # Make two separate intake objects.
+  first = None
+  second = None
+
+  # Start only first at 0.85.
+
+  # Store a snapshot before you stop first.
+  before_stop = ()  # first.left, first.right, second.left, second.right speeds
+
+  # Stop first. Leave second unchanged.
+tests:
+- name: Two distinct intakes
+  code: |
+    assert isinstance(first, FakeIntake) and isinstance(second, FakeIntake)
+    assert first is not second, "Create two objects with two constructor calls."
+- name: Four distinct motor objects
+  code: |
+    assert len({id(first.left), id(first.right), id(second.left), id(second.right)}) == 4, "Each intake must own its motor objects."
+- name: Only the first intake starts
+  code: |
+    assert before_stop == (0.85, 0.85, 0.0, 0.0), "Read all four speeds before stopping first."
+- name: Both intakes finish stopped
+  code: |
+    assert (first.left.speed, first.right.speed, second.left.speed, second.right.speed) == (0.0, 0.0, 0.0, 0.0)
+- name: A later command stays independent
+  code: |
+    first.set_speed(-0.3)
+    assert first.left.speed == -0.3 and first.right.speed == -0.3
+    assert second.left.speed == 0.0 and second.right.speed == 0.0
+    first.stop()
+hints:
+- Call FakeIntake() twice. Do not use second = first.
+- Read the speeds with first.left.speed and the corresponding attributes.
+solution: |
+  class FakeMotor:
+      def __init__(self, name):
+          self.name = name
+          self.speed = 0.0
+
+      def set(self, speed):
+          self.speed = speed
+
+  class FakeIntake:
+      def __init__(self):
+          self.left = FakeMotor('left')
+          self.right = FakeMotor('right')
+
+      def set_speed(self, speed):
+          self.left.set(speed)
+          self.right.set(speed)
+
+      def stop(self):
+          self.left.set(0.0)
+          self.right.set(0.0)
+
+  first = FakeIntake()
+  second = FakeIntake()
+  first.set_speed(0.85)
+  before_stop = (first.left.speed, first.right.speed, second.left.speed, second.right.speed)
+  first.stop()
+locked: false

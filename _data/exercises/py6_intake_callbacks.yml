@@ -1,0 +1,143 @@
+title: Start and stop an intake
+prompt: |
+  The fake intake and fake button are supplied. Complete only the two callback bodies.
+
+  1. In `start_intake()`, call `intake.set_speed(0.85)`.
+  2. In `stop_intake()`, call `intake.stop()`.
+  3. Predict the motor values after press, release, and a second press.
+  4. Select Run checks.
+
+  This model calls callbacks directly. It has no scheduler or `whenHeld` behavior. The real robot uses button bindings, robot flags, and `periodic()` to select motor commands.
+starter: |
+  class FakeMotor:
+      def __init__(self, name):
+          self.name = name
+          self.speed = 0.0
+
+      def set(self, speed):
+          self.speed = speed
+
+  class FakeIntake:
+      def __init__(self):
+          self.left = FakeMotor('left')
+          self.right = FakeMotor('right')
+
+      def set_speed(self, speed):
+          self.left.set(speed)
+          self.right.set(speed)
+
+      def stop(self):
+          self.left.set(0.0)
+          self.right.set(0.0)
+
+  class FakeButton:
+      # A teaching model with one callback for each event.
+      def __init__(self):
+          self.press_handler = None
+          self.release_handler = None
+
+      def whenPressed(self, fn):
+          self.press_handler = fn
+          return fn
+
+      def whenReleased(self, fn):
+          self.release_handler = fn
+          return fn
+
+      def press(self):
+          if self.press_handler is not None:
+              self.press_handler()
+
+      def release(self):
+          if self.release_handler is not None:
+              self.release_handler()
+
+  intake = FakeIntake()
+  button = FakeButton()
+
+  @button.whenPressed
+  def start_intake():
+      # Start both motors at 0.85.
+      pass
+
+  @button.whenReleased
+  def stop_intake():
+      # Stop both motors.
+      pass
+tests:
+- name: Press starts both motors
+  code: |
+    button.release()
+    button.press()
+    assert intake.left.speed == 0.85 and intake.right.speed == 0.85, "The press callback must start both motors."
+- name: Release stops both motors
+  code: |
+    button.press()
+    button.release()
+    assert intake.left.speed == 0.0 and intake.right.speed == 0.0, "The release callback must stop both motors."
+- name: A second press starts again
+  code: |
+    button.press()
+    button.release()
+    button.press()
+    assert intake.left.speed == 0.85 and intake.right.speed == 0.85
+    button.release()
+    assert intake.left.speed == 0.0 and intake.right.speed == 0.0
+hints:
+- Call the intake methods inside the decorated functions.
+- The press and release callbacks have different jobs.
+solution: |
+  class FakeMotor:
+      def __init__(self, name):
+          self.name = name
+          self.speed = 0.0
+
+      def set(self, speed):
+          self.speed = speed
+
+  class FakeIntake:
+      def __init__(self):
+          self.left = FakeMotor('left')
+          self.right = FakeMotor('right')
+
+      def set_speed(self, speed):
+          self.left.set(speed)
+          self.right.set(speed)
+
+      def stop(self):
+          self.left.set(0.0)
+          self.right.set(0.0)
+
+  class FakeButton:
+      # A teaching model with one callback for each event.
+      def __init__(self):
+          self.press_handler = None
+          self.release_handler = None
+
+      def whenPressed(self, fn):
+          self.press_handler = fn
+          return fn
+
+      def whenReleased(self, fn):
+          self.release_handler = fn
+          return fn
+
+      def press(self):
+          if self.press_handler is not None:
+              self.press_handler()
+
+      def release(self):
+          if self.release_handler is not None:
+              self.release_handler()
+
+  intake = FakeIntake()
+  button = FakeButton()
+
+  @button.whenPressed
+  def start_intake():
+      intake.set_speed(0.85)
+
+  @button.whenReleased
+  def stop_intake():
+      intake.stop()
+locked: false

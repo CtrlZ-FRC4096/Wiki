@@ -82,6 +82,10 @@ Do not use `time.sleep()` in robot code. Sleep freezes the whole robot loop. Use
 
 {% include interactive/python-exercise.html id="py6_hopper_frames" %}
 
+### 6.4 Extension: start and stop an intake
+
+{% include interactive/python-exercise.html id="py6_intake_callbacks" %}
+
 ## After the lessons
 
 Open `robot/oi.py` with a mentor. Trace one button binding from the press to the motor command. You now know every Python tool it uses.

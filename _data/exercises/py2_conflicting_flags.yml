@@ -1,0 +1,91 @@
+title: Test conflicting robot flags
+prompt: |
+  Optional extension. Use the same branch order as exercise 2.2: default, jam clearing, intake, then stopped.
+
+  For each supplied scenario, first fill in `prediction_a`, `prediction_b`, or `prediction_c`. Then replace the matching `state` assignment with an if/elif/else chain. Keep the supplied inputs.
+
+  Use these state labels: `stowed`, `reversing`, `intaking`, `stopped`. Scenario A requests both jam clearing and intake. Scenario B enables all flags. Scenario C enables no flag.
+
+  Select Run checks. Explain why the first true branch wins. These labels describe the teaching model, not a complete subsystem simulation.
+starter: |+
+  # Scenario A
+  at_default = False
+  clear_jam = True
+  is_intaking = True
+  prediction_a = ''  # Predict before you run checks.
+  state_a = ''  # Replace this with an if/elif/else chain.
+
+  # Scenario B
+  at_default = True
+  clear_jam = True
+  is_intaking = True
+  prediction_b = ''  # Predict before you run checks.
+  state_b = ''  # Replace this with an if/elif/else chain.
+
+  # Scenario C
+  at_default = False
+  clear_jam = False
+  is_intaking = False
+  prediction_c = ''  # Predict before you run checks.
+  state_c = ''  # Replace this with an if/elif/else chain.
+
+tests:
+- name: 'Scenario A: reversing'
+  code: |
+    assert prediction_a == "reversing", "Check the first true condition."
+    assert state_a == "reversing", "Use the required branch order."
+- name: 'Scenario B: stowed'
+  code: |
+    assert prediction_b == "stowed", "Check the first true condition."
+    assert state_b == "stowed", "Use the required branch order."
+- name: 'Scenario C: stopped'
+  code: |
+    assert prediction_c == "stopped", "Check the first true condition."
+    assert state_c == "stopped", "Use the required branch order."
+hints:
+- Use one chain for each scenario.
+- 'A: jam clearing wins. B: default wins. C: else runs.'
+solution: |+
+  # Scenario A
+  at_default = False
+  clear_jam = True
+  is_intaking = True
+  prediction_a = 'reversing'
+  if at_default:
+      state_a = 'stowed'
+  elif clear_jam:
+      state_a = 'reversing'
+  elif is_intaking:
+      state_a = 'intaking'
+  else:
+      state_a = 'stopped'
+
+  # Scenario B
+  at_default = True
+  clear_jam = True
+  is_intaking = True
+  prediction_b = 'stowed'
+  if at_default:
+      state_b = 'stowed'
+  elif clear_jam:
+      state_b = 'reversing'
+  elif is_intaking:
+      state_b = 'intaking'
+  else:
+      state_b = 'stopped'
+
+  # Scenario C
+  at_default = False
+  clear_jam = False
+  is_intaking = False
+  prediction_c = 'stopped'
+  if at_default:
+      state_c = 'stowed'
+  elif clear_jam:
+      state_c = 'reversing'
+  elif is_intaking:
+      state_c = 'intaking'
+  else:
+      state_c = 'stopped'
+
+locked: false

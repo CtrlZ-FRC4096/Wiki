@@ -1,0 +1,37 @@
+title: Convert a percent command
+prompt: |
+  The real intake method accepts a percent command. It divides the input by 100 to make a duty-cycle request.
+
+  Write `percent_to_duty_cycle(percent)`. Return the input divided by 100. Assume the input is between -100 and 100. Do not limit the result.
+
+  Predict the results for 85, 0, and -30 before you select Run checks. A duty-cycle request is not a measured motor speed.
+starter: |
+  def percent_to_duty_cycle(percent):
+      # Return the converted value.
+      pass
+tests:
+- name: 85 percent becomes 0.85
+  code: |
+    assert abs(percent_to_duty_cycle(85) - (0.85)) < 1e-9, "Divide the percent input by 100 and return the result."
+- name: 0 percent becomes 0.0
+  code: |
+    assert abs(percent_to_duty_cycle(0) - (0.0)) < 1e-9, "Divide the percent input by 100 and return the result."
+- name: -30 percent becomes -0.3
+  code: |
+    assert abs(percent_to_duty_cycle(-30) - (-0.3)) < 1e-9, "Divide the percent input by 100 and return the result."
+- name: 30 percent becomes 0.3
+  code: |
+    assert abs(percent_to_duty_cycle(30) - (0.3)) < 1e-9, "Divide the percent input by 100 and return the result."
+- name: 100 percent becomes 1.0
+  code: |
+    assert abs(percent_to_duty_cycle(100) - (1.0)) < 1e-9, "Divide the percent input by 100 and return the result."
+- name: -100 percent becomes -1.0
+  code: |
+    assert abs(percent_to_duty_cycle(-100) - (-1.0)) < 1e-9, "Divide the percent input by 100 and return the result."
+hints:
+- Use / for division.
+- Return percent / 100.
+solution: |
+  def percent_to_duty_cycle(percent):
+      return percent / 100
+locked: false

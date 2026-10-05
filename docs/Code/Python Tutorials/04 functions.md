@@ -79,4 +79,8 @@ def flip_X_coord(self, x):
 
 {% include interactive/python-exercise.html id="py4_flip_x" %}
 
+### 4.4 Extension: convert a percent command
+
+{% include interactive/python-exercise.html id="py4_percent_duty" %}
+
 Next lesson: **5. Classes and Objects**.

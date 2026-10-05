@@ -80,4 +80,8 @@ if self.auto_win is None:
 
 {% include interactive/python-exercise.html id="py2_auto_win" %}
 
+### 2.4 Extension: test conflicting robot flags
+
+{% include interactive/python-exercise.html id="py2_conflicting_flags" %}
+
 Next lesson: **3. Lists and Loops**.
