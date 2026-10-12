@@ -24,6 +24,19 @@ Use **64-bit Windows** for the class commands below. Driver Station requires Win
 | Windows runtime | [Microsoft Visual C++ Redistributable](https://learn.microsoft.com/en-us/cpp/windows/latest-supported-vc-redist), x64, if required by the libraries. |
 | AdvantageScope | [Installation guide](https://docs.advantagescope.org/overview/installation/). |
 | Phoenix Tuner X | [CTRE installation instructions](https://v6.docs.ctr-electronics.com/en/stable/docs/installation/installation.html). Install the desktop app at the tuning station. |
+| FRC Game Tools | [WPILib installation guide](https://docs.wpilib.org/en/stable/docs/zero-to-robot/step-2/frc-game-tools.html). Install the **2026** tools on Windows computers that will drive, tune, or image the physical robot. Includes Driver Station and the roboRIO Imaging Tool. |
+
+### FRC Game Tools installation
+
+Install these on the **Driver Station and physical robot tuning PCs**. Students using only local RobotPy simulation can complete that exercise without Game Tools.
+
+1. Open the [FRC Game Tools installation guide](https://docs.wpilib.org/en/stable/docs/zero-to-robot/step-2/frc-game-tools.html) and follow its link to NI's download page.
+2. Sign in or create an NI account, and select the **2026 FRC Game Tools** release for this robot season.
+3. Download the online installer, or choose **Install Offline** to prepare other computers without repeated downloads.
+4. Run the installer on Windows, accept the license agreements, and follow its prerequisite prompts. Reboot when requested, then resume installation if necessary.
+5. Open **FRC Driver Station** after installation and set the team number to **4096**. At the supervised station, confirm robot communications while the robot stays disabled.
+
+The package includes the Driver Station, roboRIO Imaging Tool and images, and their required LabVIEW runtime components. A separate full LabVIEW development installation is unnecessary for this Python lab. A mentor handles roboRIO imaging and any removal of older season tools on shared team PCs.
 
 Open a new **PowerShell** terminal and check:
 
@@ -184,6 +197,7 @@ Follow [WPILib's RobotPy deployment instructions](https://docs.wpilib.org/en/sta
 - [ ] Simulation starts without exceptions.
 - [ ] AdvantageScope connects locally and shows the selected pose.
 - [ ] Stock model selected for Monday.
+- [ ] 2026 FRC Game Tools installed on each Windows hardware station, with Driver Station set to team 4096.
 - [ ] Mentor has prepared Driver Station, Tuner, and the tuning station.
 - [ ] Students know the disable control and how to record a gain change.
 
