@@ -16,18 +16,18 @@
 
 {% include interactive/answer-lock.html %}
 {%- unless cz_interactive_css -%}
-  <link rel="stylesheet" href="{{ '/assets/css/interactive.css' | relative_url }}">
+  <link rel="stylesheet" href="{{ '/assets/css/interactive.css' | relative_url }}?v={{ site.time | date: '%s' }}">
   {%- assign cz_interactive_css = true -%}
 {%- endunless -%}
 {%- unless cz_oi_assets -%}
-  <script src="{{ '/assets/js/interactive/field-sim.js' | relative_url }}" defer></script>
-  <script src="{{ '/assets/js/interactive/oi-task.js' | relative_url }}" defer></script>
+  <script src="{{ '/assets/js/interactive/field-sim.js' | relative_url }}?v={{ site.time | date: '%s' }}" defer></script>
+  <script src="{{ '/assets/js/interactive/oi-task.js' | relative_url }}?v={{ site.time | date: '%s' }}" defer></script>
   {%- assign cz_oi_assets = true -%}
 {%- endunless -%}
 
 <div class="cz-exercise cz-oi"
      data-task-id="{{ include.id }}"
-     data-worker-url="{{ '/assets/js/interactive/python-session-worker.js' | relative_url }}">
+     data-worker-url="{{ '/assets/js/interactive/python-session-worker.js' | relative_url }}?v={{ site.time | date: '%s' }}">
 
   <div class="cz-exercise__header">
     <span class="cz-exercise__badge">Drive it</span>

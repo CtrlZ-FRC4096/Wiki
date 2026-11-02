@@ -10,7 +10,7 @@
     "phrase": {{ site.data.locked.phrase | jsonify }},
     "check": {"iv": {{ site.data.locked.check.iv | jsonify }}, "data": {{ site.data.locked.check.data | jsonify }}}
   }</script>
-  <script src="{{ '/assets/js/interactive/answer-lock.js' | relative_url }}" defer></script>
+  <script src="{{ '/assets/js/interactive/answer-lock.js' | relative_url }}?v={{ site.time | date: '%s' }}" defer></script>
   {%- endif -%}
   {%- assign cz_answer_lock = true -%}
 {%- endunless -%}

@@ -22,8 +22,8 @@
   function setup(root) {
     var CZField = window.CZField;
     var A = window.CZAuto;
-    var LOAD = A.LOAD, GOAL = A.GOAL, START = A.START, SHOT_RANGE = A.SHOT_RANGE, BARRIERS = A.BARRIERS, ACTIONS = A.ACTIONS;
-    var TARGET_SCORE = A.TARGET_SCORE, TIME_LIMIT = A.TIME_LIMIT;
+    var PICKUPS = A.PICKUPS, GOAL = A.GOAL, START = A.START, SHOT_RANGE = A.SHOT_RANGE, BARRIERS = A.BARRIERS, ACTIONS = A.ACTIONS;
+    var TARGET_SCORE = A.TARGET_SCORE, STRETCH_SCORE = A.STRETCH_SCORE, TIME_LIMIT = A.TIME_LIMIT;
     var INTAKE_SECONDS = A.INTAKE_SECONDS, READY_SPEED = A.READY_SPEED;
     var actionById = A.actionById, inZone = A.inZone, robotHitsBox = A.robotHitsBox;
     var parallelOf = A.parallelOf, buildTimeline = A.buildTimeline, inShotRange = A.inShotRange, rangeToGoal = A.rangeToGoal;
@@ -311,21 +311,21 @@
       matchGrid.classList.remove("is-stale");
       if (!matches) return;
       matches.runs.forEach(function (run) {
-        var b = el("button", "cz-auto__match " + (run.ok ? "is-pass" : "is-fail") +
-          (run.seed === matchSeed ? " is-shown" : ""), String(run.seed));
+        var b = el("button", "cz-auto__match " + (run.ok ? "is-pass" : "is-fail") + (run.stretch ? " is-stretch" : "") +
+          (run.seed === matchSeed ? " is-shown" : ""), (run.stretch ? "★" : "") + run.seed);
         b.type = "button";
-        b.title = "Match " + run.seed + ": " + (run.ok ? "works" : whyFailed(run));
+        b.title = "Match " + run.seed + ": " + (run.stretch ? "works, and scores " + run.score : run.ok ? "works" : whyFailed(run));
         b.setAttribute("aria-label", b.title);
         b.addEventListener("click", function () { showMatch(run.seed, true); });
         matchGrid.appendChild(b);
       });
       var enough = matches.passed >= MATCHES_NEEDED;
       matchSummary.textContent = "works in " + matches.passed + " of " + matches.matches +
-        " (needs " + MATCHES_NEEDED + ")";
+        " (needs " + MATCHES_NEEDED + ")" + (matches.stretched ? " · ★ " + STRETCH_SCORE + " pieces in " + matches.stretched : "");
       matchSummary.className = "cz-auto__matches-summary " + (enough ? "is-pass" : "is-fail");
 
       var r = result;
-      var outcome = r.ok ? "It works."
+      var outcome = r.stretch ? "It works, and scores " + r.score + "." : r.ok ? "It works."
         : timeline.duration > TIME_LIMIT ? "The routine is too long."
         : r.collided ? "It hits barrier " + r.collisionWith + " at " + r.collisionAt.toFixed(1) + " s."
         : !r.picked ? "It collects no fuel."
@@ -460,9 +460,9 @@
           why: countLine(m.collided, "It touches barrier " + hitWhich) + (hitIn ? " Watch match " + hitIn + "." : "")
         },
         {
-          name: "The robot collects fuel at the LOAD zone",
+          name: "The robot collects piece 2",
           ok: m.noPickup <= allowed,
-          why: countLine(m.noPickup, "It collects no fuel") + " Select Intake on the path that ends in the LOAD zone, or add an intake step there. " +
+          why: countLine(m.noPickup, "It collects no fuel") + " Select Intake on the path that ends at PIECE 2, or add an intake step there. " +
             "The robot must be inside the zone for " + INTAKE_SECONDS + " s."
         },
         {
@@ -505,6 +505,18 @@
         allOk ? "The routine works in " + m.passed + " of " + MATCHES + " matches, in " + timeline.duration.toFixed(1) +
                 " s. Now make it faster, and watch what starts to go wrong."
               : "The routine is not reliable yet. Run the failing matches and find the cause."));
+
+      // The stretch goal: a third piece in the same period.
+      var stretchOk = m.stretched >= MATCHES_NEEDED;
+      var stretch = el("p", "cz-auto__stretch" + (stretchOk ? " is-pass" : ""));
+      stretch.appendChild(el("strong", "", stretchOk ? "★ Stretch goal reached: " : "Stretch goal: "));
+      stretch.appendChild(document.createTextNode(stretchOk
+        ? STRETCH_SCORE + " pieces in " + m.stretched + " of " + MATCHES + " matches, in " + timeline.duration.toFixed(1) + " s."
+        : "score " + STRETCH_SCORE + " pieces in at least " + MATCHES_NEEDED + " of " + MATCHES + " matches. " +
+          (m.stretched ? "This routine does it in " + m.stretched + ". " : "") +
+          "A third trip fits in " + TIME_LIMIT + " s only if the robot never stops when it does not have to, " +
+          "and the limits are as high as they can be while it still works."));
+      output.appendChild(stretch);
       root.classList.toggle("is-solved", allOk);
     });
 
@@ -602,8 +614,17 @@
       }
       hud.appendChild(chip("fuel", now && now.hasFuel ? "loaded" : "empty", now && now.hasFuel));
       hud.appendChild(chip("shooter", now ? Math.round(now.shooter * 100) + "%" : "0%", now && now.shooter >= READY_SPEED));
-      hud.appendChild(chip("score", (now ? now.score : 0) + " / " + TARGET_SCORE, now && now.score >= TARGET_SCORE));
-      if (now && now.slipping) hud.appendChild(chip("wheels", "slipping", false)).classList.add("is-warn");
+      var score = now ? now.score : 0;
+      hud.appendChild(chip("score", score >= STRETCH_SCORE ? score + " ★ stretch" : score + " / " + TARGET_SCORE, score >= TARGET_SCORE));
+      // What the carpet, the camera and odometry are doing right now.
+      var used = now ? Math.round((now.demand / result.grip) * 100) : 0;
+      var grip = hud.appendChild(chip("grip", now && now.slipping ? "SLIPPING" : used + "% used", false));
+      if (now && now.slipping) grip.classList.add("is-warn");
+      hud.appendChild(chip("camera",
+        !now || now.vision === "none" ? "no tag in view" : now.vision === "fix" ? "reading a tag" : "too blurred",
+        Boolean(now && now.vision === "fix")));
+      var off = hud.appendChild(chip("pose error", (now ? Math.round(now.error * 100) : 0) + " cm", false));
+      if (now && now.error > 0.15) off.classList.add("is-warn");
       if (result.collided) hud.appendChild(chip("crash", "barrier " + result.collisionWith, false)).classList.add("is-warn");
     }
 
@@ -619,11 +640,20 @@
       var now = stateAtTime(result, playhead);
       var pose = now ? { x: now.x, y: now.y, heading: now.heading, entry: planned.entry } : planned;
 
-      view.drawZone(LOAD, {
-        label: "LOAD",
-        color: inZone(pose, LOAD) ? "rgba(240,147,43,0.34)" : "rgba(240,147,43,0.12)",
-        outline: "rgba(240,147,43,0.9)",
-        dashed: !inZone(pose, LOAD)
+      // Where the pieces wait: one place per trip, taken in order. The next
+      // one to collect is brightest; a collected one is left empty.
+      var taken = now ? now.taken : 0;
+      PICKUPS.forEach(function (spot, i) {
+        var gone = i < taken, next = i === taken;
+        var here = next && inZone(pose, spot);
+        var stretch = i + 2 > TARGET_SCORE;
+        view.drawZone(spot, {
+          label: spot.label + (stretch ? " ★" : "") + (gone ? " ✓" : ""),
+          color: here ? "rgba(240,147,43,0.34)" : gone ? "rgba(240,147,43,0.04)" : "rgba(240,147,43,0.12)",
+          outline: gone ? "rgba(240,147,43,0.35)" : next ? "rgba(240,147,43,0.95)" : "rgba(240,147,43,0.6)",
+          dashed: !here
+        });
+        if (!gone) view.drawMarker(spot, { radius: 0.16, color: "#ffd28a", alpha: next ? 1 : 0.6 });
       });
       // The goal and the ring you have to be inside to score. The ring
       // brightens when the robot is within range, so "close enough" is a
@@ -748,12 +778,14 @@
         ctx.restore();
       }
       if (planned.entry && planned.entry.kind === "path") {
-        view.drawMarker(planned, { radius: 0.11, color: "#f0932b", outline: "rgba(0,0,0,0.6)" });
+        drawOutline(ctx, planned, "rgba(240,147,43,0.95)", [], 2);
       }
 
       view.drawRobot(pose, { color: now && now.hasFuel ? "#f0932b" : "#57a8ff" });
+      // A red ring round the robot while its wheels slip.
+      if (now && now.slipping) drawOutline(ctx, pose, "#f2777a", [], 3, 0.12);
       drawRobotState(ctx, pose, now);
-      if (now) drawEstimate(ctx, now);
+      if (now) drawOutline(ctx, { x: now.ex, y: now.ey, heading: now.heading }, "rgba(127,215,230,0.95)", [4, 3], 1.8);
       drawHud(now);
       drawChart(now);
 
@@ -787,8 +819,8 @@
           var d = Math.hypot(tag.x - now.x, tag.y - now.y);
           if (d < best) { best = d; nearest = tag; }
         });
-        ctx.strokeStyle = now.vision === "fix" ? "rgba(127,215,230,0.75)" : "rgba(127,215,230,0.25)";
-        ctx.lineWidth = 1;
+        ctx.strokeStyle = now.vision === "fix" ? "rgba(127,215,230,0.9)" : "rgba(127,215,230,0.35)";
+        ctx.lineWidth = now.vision === "fix" ? 1.5 : 1;
         ctx.setLineDash(now.vision === "fix" ? [] : [2, 4]);
         ctx.beginPath();
         ctx.moveTo(view.px(nearest.x), view.py(nearest.y));
@@ -827,18 +859,19 @@
       ctx.restore();
     }
 
-    /* Where the robot thinks it is: an outline, apart from the robot when
-       odometry has drifted. */
-    function drawEstimate(ctx, now) {
-      if (now.error < 0.03) return;
+    /* A robot-sized outline: where the plan wants the robot (orange), or
+       where the robot thinks it is (dashed blue). Grow it a little to ring
+       the robot instead. */
+    function drawOutline(ctx, pose, colour, dash, width, grow) {
       var s = view.scale;
+      var pad = (grow || 0) * s;
       ctx.save();
-      ctx.translate(view.px(now.ex), view.py(now.ey));
-      ctx.rotate(-now.heading);
-      ctx.strokeStyle = "rgba(127,215,230,0.95)";
-      ctx.lineWidth = 1.5;
-      ctx.setLineDash([4, 3]);
-      var w = CZField.ROBOT.length * s, h = CZField.ROBOT.width * s;
+      ctx.translate(view.px(pose.x), view.py(pose.y));
+      ctx.rotate(-pose.heading);
+      ctx.strokeStyle = colour;
+      ctx.lineWidth = width;
+      ctx.setLineDash(dash);
+      var w = CZField.ROBOT.length * s + pad * 2, h = CZField.ROBOT.width * s + pad * 2;
       ctx.strokeRect(-w / 2, -h / 2, w, h);
       ctx.restore();
     }

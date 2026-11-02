@@ -6,12 +6,12 @@
 {%- endcomment -%}
 
 {%- unless cz_interactive_css -%}
-  <link rel="stylesheet" href="{{ '/assets/css/interactive.css' | relative_url }}">
+  <link rel="stylesheet" href="{{ '/assets/css/interactive.css' | relative_url }}?v={{ site.time | date: '%s' }}">
   {%- assign cz_interactive_css = true -%}
 {%- endunless -%}
 {%- unless cz_dial_assets -%}
-  <script src="{{ '/assets/js/interactive/swerve-core.js' | relative_url }}" defer></script>
-  <script src="{{ '/assets/js/interactive/swerve-dial.js' | relative_url }}" defer></script>
+  <script src="{{ '/assets/js/interactive/swerve-core.js' | relative_url }}?v={{ site.time | date: '%s' }}" defer></script>
+  <script src="{{ '/assets/js/interactive/swerve-dial.js' | relative_url }}?v={{ site.time | date: '%s' }}" defer></script>
   {%- assign cz_dial_assets = true -%}
 {%- endunless -%}
 

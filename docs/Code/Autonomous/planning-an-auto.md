@@ -84,13 +84,22 @@ The robot starts with one piece of fuel. It can hold one piece at a time.
 Complete this sequence:
 
 1. Shoot the first piece from a position inside the dashed ring.
-2. Move to the LOAD zone in your alliance area.
-3. Collect a second piece with the intake.
+2. Move to **PIECE 2**, in your alliance area.
+3. Collect the piece with the intake.
 4. Shoot the second piece.
-5. Do steps 2 to 4 again for a third piece.
 
-Score three pieces in less than 20 seconds. Do not touch barrier A or barrier
-B. The routine must work in at least 18 of 20 matches.
+Score two pieces in less than 20 seconds. Do not touch barrier A or barrier B.
+The routine must work in at least 18 of 20 matches.
+
+**Stretch goal:** then collect **PIECE 3** and shoot it too, still in less than
+20 seconds and still in 18 of 20 matches. PIECE 3 is in a different place: low
+down between the two barriers, so the route to it is new, with a tight turn
+round barrier B. This is difficult. It needs a routine that never stops when
+it does not have to, and limits as high as they can be while the robot still
+makes that turn.
+
+Each piece waits in its own place, and the robot collects them in order. A
+collected piece is gone, so the robot cannot collect piece 2 twice.
 
 Four conditions make this an exercise and not a straight line:
 
@@ -100,9 +109,9 @@ Four conditions make this an exercise and not a straight line:
   than a driver uses in teleop, because an autonomous shot must be repeatable.
   Shoot from the edge of the ring. If you drive to the goal, the routine is too
   long for the period.
-- **The period is short.** A routine that stops to collect a piece, then
-  drives, then stops to start the shooter, then drives, does not fit. Move
-  those actions into the paths. This saves approximately three seconds.
+- **The period is short.** Two pieces fit easily. But a routine that stops to
+  collect a piece, then drives, then stops to start the shooter, then drives,
+  has no time left for a third. Move those actions into the paths.
 - **The robot is not the plan.** A faster plan is shorter on paper. On carpet,
   a plan that asks for too much makes the wheels slip, the robot lose track
   of where it is, and the shots miss. The next section explains why.
@@ -164,15 +173,16 @@ at least 18 of the 20.
 
 This gives you a balance to find:
 
-| Limits | What happens |
-|:-------|:-------------|
-| Too low | It works every time, but it does not finish in 20 seconds |
-| Balanced | It works in almost every match, with time to spare |
-| Too high | The plan is shorter, but the wheels slip and the robot falls behind. It touches barriers and misses shots in some matches, and the number of those matches increases quickly |
+| Limits | Two pieces | Three pieces (stretch) |
+|:-------|:-----------|:-----------------------|
+| Too low | Works in every match, with time to spare | Does not finish in 20 seconds |
+| Balanced | Works in almost every match | Works in almost every match, just inside 20 seconds |
+| Too high | The wheels slip and the robot falls behind. It touches barriers and misses shots in some matches, and the number of those matches increases quickly | The same |
 
-Start with low limits and a routine that works. Then increase the limits a
-little at a time, and press **Check routine** after each change. Stop when
-matches start to fail. Then decrease the limits a little.
+Start with low limits and a routine that scores two pieces. Then increase the
+limits a little at a time, and press **Check routine** after each change. Stop
+when matches start to fail. Then decrease the limits a little. For the stretch
+goal, you need to find the exact top of the balance.
 
 ### The display
 
@@ -183,10 +193,14 @@ matches start to fail. Then decrease the limits a little.
 - The **robot** is where the robot really is. It shows its actions. A bar
   across the back shows the intake. A ring shows the shooter speed. A dot in
   the center shows a piece of fuel.
-- The **orange dot** is where the plan says the robot should be now. A dashed
-  line joins it to the robot when the robot falls behind.
-- The **dashed outline** is where the robot thinks it is. It moves away from
-  the robot when odometry drifts.
+- The **orange outline** is where the plan says the robot should be now. A
+  dashed line joins it to the robot when the robot falls behind.
+- The **dashed blue outline** is where the robot thinks it is. It moves away
+  from the robot when odometry drifts.
+- A **red ring** round the robot means its wheels are slipping now.
+- The **chips** under the field show the time, the fuel, the shooter, the
+  score, how much of the grip the robot uses, what the camera sees, and how far
+  the robot's estimate is from where it really is.
 - The **white line** is where the robot really went. It is **red** where the
   wheels slipped.
 - The **small squares** are AprilTags. A line from a tag to the robot shows
@@ -201,14 +215,16 @@ matches start to fail. Then decrease the limits a little.
   match.
 - The **20 matches** are under the chart. Green worked, red failed. Click one
   to watch it. The text below says what happened in it.
+- The **PIECE** zones show where each piece waits. The next one to collect is
+  brightest. A collected one is empty, with a tick.
 - The **range ring** becomes brighter when the robot is close enough to shoot.
 - A **collision** leaves a red robot at the position of contact.
 
 ### Parallel actions
 
 A path or a movement to a pose can operate with more than one action. Click the
-buttons on a step to select them. Select `Intake` for the path to the LOAD
-zone. Select `Spin up` for the path to the goal. These become a
+buttons on a step to select them. Select `Intake` for the path to a piece.
+Select `Spin up` for the path to the goal. These become a
 `ParallelCommandGroup` in the generated code.
 
 {% include interactive/auto-planner.html title="Sketch an autonomous routine" %}

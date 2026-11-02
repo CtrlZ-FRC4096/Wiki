@@ -19,30 +19,40 @@ const LOW = 3.2, HIGH = 4.6;
 const STANDOFF = CZAuto.SHOT_RANGE * 0.98;
 const FIRE = { x: CZAuto.GOAL.x - STANDOFF * 0.94, y: CZAuto.GOAL.y + STANDOFF * 0.34 };
 
-// Above barrier B already? Then the climb ends at the firing point.
-const CLIMB = FIRE.x > 10.6 ? [{ x: 9.7, y: HIGH }] : [];
-const LOAD = { x: CZAuto.LOAD.x, y: CZAuto.LOAD.y };
-const CYCLE = [
-  { kind: "path", waypoints: [...CLIMB, { x: 8.0, y: LOW }, { x: LOAD.x + 1.5, y: LOW }, LOAD],
-    endHeading: 0, parallel: ["intake"] },
-  { kind: "action", action: "intake", timeout: 0.7 },
-  { kind: "path", waypoints: [{ x: LOAD.x + 1.5, y: LOW }, { x: 8.0, y: LOW }, ...CLIMB, FIRE],
+/* Each piece waits in its own place. Piece 2 is in the alliance area, so the
+ * trip is the slalom again. Piece 3 is low down between the barriers, round
+ * the top of barrier B. */
+const [PIECE2, PIECE3] = CZAuto.PICKUPS.map((p) => ({ x: p.x, y: p.y }));
+const TO_PIECE2 = [{ x: 9.7, y: HIGH }, { x: 8.0, y: LOW }, { x: PIECE2.x + 1.5, y: LOW }, PIECE2];
+const FROM_PIECE2 = [{ x: PIECE2.x + 1.5, y: LOW }, { x: 8.0, y: LOW }, { x: 9.7, y: HIGH }, FIRE];
+const TO_PIECE3 = [{ x: 11.0, y: 4.9 }, { x: 9.3, y: 4.3 }, PIECE3];
+const FROM_PIECE3 = [{ x: 9.3, y: 4.3 }, { x: 11.0, y: 4.9 }, FIRE];
+
+/* Fetch a piece and shoot it. With stops, wait at the piece to collect it;
+ * without, run the intake on the way in and on the way out instead. */
+const fetch = (to, from, stops = true) => [
+  { kind: "path", waypoints: to, endHeading: 0, parallel: ["intake"] },
+  ...(stops ? [{ kind: "action", action: "intake", timeout: 0.7 }] : []),
+  { kind: "path", waypoints: from, endHeading: 0, parallel: stops ? ["spin_up_shooter"] : ["intake", "spin_up_shooter"] },
+  { kind: "action", action: "shoot", timeout: 0.6 }
+];
+
+const FIRST = [
+  { kind: "path", waypoints: [{ x: 4.6, y: LOW }, { x: 8.0, y: LOW }, { x: 9.7, y: HIGH }, FIRE],
     endHeading: 0, parallel: ["spin_up_shooter"] },
   { kind: "action", action: "shoot", timeout: 0.6 }
 ];
 
-/* Shoot the preloaded piece, then fetch two more. */
-const SOLUTION = {
+/* Shoot the preloaded piece, then fetch piece 2. */
+const SOLUTION = { name: "wiki_auto", startPose: { ...CZAuto.START }, steps: [...FIRST, ...fetch(TO_PIECE2, FROM_PIECE2)] };
+
+/* The stretch goal: pieces 2 and 3, never stopping. */
+const STRETCH = {
   name: "wiki_auto",
   startPose: { ...CZAuto.START },
-  steps: [
-    { kind: "path", waypoints: [{ x: 4.6, y: LOW }, { x: 8.0, y: LOW }, ...CLIMB, FIRE],
-      endHeading: 0, parallel: ["spin_up_shooter"] },
-    { kind: "action", action: "shoot", timeout: 0.6 },
-    ...CYCLE,
-    ...CYCLE
-  ]
+  steps: [...FIRST, ...fetch(TO_PIECE2, FROM_PIECE2, false), ...fetch(TO_PIECE3, FROM_PIECE3, false)]
 };
+const AT_THE_EDGE = { maxV: 5.0, maxA: 5.0 };
 
 /* Limits that work: fast enough to fit, gentle enough not to slip much. */
 const MODERATE = { maxV: 4.0, maxA: 5.0 };
@@ -111,8 +121,8 @@ test("the same route pushed to the limits slips and stops working", async ({ pag
   await expectNoErrors(errors);
 });
 
-test("gentle limits work but run out of time", async ({ page }) => {
-  await seed(page, SOLUTION, { maxV: 3.0, maxA: 3.0 });
+test("very gentle limits work but run out of time", async ({ page }) => {
+  await seed(page, SOLUTION, { maxV: 3.0, maxA: 2.0 });
   await page.goto(PATH, { waitUntil: "networkidle" });
   const auto = page.locator(".cz-auto");
   await auto.locator('[data-action="check"]').click();
@@ -120,6 +130,27 @@ test("gentle limits work but run out of time", async ({ page }) => {
   expect(await failed.first().textContent()).toContain(`${CZAuto.TIME_LIMIT} seconds`);
   // Nothing but the clock is wrong.
   expect(await auto.locator(".cz-exercise__check.is-pass").count()).toBe(3);
+});
+
+test("the stretch goal needs no stops and limits at the edge", async ({ page }) => {
+  const errors = watchForErrors(page);
+  await seed(page, STRETCH, AT_THE_EDGE);
+  await page.goto(PATH, { waitUntil: "networkidle" });
+  const auto = page.locator(".cz-auto");
+  await auto.locator('[data-action="check"]').click();
+  await expect(auto.locator(".cz-exercise__verdict.is-pass")).toBeVisible();
+  await expect(auto.locator(".cz-auto__stretch.is-pass")).toBeVisible();
+  expect(await auto.locator(".cz-auto__match.is-stretch").count()).toBeGreaterThanOrEqual(CZAuto.MATCHES_NEEDED);
+  await expectNoErrors(errors);
+});
+
+test("the two-piece routine does not reach the stretch goal", async ({ page }) => {
+  await seed(page, SOLUTION);
+  await page.goto(PATH, { waitUntil: "networkidle" });
+  const auto = page.locator(".cz-auto");
+  await auto.locator('[data-action="check"]').click();
+  await expect(auto.locator(".cz-auto__stretch")).toBeVisible();
+  await expect(auto.locator(".cz-auto__stretch.is-pass")).toHaveCount(0);
 });
 
 test("a straight line at the goal hits a barrier", async ({ page }) => {

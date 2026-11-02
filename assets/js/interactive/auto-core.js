@@ -14,12 +14,17 @@
 
   /* ---------------- the task ---------------- */
 
-  // Loading zone sits in our own alliance area, where the game pieces are.
-  var LOAD = { x: 4.4, y: 4.8, w: 1.6, h: 1.6 };
+  // Each piece the robot fetches waits in its own place, so every trip is a
+  // different route. Collected in order: piece 2 first, then piece 3.
+  var PICKUPS = [
+    { x: 4.4, y: 4.8, w: 1.6, h: 1.6, label: "PIECE 2" },
+    { x: 8.8, y: 1.0, w: 1.6, h: 1.6, label: "PIECE 3" }
+  ];
+  function nextPickup(taken) { return taken < PICKUPS.length ? PICKUPS[taken] : null; }
   // The goal is across the field, and you shoot at it from range rather than
   // driving into it — a tighter range than teleop, because an auto has to be
   // repeatable rather than merely possible.
-  var GOAL = { x: 12.8, y: 4.0 };
+  var GOAL = { x: 16.4, y: 4.0 };
   var SHOT_RANGE = 3.0;
   // Two staggered walls: the only way through is under the first and over the
   // second, which is what makes the routine a route rather than a straight line.
@@ -32,7 +37,9 @@
   // match. The user does not choose it.
   var START = { x: 1.0, y: 2.6, heading: 0 };
 
-  var TARGET_SCORE = 3;
+  var TARGET_SCORE = 2;
+  // The stretch goal: a third piece, which only fits when nothing is wasted.
+  var STRETCH_SCORE = 3;
   var TIME_LIMIT = 20;
   var INTAKE_SECONDS = 0.5;
   var SPINUP_SECONDS = 1.0;
@@ -453,7 +460,7 @@
       // Autonomous starts with a piece already in the robot, same as a match.
       hasFuel: true, shooter: 0, score: 0,
       collided: false, collisionAt: null, collisionWith: null, collisionPose: null,
-      intakeTimer: 0, events: [], misses: [],
+      intakeTimer: 0, events: [], misses: [], taken: 0,
       grip: grip, slipSeconds: 0, slips: 0, slide: 0, worstError: 0, worstLag: 0, fixes: 0
     };
     var firedIn = {};
@@ -581,12 +588,14 @@
       }
 
       // Intake only works where the game pieces are.
-      if (acting.indexOf("intake") !== -1 && !state.hasFuel && inZone(pose, LOAD)) {
+      var spot = nextPickup(state.taken);
+      if (acting.indexOf("intake") !== -1 && !state.hasFuel && spot && inZone(pose, spot)) {
         state.intakeTimer += dt;
         if (state.intakeTimer >= INTAKE_SECONDS) {
           state.hasFuel = true;
           state.intakeTimer = 0;
-          state.events.push({ t: t, kind: "pickup" });
+          state.taken++;
+          state.events.push({ t: t, kind: "pickup", spot: state.taken - 1 });
         }
       } else if (acting.indexOf("intake") === -1) {
         state.intakeTimer = 0;
@@ -639,7 +648,8 @@
           shooter: state.shooter,
           score: state.score,
           collided: state.collided,
-          atLoad: inZone(pose, LOAD),
+          taken: state.taken,
+          atPickup: Boolean(spot && inZone(pose, spot)),
           inRange: inShotRange(pose),
           acting: acting
         });
@@ -649,6 +659,7 @@
     state.trace = trace;
     state.picked = state.events.filter(function (e) { return e.kind === "pickup"; }).length;
     state.ok = !state.collided && state.score >= TARGET_SCORE && timeline.duration <= TIME_LIMIT;
+    state.stretch = state.ok && state.score >= STRETCH_SCORE;
     return state;
   }
 
@@ -662,12 +673,13 @@
   function reliability(timeline, robot, matches) {
     matches = matches || MATCHES;
     var out = {
-      matches: matches, passed: 0, collided: 0, noPickup: 0, missedShots: 0, slipped: 0,
+      matches: matches, passed: 0, stretched: 0, collided: 0, noPickup: 0, missedShots: 0, slipped: 0,
       hits: {}, missKinds: {}, slide: 0, worstLag: 0, worstError: 0, runs: []
     };
     for (var seed = 1; seed <= matches; seed++) {
       var r = simulateRoutine(timeline, robot, { seed: seed, trace: false });
       if (r.ok) out.passed++;
+      if (r.stretch) out.stretched++;
       if (r.collided) { out.collided++; out.hits[r.collisionWith] = (out.hits[r.collisionWith] || 0) + 1; }
       if (!r.picked) out.noPickup++;
       if (r.score < TARGET_SCORE) out.missedShots++;
@@ -677,11 +689,12 @@
       out.worstLag = Math.max(out.worstLag, r.worstLag);
       out.worstError = Math.max(out.worstError, r.worstError);
       out.runs.push({
-        seed: seed, ok: r.ok, score: r.score, picked: r.picked, collided: r.collided ? r.collisionWith : null,
+        seed: seed, ok: r.ok, stretch: r.stretch, score: r.score, picked: r.picked, collided: r.collided ? r.collisionWith : null,
         slipSeconds: r.slipSeconds, slide: r.slide, worstError: r.worstError, worstLag: r.worstLag, misses: r.misses
       });
     }
     out.reliable = out.passed >= Math.ceil((MATCHES_NEEDED / MATCHES) * matches);
+    out.stretchReliable = out.stretched >= Math.ceil((MATCHES_NEEDED / MATCHES) * matches);
     return out;
   }
 
@@ -759,7 +772,8 @@
 
 
   return {
-    LOAD: LOAD,
+    PICKUPS: PICKUPS,
+    nextPickup: nextPickup,
     START: START,
     GOAL: GOAL,
     SHOT_RANGE: SHOT_RANGE,
@@ -768,6 +782,7 @@
     BARRIERS: BARRIERS,
     ACTIONS: ACTIONS,
     TARGET_SCORE: TARGET_SCORE,
+    STRETCH_SCORE: STRETCH_SCORE,
     TIME_LIMIT: TIME_LIMIT,
     INTAKE_SECONDS: INTAKE_SECONDS,
     READY_SPEED: READY_SPEED,
