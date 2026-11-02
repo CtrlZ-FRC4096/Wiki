@@ -53,7 +53,8 @@ Drive a robot around:
 - [Operator Interface](../../Controls/operator-interface) — write button
   bindings, then complete a scoring cycle with your keyboard
 - [How to Plan an Auto](../../Autonomous/planning-an-auto) — draw paths and
-  actions on a 2D field, and measure the duration
+  actions on a 2D field, measure the duration, and find the max speed and
+  acceleration that work in 18 of 20 matches
 
 ## Writing a tutorial
 

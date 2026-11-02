@@ -1,6 +1,7 @@
 {%- comment -%}
   Autonomous routine planner: draw paths on a 2D field, attach actions,
-  play the routine back, and export Python in autoroutines.py shape.
+  run the routine as twenty matches with wheel slip and camera noise, and
+  export Python in autoroutines.py shape.
 
   Usage:  {% include interactive/auto-planner.html %}
 {%- endcomment -%}
@@ -25,10 +26,10 @@
 
   <p class="cz-auto__task">
     <strong>The task:</strong> the robot starts with one piece of fuel. Shoot it
-    from inside the dashed ring. Then move to the LOAD zone in your alliance
-    area, collect a second piece, and shoot again. Score
-    {{ include.target | default: 2 }} pieces in less than 15 seconds. Do not
-    touch barrier A or barrier B.
+    from inside the dashed ring. Then fetch two more from the LOAD zone in your
+    alliance area, one at a time, and shoot each. Score
+    {{ include.target | default: 3 }} pieces in less than 20 seconds, in at
+    least 18 of 20 matches. Do not touch barrier A or barrier B.
   </p>
 
   <div class="cz-auto__stage">
@@ -38,6 +39,25 @@
   </div>
 
   <div class="cz-auto__strip" aria-hidden="true"></div>
+
+  <canvas class="cz-auto__chart" aria-label="Speed, grip used and pose error during the match. Drag to move through it."></canvas>
+
+  <ul class="cz-auto__legend">
+    <li><span class="cz-auto__key is-plan"></span>planned path and where the plan wants the robot</li>
+    <li><span class="cz-auto__key is-real"></span>where the robot really went</li>
+    <li><span class="cz-auto__key is-slip"></span>wheels slipping</li>
+    <li><span class="cz-auto__key is-estimate"></span>where the robot thinks it is</li>
+    <li><span class="cz-auto__key is-tag"></span>AprilTag, and the camera reading it</li>
+  </ul>
+
+  <div class="cz-auto__matches">
+    <div class="cz-auto__matches-head">
+      <span class="cz-exercise__label">{{ include.matches | default: 20 }} matches</span>
+      <span class="cz-auto__matches-summary"></span>
+    </div>
+    <div class="cz-auto__match-grid"></div>
+    <p class="cz-auto__match-note"></p>
+  </div>
 
   <div class="cz-exercise__toolbar">
     <button type="button" class="btn btn-primary cz-exercise__btn" data-action="check">Check routine</button>
@@ -58,13 +78,17 @@
   <div class="cz-auto__limits">
     <label>max speed
       <input type="range" data-limit="maxV" min="1" max="6.5" step="0.1">
-      <span data-readout="maxV">4.5 m/s</span>
+      <span data-readout="maxV">3.0 m/s</span>
     </label>
     <label>max acceleration
-      <input type="range" data-limit="maxA" min="1" max="6" step="0.1">
-      <span data-readout="maxA">4.5 m/s²</span>
+      <input type="range" data-limit="maxA" min="1" max="10" step="0.1">
+      <span data-readout="maxA">3.0 m/s²</span>
     </label>
   </div>
+  <p class="cz-auto__limits-note">
+    The drive motors reach 4.75 m/s at most. The wheels grip the carpet up to
+    about 8.8 m/s², shared between speeding up, slowing down and turning.
+  </p>
 
   <div class="cz-auto__steps"></div>
 

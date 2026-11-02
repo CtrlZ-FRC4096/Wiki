@@ -54,7 +54,7 @@ npm run report
 | `exercises.spec.mjs` | Each Python exercise rejects wrong code and accepts its own published solution. A loop that never ends is stopped. Work is kept across a reload |
 | `tuning.spec.mjs` | Each simulator rejects all-zero gains and accepts its published gains. Each Isolate mode changes what runs and greys the right sliders |
 | `operator-interface.spec.mjs` | A syntax error is reported. The bindings complete a full scoring cycle. Reset robot keeps the bindings |
-| `auto-planner.spec.mjs` | The objective is reachable, a straight line hits a barrier, and the start pose cannot be moved |
+| `auto-planner.spec.mjs` | The objective is reachable at moderate limits, gentle limits run out of time, limits pushed too high stop working, a straight line hits a barrier, and the start pose cannot be moved |
 | `swerve-dial.spec.mjs` | The dial reports the same values as the maths in `swerve-core.js` |
 | `first-tutorials.spec.mjs` | The three beginner tutorials, at a phone size with touch on. Every control is at least 44px, nothing needs typing, and each exercise passes on the right answer and explains the wrong one |
 
