@@ -15,11 +15,11 @@
   /* ---------------- the task ---------------- */
 
   // Loading zone sits in our own alliance area, where the game pieces are.
-  var LOAD = { x: 3.0, y: 6.2, w: 1.6, h: 1.6 };
+  var LOAD = { x: 4.4, y: 4.8, w: 1.6, h: 1.6 };
   // The goal is across the field, and you shoot at it from range rather than
   // driving into it — a tighter range than teleop, because an auto has to be
   // repeatable rather than merely possible.
-  var GOAL = { x: 14.8, y: 4.0 };
+  var GOAL = { x: 12.8, y: 4.0 };
   var SHOT_RANGE = 3.0;
   // Two staggered walls: the only way through is under the first and over the
   // second, which is what makes the routine a route rather than a straight line.
@@ -32,8 +32,8 @@
   // match. The user does not choose it.
   var START = { x: 1.0, y: 2.6, heading: 0 };
 
-  var TARGET_SCORE = 2;
-  var TIME_LIMIT = 15;
+  var TARGET_SCORE = 3;
+  var TIME_LIMIT = 20;
   var INTAKE_SECONDS = 0.5;
   var SPINUP_SECONDS = 1.0;
   var READY_SPEED = 0.9;

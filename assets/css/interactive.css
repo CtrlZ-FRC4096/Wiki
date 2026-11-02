@@ -770,7 +770,7 @@
 }
 
 /* One block per step, width proportional to how long it takes. The slack
-   block at the end is whatever is left of the fifteen seconds. */
+   block at the end is whatever is left of the period. */
 .cz-auto__strip {
   position: relative;
   display: flex;

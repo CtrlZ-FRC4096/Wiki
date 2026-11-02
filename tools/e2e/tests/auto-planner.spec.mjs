@@ -19,19 +19,28 @@ const LOW = 3.2, HIGH = 4.6;
 const STANDOFF = CZAuto.SHOT_RANGE * 0.98;
 const FIRE = { x: CZAuto.GOAL.x - STANDOFF * 0.94, y: CZAuto.GOAL.y + STANDOFF * 0.34 };
 
+// Above barrier B already? Then the climb ends at the firing point.
+const CLIMB = FIRE.x > 10.6 ? [{ x: 9.7, y: HIGH }] : [];
+const LOAD = { x: CZAuto.LOAD.x, y: CZAuto.LOAD.y };
+const CYCLE = [
+  { kind: "path", waypoints: [...CLIMB, { x: 8.0, y: LOW }, { x: LOAD.x + 1.5, y: LOW }, LOAD],
+    endHeading: 0, parallel: ["intake"] },
+  { kind: "action", action: "intake", timeout: 0.7 },
+  { kind: "path", waypoints: [{ x: LOAD.x + 1.5, y: LOW }, { x: 8.0, y: LOW }, ...CLIMB, FIRE],
+    endHeading: 0, parallel: ["spin_up_shooter"] },
+  { kind: "action", action: "shoot", timeout: 0.6 }
+];
+
+/* Shoot the preloaded piece, then fetch two more. */
 const SOLUTION = {
   name: "wiki_auto",
   startPose: { ...CZAuto.START },
   steps: [
-    { kind: "path", waypoints: [{ x: 4.6, y: LOW }, { x: 8.0, y: LOW }, { x: 9.7, y: HIGH }, FIRE],
+    { kind: "path", waypoints: [{ x: 4.6, y: LOW }, { x: 8.0, y: LOW }, ...CLIMB, FIRE],
       endHeading: 0, parallel: ["spin_up_shooter"] },
     { kind: "action", action: "shoot", timeout: 0.6 },
-    { kind: "path", waypoints: [{ x: 9.7, y: HIGH }, { x: 8.0, y: LOW }, { x: 5.5, y: LOW }, { x: CZAuto.LOAD.x, y: CZAuto.LOAD.y }],
-      endHeading: 0, parallel: ["intake"] },
-    { kind: "action", action: "intake", timeout: 0.7 },
-    { kind: "path", waypoints: [{ x: 5.5, y: LOW }, { x: 8.0, y: LOW }, { x: 9.7, y: HIGH }, FIRE],
-      endHeading: 0, parallel: ["spin_up_shooter"] },
-    { kind: "action", action: "shoot", timeout: 0.6 }
+    ...CYCLE,
+    ...CYCLE
   ]
 };
 
@@ -88,7 +97,7 @@ test("the same route pushed to the limits slips and stops working", async ({ pag
   await auto.locator('[data-action="check"]').click();
   await expect(auto.locator(".cz-exercise__verdict.is-fail")).toBeVisible();
   // It fits in the period easily; it just doesn't work.
-  expect(await auto.locator(".cz-exercise__check.is-pass").first().textContent()).toContain("15 seconds");
+  expect(await auto.locator(".cz-exercise__check.is-pass").first().textContent()).toContain(`${CZAuto.TIME_LIMIT} seconds`);
   const advice = await auto.locator(".cz-auto__advice").textContent();
   expect(advice).toContain("slipped");
   expect(advice).toContain("4.75 m/s");
@@ -108,7 +117,7 @@ test("gentle limits work but run out of time", async ({ page }) => {
   const auto = page.locator(".cz-auto");
   await auto.locator('[data-action="check"]').click();
   const failed = auto.locator(".cz-exercise__check.is-fail .cz-exercise__check-name");
-  expect(await failed.first().textContent()).toContain("15 seconds");
+  expect(await failed.first().textContent()).toContain(`${CZAuto.TIME_LIMIT} seconds`);
   // Nothing but the clock is wrong.
   expect(await auto.locator(".cz-exercise__check.is-pass").count()).toBe(3);
 });

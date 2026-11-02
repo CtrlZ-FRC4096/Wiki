@@ -14,7 +14,7 @@ nav_order: 1
 {:toc}
 </details>
 
-The autonomous period is 15 seconds. Most autonomous routines that fail at a
+The autonomous period is 20 seconds. Most autonomous routines that fail at a
 competition do not fail because the code is incorrect. They fail because nobody
 measured the duration of the routine, or found the actions that can operate at
 the same time.
@@ -80,27 +80,29 @@ cannot reach the target continues to try for the remainder of the match.
 
 ## Exercise
 
-The robot starts with one piece of fuel. Complete this sequence:
+The robot starts with one piece of fuel. It can hold one piece at a time.
+Complete this sequence:
 
 1. Shoot the first piece from a position inside the dashed ring.
 2. Move to the LOAD zone in your alliance area.
 3. Collect a second piece with the intake.
 4. Shoot the second piece.
+5. Do steps 2 to 4 again for a third piece.
 
-Score two pieces in less than 15 seconds. Do not touch barrier A or barrier B.
-The routine must work in at least 18 of 20 matches.
+Score three pieces in less than 20 seconds. Do not touch barrier A or barrier
+B. The routine must work in at least 18 of 20 matches.
 
 Four conditions make this an exercise and not a straight line:
 
 - **The barriers are not in line.** The only route is below **A** and above
-  **B**. A straight line to the goal hits **A**.
+  **B**, every trip. A straight line to the goal hits **A**.
 - **You shoot from a distance.** The dashed ring is 3 metres. This is smaller
   than a driver uses in teleop, because an autonomous shot must be repeatable.
   Shoot from the edge of the ring. If you drive to the goal, the routine is too
   long for the period.
 - **The period is short.** A routine that stops to collect a piece, then
   drives, then stops to start the shooter, then drives, does not fit. Move
-  those actions into the paths. This saves approximately two seconds.
+  those actions into the paths. This saves approximately three seconds.
 - **The robot is not the plan.** A faster plan is shorter on paper. On carpet,
   a plan that asks for too much makes the wheels slip, the robot lose track
   of where it is, and the shots miss. The next section explains why.
@@ -164,7 +166,7 @@ This gives you a balance to find:
 
 | Limits | What happens |
 |:-------|:-------------|
-| Too low | It works every time, but it does not finish in 15 seconds |
+| Too low | It works every time, but it does not finish in 20 seconds |
 | Balanced | It works in almost every match, with time to spare |
 | Too high | The plan is shorter, but the wheels slip and the robot falls behind. It touches barriers and misses shots in some matches, and the number of those matches increases quickly |
 
@@ -176,7 +178,7 @@ matches start to fail. Then decrease the limits a little.
 
 - The **timeline** below the field shows the full routine. Each block is one
   step. The width is the duration. Each colored dot is an action that operates
-  during that step. The empty block on the right is the remainder of the 15
+  during that step. The empty block on the right is the remainder of the 20
   seconds.
 - The **robot** is where the robot really is. It shows its actions. A bar
   across the back shows the intake. A ring shows the shooter speed. A dot in
@@ -214,7 +216,7 @@ zone. Select `Spin up` for the path to the goal. These become a
 The generated Python is an initial version, not a complete routine. You must
 still draw the paths in PathPlanner and give them names, with the max speed
 and max acceleration you found. Use this page to answer three questions
-before you go to the field: does the routine fit in 15 seconds, which actions
+before you go to the field: does the routine fit in 20 seconds, which actions
 can operate at the same time, and how hard can the robot drive before it
 stops being reliable?
 
