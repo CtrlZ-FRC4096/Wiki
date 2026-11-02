@@ -88,8 +88,9 @@ The robot starts with one piece of fuel. Complete this sequence:
 4. Shoot the second piece.
 
 Score two pieces in less than 15 seconds. Do not touch barrier A or barrier B.
+The routine must work in at least 18 of 20 matches.
 
-Three conditions make this an exercise and not a straight line:
+Four conditions make this an exercise and not a straight line:
 
 - **The barriers are not in line.** The only route is below **A** and above
   **B**. A straight line to the goal hits **A**.
@@ -100,6 +101,9 @@ Three conditions make this an exercise and not a straight line:
 - **The period is short.** A routine that stops to collect a piece, then
   drives, then stops to start the shooter, then drives, does not fit. Move
   those actions into the paths. This saves approximately two seconds.
+- **The robot is not the plan.** A faster plan is shorter on paper. On carpet,
+  a plan that asks for too much makes the wheels slip, the robot lose track
+  of where it is, and the shots miss. The next section explains why.
 
 To add a waypoint, select a step in the list, then click the field. To move a
 waypoint, drag it. To delete a waypoint, right-click it. Press **Check
@@ -108,14 +112,93 @@ routine** when the routine is complete.
 The green START marker is the start pose. It is part of the task, the same as a
 starting position in a match. You cannot move it.
 
+### Max speed and max acceleration
+
+Every PathPlanner path has a max speed and a max acceleration. The planner
+uses them to make the plan: how fast the robot goes at each point on the path,
+and when it gets there. Higher limits make a shorter plan. But the plan is
+only what the code asks for. The robot on the carpet does what physics lets
+it do. This page simulates that physics, with ideas from
+[maple-sim](https://github.com/Shenzhen-Robotics-Alliance/maple-sim){:target="_blank"},
+a physics simulator for FRC robots.
+
+**The wheels can only grip so hard.** Friction between the wheels and the
+carpet is what pushes the robot. That force is the friction coefficient times
+the weight of the robot, so the most the robot can accelerate is the friction
+coefficient times *g*. maple-sim gives Colson wheels a coefficient of 0.9, so
+the limit is about 0.9 × 9.81 ≈ 8.8 m/s². Speeding up, slowing down and turning
+all use this same grip. A turn of radius *r* at speed *v* needs *v*²/*r*. The
+planner slows the robot in a curve so the turn needs no more than max
+acceleration. But speeding up or slowing down in the curve adds to it. Ask
+for more than the grip and the wheels **slip**: they spin faster than the
+robot moves, and the robot slides wide of the path.
+
+**The motors have a top speed.** The drive motors reach 4.75 m/s at most, and
+they have less acceleration to give as they get near it. A max speed above
+4.75 m/s is a plan the robot cannot follow. It falls behind. The path follower
+steers toward where the plan says the robot should be, so a robot that is
+behind cuts the corners. When the path ends, the robot is still moving.
+
+**The robot works out where it is.** Odometry counts how far each wheel turns.
+A slipping wheel turns more than the robot moves, and odometry cannot tell the
+difference, so the estimate drifts away from the real position. A camera that
+sees an AprilTag corrects the estimate. The robot code blends the two the way
+WPILib's `SwerveDrivePoseEstimator` does: a reading it trusts more moves the
+estimate more. A tag far away gives a noisier reading. A robot that moves fast
+blurs the picture: at 4 m/s, only a tag less than about 2 m away gives a
+reading clear enough to use. The middle of the field has no tag in range.
+
+**Everything uses the estimate.** The path follower steers by where the robot
+*thinks* it is. The shooter aims from where the robot thinks it is. An
+estimate that is 30 cm wrong puts the real robot 30 cm off the path, and the
+shot 30 cm off the goal. A shot taken while the robot is still moving is
+carried off line by the speed of the robot.
+
+**No two matches are the same.** The carpet, the wear on the treads and the
+battery change the grip a little from match to match. The camera noise is
+different every time. So the page runs your routine as 20 matches. A routine
+that works once is not a routine you can use at a competition. It must work in
+at least 18 of the 20.
+
+This gives you a balance to find:
+
+| Limits | What happens |
+|:-------|:-------------|
+| Too low | It works every time, but it does not finish in 15 seconds |
+| Balanced | It works in almost every match, with time to spare |
+| Too high | The plan is shorter, but the wheels slip and the robot falls behind. It touches barriers and misses shots in some matches, and the number of those matches increases quickly |
+
+Start with low limits and a routine that works. Then increase the limits a
+little at a time, and press **Check routine** after each change. Stop when
+matches start to fail. Then decrease the limits a little.
+
 ### The display
 
 - The **timeline** below the field shows the full routine. Each block is one
   step. The width is the duration. Each colored dot is an action that operates
   during that step. The empty block on the right is the remainder of the 15
   seconds.
-- The **robot** shows its actions. A bar across the back shows the intake. A
-  ring shows the shooter speed. A dot in the center shows a piece of fuel.
+- The **robot** is where the robot really is. It shows its actions. A bar
+  across the back shows the intake. A ring shows the shooter speed. A dot in
+  the center shows a piece of fuel.
+- The **orange dot** is where the plan says the robot should be now. A dashed
+  line joins it to the robot when the robot falls behind.
+- The **dashed outline** is where the robot thinks it is. It moves away from
+  the robot when odometry drifts.
+- The **white line** is where the robot really went. It is **red** where the
+  wheels slipped.
+- The **small squares** are AprilTags. A line from a tag to the robot shows
+  the camera reading it. A faint dashed line shows a tag in view that is too
+  blurred to use. The small dots are recent readings.
+- The **chart** below the timeline has three rows. **Speed** compares the plan
+  (dashed orange) with the robot (blue), against the top speed of the motors.
+  **Grip used** shows how much of the grip of the wheels the robot asks for.
+  Above the dashed red line, the wheels slip. **Pose error** shows how far the
+  estimate is from the real position, with a tick for each camera reading. Red
+  bands are where the wheels slipped. Drag on the chart to move through the
+  match.
+- The **20 matches** are under the chart. Green worked, red failed. Click one
+  to watch it. The text below says what happened in it.
 - The **range ring** becomes brighter when the robot is close enough to shoot.
 - A **collision** leaves a red robot at the position of contact.
 
@@ -129,12 +212,18 @@ zone. Select `Spin up` for the path to the goal. These become a
 {% include interactive/auto-planner.html title="Sketch an autonomous routine" %}
 
 The generated Python is an initial version, not a complete routine. You must
-still draw the paths in PathPlanner and give them names. Use this page to
-answer two questions before you go to the field: does the routine fit in 15
-seconds, and which actions can operate at the same time?
+still draw the paths in PathPlanner and give them names, with the max speed
+and max acceleration you found. Use this page to answer three questions
+before you go to the field: does the routine fit in 15 seconds, which actions
+can operate at the same time, and how hard can the robot drive before it
+stops being reliable?
 
 ## Limits of this exercise
 
+- **The physics is simplified.** The robot does not rotate under physics, it
+  does not hit other robots, and all four wheels share one grip. The numbers
+  are typical for an FRC swerve robot, not measured on ours. Find the real
+  limits on the real robot, on carpet, with a full battery and a used one.
 - **These are the only barriers.** The collision test uses the rectangular
   shape of the robot, with the corners. But a real field has many more objects.
 - **Other robots move.** Your alliance partners drive their own routines
@@ -150,4 +239,7 @@ seconds, and which actions can operate at the same time?
 
 - [Controls](../../Controls/controls)
 - [PathPlanner documentation](https://pathplanner.dev/){:target="_blank"}
+- [maple-sim](https://github.com/Shenzhen-Robotics-Alliance/maple-sim){:target="_blank"}:
+  the physics simulator the slipping on this page is modelled on
+- [WPILib: Pose estimators](https://docs.wpilib.org/en/stable/docs/software/advanced-controls/state-space/state-space-pose-estimators.html){:target="_blank"}
 - [WPILib: Trajectory generation](https://docs.wpilib.org/en/stable/docs/software/advanced-controls/trajectories/index.html){:target="_blank"}

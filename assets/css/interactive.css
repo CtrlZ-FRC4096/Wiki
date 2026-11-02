@@ -850,6 +850,132 @@
 
 .cz-auto__chip:hover { border-color: var(--chip); }
 
+.cz-oi__chip.is-warn {
+  border-color: var(--cz-fail);
+  color: var(--cz-fail);
+}
+
+/* ---- planner: chart, legend, twenty matches ---- */
+
+.cz-auto__chart {
+  display: block;
+  width: 100%;
+  height: 150px;
+  margin-top: 6px;
+  border: 1px solid var(--cz-border);
+  border-radius: 3px;
+  touch-action: none;
+  cursor: ew-resize;
+}
+
+.cz-exercise ul.cz-auto__legend {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 0.2rem 1rem;
+  margin: 0.4rem 0 0;
+  padding: 0;
+  list-style: none;
+  font-size: 0.7rem;
+  color: var(--cz-muted);
+}
+
+.cz-auto__legend li {
+  display: inline-flex;
+  align-items: center;
+  gap: 0.35rem;
+  margin: 0;
+}
+
+.cz-exercise ul.cz-auto__legend > li::before { content: none; }
+
+.cz-auto__key {
+  display: inline-block;
+  width: 16px;
+  height: 0;
+  border-top: 2px solid currentColor;
+}
+
+.cz-auto__key.is-plan { border-top-color: #f0932b; }
+.cz-auto__key.is-real { border-top-color: #e8ecf4; }
+.cz-auto__key.is-slip { border-top: 3px solid #f2777a; }
+.cz-auto__key.is-estimate {
+  height: 9px;
+  border: 1.5px dashed #7fd7e6;
+}
+.cz-auto__key.is-tag {
+  width: 9px;
+  height: 9px;
+  border: 0;
+  background: #e8ecf4;
+  box-shadow: inset 0 0 0 2.5px #e8ecf4, inset 0 0 0 5px #16181e;
+}
+
+.cz-auto__limits-note {
+  margin: 0.35rem 0 0;
+  font-size: 0.72rem;
+  color: var(--cz-muted);
+}
+
+.cz-auto__matches {
+  margin-top: 0.7rem;
+  padding: 0.5rem 0.6rem;
+  border: 1px solid var(--cz-border);
+  border-radius: 4px;
+}
+
+.cz-auto__matches-head {
+  display: flex;
+  flex-wrap: wrap;
+  align-items: baseline;
+  gap: 0.6rem;
+}
+
+.cz-auto__matches-summary {
+  font-size: 0.76rem;
+  font-weight: 600;
+}
+
+.cz-auto__matches-summary.is-pass { color: var(--cz-pass); }
+.cz-auto__matches-summary.is-fail { color: var(--cz-fail); }
+
+.cz-auto__match-grid {
+  display: grid;
+  grid-template-columns: repeat(10, minmax(0, 1fr));
+  gap: 4px;
+  margin-top: 0.45rem;
+  transition: opacity 0.15s;
+}
+
+.cz-auto__match-grid.is-stale { opacity: 0.45; }
+
+.cz-auto__match {
+  padding: 0.2rem 0;
+  border: 1px solid transparent;
+  border-radius: 3px;
+  font-size: 0.68rem;
+  font-family: ui-monospace, SFMono-Regular, Menlo, Consolas, monospace;
+  color: #0f1115;
+  cursor: pointer;
+}
+
+.cz-auto__match.is-pass { background: rgba(76, 195, 138, 0.85); }
+.cz-auto__match.is-fail { background: rgba(242, 119, 122, 0.85); }
+.cz-auto__match.is-shown { border-color: #fff; box-shadow: 0 0 0 1px #fff; font-weight: 700; }
+
+.cz-auto__match-note {
+  margin: 0.45rem 0 0;
+  font-size: 0.74rem;
+  color: var(--cz-muted);
+}
+
+.cz-auto__advice {
+  margin: 0.5rem 0 0;
+  padding-left: 1.1rem;
+  font-size: 0.78rem;
+}
+
+.cz-auto__advice li { margin: 0.2rem 0; }
+
 /* ------------------------------------------------------------------ *
  * Swerve module dial
  * ------------------------------------------------------------------ */
@@ -1463,6 +1589,9 @@
   .cz-basic__scene,
   .cz-sim__stage,
   .cz-auto__stage,
+  .cz-auto__strip,
+  .cz-auto__chart,
+  .cz-auto__legend,
   .cz-oi__stage { order: 1; }
 
   .cz-exercise__toolbar { order: 2; }
@@ -1480,7 +1609,9 @@
   .cz-oi__log,
   .cz-oi__focus-hint,
   .cz-oi__output,
+  .cz-auto__matches,
   .cz-auto__limits,
+  .cz-auto__limits-note,
   .cz-auto__steps,
   .cz-auto__export,
   .cz-auto__output { order: 3; }
@@ -1491,4 +1622,26 @@
   .cz-sim__stage,
   .cz-auto__stage,
   .cz-oi__stage { margin-top: 0.9rem; }
+}
+
+/* On a phone the field is too small to carry the clock and the chips on top
+   of it, so they sit in a row underneath instead. */
+@media (max-width: 600px) {
+  .cz-auto__stage {
+    display: flex;
+    flex-wrap: wrap;
+    gap: 4px;
+    padding-bottom: 4px;
+  }
+
+  .cz-auto__canvas { flex: 0 0 100%; }
+
+  .cz-auto__clock,
+  .cz-auto__hud {
+    position: static;
+    max-width: none;
+    margin: 0 4px;
+  }
+
+  .cz-auto__hud { justify-content: flex-start; }
 }
