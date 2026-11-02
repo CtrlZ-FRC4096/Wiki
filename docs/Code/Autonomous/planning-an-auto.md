@@ -84,17 +84,22 @@ The robot starts with one piece of fuel. It can hold one piece at a time.
 Complete this sequence:
 
 1. Shoot the first piece from a position inside the dashed ring.
-2. Move to the LOAD zone in your alliance area.
-3. Collect a second piece with the intake.
+2. Move to **PIECE 2**, in your alliance area.
+3. Collect the piece with the intake.
 4. Shoot the second piece.
 
 Score two pieces in less than 20 seconds. Do not touch barrier A or barrier B.
 The routine must work in at least 18 of 20 matches.
 
-**Stretch goal:** do steps 2 to 4 again for a third piece, still in less than
-20 seconds and still in 18 of 20 matches. This is difficult. It needs a
-routine that never stops when it does not have to, and limits as high as they
-can be while the routine still works.
+**Stretch goal:** then collect **PIECE 3** and shoot it too, still in less than
+20 seconds and still in 18 of 20 matches. PIECE 3 is in a different place: low
+down between the two barriers, so the route to it is new, with a tight turn
+round barrier B. This is difficult. It needs a routine that never stops when
+it does not have to, and limits as high as they can be while the robot still
+makes that turn.
+
+Each piece waits in its own place, and the robot collects them in order. A
+collected piece is gone, so the robot cannot collect piece 2 twice.
 
 Four conditions make this an exercise and not a straight line:
 
@@ -210,14 +215,16 @@ goal, you need to find the exact top of the balance.
   match.
 - The **20 matches** are under the chart. Green worked, red failed. Click one
   to watch it. The text below says what happened in it.
+- The **PIECE** zones show where each piece waits. The next one to collect is
+  brightest. A collected one is empty, with a tick.
 - The **range ring** becomes brighter when the robot is close enough to shoot.
 - A **collision** leaves a red robot at the position of contact.
 
 ### Parallel actions
 
 A path or a movement to a pose can operate with more than one action. Click the
-buttons on a step to select them. Select `Intake` for the path to the LOAD
-zone. Select `Spin up` for the path to the goal. These become a
+buttons on a step to select them. Select `Intake` for the path to a piece.
+Select `Spin up` for the path to the goal. These become a
 `ParallelCommandGroup` in the generated code.
 
 {% include interactive/auto-planner.html title="Sketch an autonomous routine" %}

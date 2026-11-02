@@ -22,7 +22,7 @@
   function setup(root) {
     var CZField = window.CZField;
     var A = window.CZAuto;
-    var LOAD = A.LOAD, GOAL = A.GOAL, START = A.START, SHOT_RANGE = A.SHOT_RANGE, BARRIERS = A.BARRIERS, ACTIONS = A.ACTIONS;
+    var PICKUPS = A.PICKUPS, GOAL = A.GOAL, START = A.START, SHOT_RANGE = A.SHOT_RANGE, BARRIERS = A.BARRIERS, ACTIONS = A.ACTIONS;
     var TARGET_SCORE = A.TARGET_SCORE, STRETCH_SCORE = A.STRETCH_SCORE, TIME_LIMIT = A.TIME_LIMIT;
     var INTAKE_SECONDS = A.INTAKE_SECONDS, READY_SPEED = A.READY_SPEED;
     var actionById = A.actionById, inZone = A.inZone, robotHitsBox = A.robotHitsBox;
@@ -460,9 +460,9 @@
           why: countLine(m.collided, "It touches barrier " + hitWhich) + (hitIn ? " Watch match " + hitIn + "." : "")
         },
         {
-          name: "The robot collects fuel at the LOAD zone",
+          name: "The robot collects piece 2",
           ok: m.noPickup <= allowed,
-          why: countLine(m.noPickup, "It collects no fuel") + " Select Intake on the path that ends in the LOAD zone, or add an intake step there. " +
+          why: countLine(m.noPickup, "It collects no fuel") + " Select Intake on the path that ends at PIECE 2, or add an intake step there. " +
             "The robot must be inside the zone for " + INTAKE_SECONDS + " s."
         },
         {
@@ -640,11 +640,20 @@
       var now = stateAtTime(result, playhead);
       var pose = now ? { x: now.x, y: now.y, heading: now.heading, entry: planned.entry } : planned;
 
-      view.drawZone(LOAD, {
-        label: "LOAD",
-        color: inZone(pose, LOAD) ? "rgba(240,147,43,0.34)" : "rgba(240,147,43,0.12)",
-        outline: "rgba(240,147,43,0.9)",
-        dashed: !inZone(pose, LOAD)
+      // Where the pieces wait: one place per trip, taken in order. The next
+      // one to collect is brightest; a collected one is left empty.
+      var taken = now ? now.taken : 0;
+      PICKUPS.forEach(function (spot, i) {
+        var gone = i < taken, next = i === taken;
+        var here = next && inZone(pose, spot);
+        var stretch = i + 2 > TARGET_SCORE;
+        view.drawZone(spot, {
+          label: spot.label + (stretch ? " ★" : "") + (gone ? " ✓" : ""),
+          color: here ? "rgba(240,147,43,0.34)" : gone ? "rgba(240,147,43,0.04)" : "rgba(240,147,43,0.12)",
+          outline: gone ? "rgba(240,147,43,0.35)" : next ? "rgba(240,147,43,0.95)" : "rgba(240,147,43,0.6)",
+          dashed: !here
+        });
+        if (!gone) view.drawMarker(spot, { radius: 0.16, color: "#ffd28a", alpha: next ? 1 : 0.6 });
       });
       // The goal and the ring you have to be inside to score. The ring
       // brightens when the robot is within range, so "close enough" is a

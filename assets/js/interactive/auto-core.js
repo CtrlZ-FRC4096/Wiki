@@ -14,8 +14,13 @@
 
   /* ---------------- the task ---------------- */
 
-  // Loading zone sits in our own alliance area, where the game pieces are.
-  var LOAD = { x: 4.4, y: 4.8, w: 1.6, h: 1.6 };
+  // Each piece the robot fetches waits in its own place, so every trip is a
+  // different route. Collected in order: piece 2 first, then piece 3.
+  var PICKUPS = [
+    { x: 4.4, y: 4.8, w: 1.6, h: 1.6, label: "PIECE 2" },
+    { x: 8.8, y: 1.0, w: 1.6, h: 1.6, label: "PIECE 3" }
+  ];
+  function nextPickup(taken) { return taken < PICKUPS.length ? PICKUPS[taken] : null; }
   // The goal is across the field, and you shoot at it from range rather than
   // driving into it — a tighter range than teleop, because an auto has to be
   // repeatable rather than merely possible.
@@ -455,7 +460,7 @@
       // Autonomous starts with a piece already in the robot, same as a match.
       hasFuel: true, shooter: 0, score: 0,
       collided: false, collisionAt: null, collisionWith: null, collisionPose: null,
-      intakeTimer: 0, events: [], misses: [],
+      intakeTimer: 0, events: [], misses: [], taken: 0,
       grip: grip, slipSeconds: 0, slips: 0, slide: 0, worstError: 0, worstLag: 0, fixes: 0
     };
     var firedIn = {};
@@ -583,12 +588,14 @@
       }
 
       // Intake only works where the game pieces are.
-      if (acting.indexOf("intake") !== -1 && !state.hasFuel && inZone(pose, LOAD)) {
+      var spot = nextPickup(state.taken);
+      if (acting.indexOf("intake") !== -1 && !state.hasFuel && spot && inZone(pose, spot)) {
         state.intakeTimer += dt;
         if (state.intakeTimer >= INTAKE_SECONDS) {
           state.hasFuel = true;
           state.intakeTimer = 0;
-          state.events.push({ t: t, kind: "pickup" });
+          state.taken++;
+          state.events.push({ t: t, kind: "pickup", spot: state.taken - 1 });
         }
       } else if (acting.indexOf("intake") === -1) {
         state.intakeTimer = 0;
@@ -641,7 +648,8 @@
           shooter: state.shooter,
           score: state.score,
           collided: state.collided,
-          atLoad: inZone(pose, LOAD),
+          taken: state.taken,
+          atPickup: Boolean(spot && inZone(pose, spot)),
           inRange: inShotRange(pose),
           acting: acting
         });
@@ -764,7 +772,8 @@
 
 
   return {
-    LOAD: LOAD,
+    PICKUPS: PICKUPS,
+    nextPickup: nextPickup,
     START: START,
     GOAL: GOAL,
     SHOT_RANGE: SHOT_RANGE,
