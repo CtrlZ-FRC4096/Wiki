@@ -87,10 +87,14 @@ Complete this sequence:
 2. Move to the LOAD zone in your alliance area.
 3. Collect a second piece with the intake.
 4. Shoot the second piece.
-5. Do steps 2 to 4 again for a third piece.
 
-Score three pieces in less than 20 seconds. Do not touch barrier A or barrier
-B. The routine must work in at least 18 of 20 matches.
+Score two pieces in less than 20 seconds. Do not touch barrier A or barrier B.
+The routine must work in at least 18 of 20 matches.
+
+**Stretch goal:** do steps 2 to 4 again for a third piece, still in less than
+20 seconds and still in 18 of 20 matches. This is difficult. It needs a
+routine that never stops when it does not have to, and limits as high as they
+can be while the routine still works.
 
 Four conditions make this an exercise and not a straight line:
 
@@ -100,9 +104,9 @@ Four conditions make this an exercise and not a straight line:
   than a driver uses in teleop, because an autonomous shot must be repeatable.
   Shoot from the edge of the ring. If you drive to the goal, the routine is too
   long for the period.
-- **The period is short.** A routine that stops to collect a piece, then
-  drives, then stops to start the shooter, then drives, does not fit. Move
-  those actions into the paths. This saves approximately three seconds.
+- **The period is short.** Two pieces fit easily. But a routine that stops to
+  collect a piece, then drives, then stops to start the shooter, then drives,
+  has no time left for a third. Move those actions into the paths.
 - **The robot is not the plan.** A faster plan is shorter on paper. On carpet,
   a plan that asks for too much makes the wheels slip, the robot lose track
   of where it is, and the shots miss. The next section explains why.
@@ -164,15 +168,16 @@ at least 18 of the 20.
 
 This gives you a balance to find:
 
-| Limits | What happens |
-|:-------|:-------------|
-| Too low | It works every time, but it does not finish in 20 seconds |
-| Balanced | It works in almost every match, with time to spare |
-| Too high | The plan is shorter, but the wheels slip and the robot falls behind. It touches barriers and misses shots in some matches, and the number of those matches increases quickly |
+| Limits | Two pieces | Three pieces (stretch) |
+|:-------|:-----------|:-----------------------|
+| Too low | Works in every match, with time to spare | Does not finish in 20 seconds |
+| Balanced | Works in almost every match | Works in almost every match, just inside 20 seconds |
+| Too high | The wheels slip and the robot falls behind. It touches barriers and misses shots in some matches, and the number of those matches increases quickly | The same |
 
-Start with low limits and a routine that works. Then increase the limits a
-little at a time, and press **Check routine** after each change. Stop when
-matches start to fail. Then decrease the limits a little.
+Start with low limits and a routine that scores two pieces. Then increase the
+limits a little at a time, and press **Check routine** after each change. Stop
+when matches start to fail. Then decrease the limits a little. For the stretch
+goal, you need to find the exact top of the balance.
 
 ### The display
 
@@ -183,10 +188,14 @@ matches start to fail. Then decrease the limits a little.
 - The **robot** is where the robot really is. It shows its actions. A bar
   across the back shows the intake. A ring shows the shooter speed. A dot in
   the center shows a piece of fuel.
-- The **orange dot** is where the plan says the robot should be now. A dashed
-  line joins it to the robot when the robot falls behind.
-- The **dashed outline** is where the robot thinks it is. It moves away from
-  the robot when odometry drifts.
+- The **orange outline** is where the plan says the robot should be now. A
+  dashed line joins it to the robot when the robot falls behind.
+- The **dashed blue outline** is where the robot thinks it is. It moves away
+  from the robot when odometry drifts.
+- A **red ring** round the robot means its wheels are slipping now.
+- The **chips** under the field show the time, the fuel, the shooter, the
+  score, how much of the grip the robot uses, what the camera sees, and how far
+  the robot's estimate is from where it really is.
 - The **white line** is where the robot really went. It is **red** where the
   wheels slipped.
 - The **small squares** are AprilTags. A line from a tag to the robot shows

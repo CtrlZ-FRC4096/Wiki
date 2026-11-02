@@ -31,18 +31,21 @@ const CYCLE = [
   { kind: "action", action: "shoot", timeout: 0.6 }
 ];
 
-/* Shoot the preloaded piece, then fetch two more. */
-const SOLUTION = {
-  name: "wiki_auto",
-  startPose: { ...CZAuto.START },
-  steps: [
-    { kind: "path", waypoints: [{ x: 4.6, y: LOW }, { x: 8.0, y: LOW }, ...CLIMB, FIRE],
-      endHeading: 0, parallel: ["spin_up_shooter"] },
-    { kind: "action", action: "shoot", timeout: 0.6 },
-    ...CYCLE,
-    ...CYCLE
-  ]
-};
+const FIRST = [
+  { kind: "path", waypoints: [{ x: 4.6, y: LOW }, { x: 8.0, y: LOW }, ...CLIMB, FIRE],
+    endHeading: 0, parallel: ["spin_up_shooter"] },
+  { kind: "action", action: "shoot", timeout: 0.6 }
+];
+
+/* Shoot the preloaded piece, then fetch one more. */
+const SOLUTION = { name: "wiki_auto", startPose: { ...CZAuto.START }, steps: [...FIRST, ...CYCLE] };
+
+/* The stretch goal: two more, never stopping. The intake runs on the way into
+ * the LOAD zone and on the way out, so there is no wait there. */
+const NONSTOP = CYCLE.filter((s) => s.kind !== "action" || s.action !== "intake").map((s) =>
+  s.kind === "path" && s.parallel.includes("spin_up_shooter") ? { ...s, parallel: ["intake", "spin_up_shooter"] } : s);
+const STRETCH = { name: "wiki_auto", startPose: { ...CZAuto.START }, steps: [...FIRST, ...NONSTOP, ...NONSTOP] };
+const AT_THE_EDGE = { maxV: 4.0, maxA: 7.0 };
 
 /* Limits that work: fast enough to fit, gentle enough not to slip much. */
 const MODERATE = { maxV: 4.0, maxA: 5.0 };
@@ -111,8 +114,8 @@ test("the same route pushed to the limits slips and stops working", async ({ pag
   await expectNoErrors(errors);
 });
 
-test("gentle limits work but run out of time", async ({ page }) => {
-  await seed(page, SOLUTION, { maxV: 3.0, maxA: 3.0 });
+test("very gentle limits work but run out of time", async ({ page }) => {
+  await seed(page, SOLUTION, { maxV: 3.0, maxA: 2.0 });
   await page.goto(PATH, { waitUntil: "networkidle" });
   const auto = page.locator(".cz-auto");
   await auto.locator('[data-action="check"]').click();
@@ -120,6 +123,27 @@ test("gentle limits work but run out of time", async ({ page }) => {
   expect(await failed.first().textContent()).toContain(`${CZAuto.TIME_LIMIT} seconds`);
   // Nothing but the clock is wrong.
   expect(await auto.locator(".cz-exercise__check.is-pass").count()).toBe(3);
+});
+
+test("the stretch goal needs no stops and limits at the edge", async ({ page }) => {
+  const errors = watchForErrors(page);
+  await seed(page, STRETCH, AT_THE_EDGE);
+  await page.goto(PATH, { waitUntil: "networkidle" });
+  const auto = page.locator(".cz-auto");
+  await auto.locator('[data-action="check"]').click();
+  await expect(auto.locator(".cz-exercise__verdict.is-pass")).toBeVisible();
+  await expect(auto.locator(".cz-auto__stretch.is-pass")).toBeVisible();
+  expect(await auto.locator(".cz-auto__match.is-stretch").count()).toBeGreaterThanOrEqual(CZAuto.MATCHES_NEEDED);
+  await expectNoErrors(errors);
+});
+
+test("the two-piece routine does not reach the stretch goal", async ({ page }) => {
+  await seed(page, SOLUTION);
+  await page.goto(PATH, { waitUntil: "networkidle" });
+  const auto = page.locator(".cz-auto");
+  await auto.locator('[data-action="check"]').click();
+  await expect(auto.locator(".cz-auto__stretch")).toBeVisible();
+  await expect(auto.locator(".cz-auto__stretch.is-pass")).toHaveCount(0);
 });
 
 test("a straight line at the goal hits a barrier", async ({ page }) => {

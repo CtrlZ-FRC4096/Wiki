@@ -899,8 +899,20 @@
 .cz-auto__key.is-real { border-top-color: #e8ecf4; }
 .cz-auto__key.is-slip { border-top: 3px solid #f2777a; }
 .cz-auto__key.is-estimate {
-  height: 9px;
+  width: 14px;
+  height: 11px;
   border: 1.5px dashed #7fd7e6;
+}
+.cz-auto__key.is-planbox {
+  width: 14px;
+  height: 11px;
+  border: 2px solid #f0932b;
+}
+.cz-auto__key.is-robot {
+  width: 14px;
+  height: 11px;
+  border: 0;
+  background: #57a8ff;
 }
 .cz-auto__key.is-tag {
   width: 9px;
@@ -960,7 +972,18 @@
 
 .cz-auto__match.is-pass { background: rgba(76, 195, 138, 0.85); }
 .cz-auto__match.is-fail { background: rgba(242, 119, 122, 0.85); }
+.cz-auto__match.is-stretch { background: #f5c451; }
 .cz-auto__match.is-shown { border-color: #fff; box-shadow: 0 0 0 1px #fff; font-weight: 700; }
+
+.cz-auto__stretch {
+  margin: 0.5rem 0 0;
+  padding: 0.4rem 0.6rem;
+  border-left: 3px solid #f5c451;
+  background: rgba(245, 196, 81, 0.08);
+  font-size: 0.8rem;
+}
+
+.cz-auto__stretch.is-pass { color: #f5c451; }
 
 .cz-auto__match-note {
   margin: 0.45rem 0 0;
@@ -1624,24 +1647,22 @@
   .cz-oi__stage { margin-top: 0.9rem; }
 }
 
-/* On a phone the field is too small to carry the clock and the chips on top
-   of it, so they sit in a row underneath instead. */
-@media (max-width: 600px) {
-  .cz-auto__stage {
-    display: flex;
-    flex-wrap: wrap;
-    gap: 4px;
-    padding-bottom: 4px;
-  }
-
-  .cz-auto__canvas { flex: 0 0 100%; }
-
-  .cz-auto__clock,
-  .cz-auto__hud {
-    position: static;
-    max-width: none;
-    margin: 0 4px;
-  }
-
-  .cz-auto__hud { justify-content: flex-start; }
+/* The clock and the chips sit in a row under the field, not on top of it,
+   so they never hide the robot. */
+.cz-auto__stage {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 4px;
+  padding-bottom: 4px;
 }
+
+.cz-auto__canvas { flex: 0 0 100%; }
+
+.cz-auto__clock,
+.cz-auto__hud {
+  position: static;
+  max-width: none;
+  margin: 0 4px;
+}
+
+.cz-auto__hud { justify-content: flex-start; }

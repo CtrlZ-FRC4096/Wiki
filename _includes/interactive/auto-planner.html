@@ -7,13 +7,13 @@
 {%- endcomment -%}
 
 {%- unless cz_interactive_css -%}
-  <link rel="stylesheet" href="{{ '/assets/css/interactive.css' | relative_url }}">
+  <link rel="stylesheet" href="{{ '/assets/css/interactive.css' | relative_url }}?v={{ site.time | date: '%s' }}">
   {%- assign cz_interactive_css = true -%}
 {%- endunless -%}
 {%- unless cz_auto_assets -%}
-  <script src="{{ '/assets/js/interactive/field-sim.js' | relative_url }}" defer></script>
-  <script src="{{ '/assets/js/interactive/auto-core.js' | relative_url }}" defer></script>
-  <script src="{{ '/assets/js/interactive/auto-planner.js' | relative_url }}" defer></script>
+  <script src="{{ '/assets/js/interactive/field-sim.js' | relative_url }}?v={{ site.time | date: '%s' }}" defer></script>
+  <script src="{{ '/assets/js/interactive/auto-core.js' | relative_url }}?v={{ site.time | date: '%s' }}" defer></script>
+  <script src="{{ '/assets/js/interactive/auto-planner.js' | relative_url }}?v={{ site.time | date: '%s' }}" defer></script>
   {%- assign cz_auto_assets = true -%}
 {%- endunless -%}
 
@@ -26,10 +26,11 @@
 
   <p class="cz-auto__task">
     <strong>The task:</strong> the robot starts with one piece of fuel. Shoot it
-    from inside the dashed ring. Then fetch two more from the LOAD zone in your
-    alliance area, one at a time, and shoot each. Score
-    {{ include.target | default: 3 }} pieces in less than 20 seconds, in at
+    from inside the dashed ring. Then move to the LOAD zone in your alliance
+    area, collect a second piece, and shoot again. Score
+    {{ include.target | default: 2 }} pieces in less than 20 seconds, in at
     least 18 of 20 matches. Do not touch barrier A or barrier B.
+    <strong>Stretch goal:</strong> fetch a third piece, still in 20 seconds.
   </p>
 
   <div class="cz-auto__stage">
@@ -43,10 +44,12 @@
   <canvas class="cz-auto__chart" aria-label="Speed, grip used and pose error during the match. Drag to move through it."></canvas>
 
   <ul class="cz-auto__legend">
-    <li><span class="cz-auto__key is-plan"></span>planned path and where the plan wants the robot</li>
-    <li><span class="cz-auto__key is-real"></span>where the robot really went</li>
+    <li><span class="cz-auto__key is-robot"></span>where the robot really is</li>
+    <li><span class="cz-auto__key is-planbox"></span>where the plan wants it</li>
+    <li><span class="cz-auto__key is-estimate"></span>where it thinks it is</li>
+    <li><span class="cz-auto__key is-plan"></span>planned path</li>
+    <li><span class="cz-auto__key is-real"></span>where it really went</li>
     <li><span class="cz-auto__key is-slip"></span>wheels slipping</li>
-    <li><span class="cz-auto__key is-estimate"></span>where the robot thinks it is</li>
     <li><span class="cz-auto__key is-tag"></span>AprilTag, and the camera reading it</li>
   </ul>
 
