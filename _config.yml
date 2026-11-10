@@ -128,6 +128,8 @@ exclude:
   # tools/e2e/node_modules. The plain "node_modules" line above only matches a
   # directory at the top level.
   - tools
+  # The RobotPy practice pack. Students download it with git, it is not a page.
+  - practice
 
 plugins:
   - jekyll-seo-tag

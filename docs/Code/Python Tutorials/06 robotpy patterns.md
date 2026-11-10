@@ -112,3 +112,5 @@ except StopIteration:
 ## After the lessons
 
 Open `robot/oi.py` with a mentor. Trace one button binding from the press to the motor command. You now know every Python tool it uses.
+
+Next lesson: **7. RobotPy in Our Robot Code**. It uses the real robot libraries on your own computer.

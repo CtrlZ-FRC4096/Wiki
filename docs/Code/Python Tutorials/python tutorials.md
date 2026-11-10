@@ -27,6 +27,8 @@ Learn the Python used in our robot code, one small piece at a time. Each lesson 
 {: .note }
 The robot libraries (WPILib, REV, Phoenix) are not available in the browser. This is why the exercises use plain Python and fake motors.
 
+Lesson 7 is different. It uses the real libraries, so you do it on your own computer. Its exercises are Python files with tests that you run with pytest.
+
 ## The lessons
 
 | # | Lesson | Used in |
@@ -37,3 +39,4 @@ The robot libraries (WPILib, REV, Phoenix) are not available in the browser. Thi
 | 4 | Functions | `get_motor_config()`, `shot_calc.py` |
 | 5 | Classes and Objects | every file in `robot/subsystems/` |
 | 6 | RobotPy Patterns | `@button.whenPressed`, lambdas, `yield` in `oi.py` |
+| 7 | RobotPy in Our Robot Code | every file in `robot/`, with the real libraries |
