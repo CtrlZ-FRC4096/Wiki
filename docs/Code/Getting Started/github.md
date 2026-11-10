@@ -14,6 +14,8 @@ Start with this [Introduction to Git in VS Code](https://code.visualstudio.com/d
 
 It is recommended to learn here about the [GitHub Flow](https://docs.github.com/en/get-started/using-github/github-flow)
 
+To practice Git commands hands-on, try [Learn Git Branching](https://learngitbranching.js.org/). It is an interactive, in-browser tutorial that visualizes your commits and branches as you run commands like `commit`, `branch`, `checkout`, `merge`, and `rebase`, so you can experiment without risking any real code.
+
 ## Branches
 We use branches to isolate feature developement, prevent conflicts with the main branch, and safely experiment. Branches makes a copy of the code and allows you to make changes which can be integrated later. 
 
@@ -67,6 +69,7 @@ Git version control can be a bit confusing so when in doubt use ask questions or
 
 Additional Resources:
 - [GitHub Flow Guide](https://docs.github.com/en/get-started/using-github/github-flow)
+- [Learn Git Branching](https://learngitbranching.js.org/) (interactive Git practice)
 - [Git Documentation](https://git-scm.com/doc)
 - [VSCode Git Tutorial](https://code.visualstudio.com/docs/sourcecontrol/intro-to-git)
 
