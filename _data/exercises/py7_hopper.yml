@@ -1,0 +1,164 @@
+title: Write a subsystem
+library: robotpy
+prompt: |
+  This is a short copy of `subsystems/hopper.py` in Robot-2026. Finish it.
+
+  - **3.1** `set_speed(speed)`: save `speed` in `self.commanded_speed`, then send the motor `controls.VelocityVoltage(speed)` with `set_control()`.
+  - **3.2** `get_speed()`: in simulation the motor does not turn, so return the commanded speed. On the robot, return `self.indexer_motor.get_velocity().value`. `self.robot.isSimulation()` tells you which.
+  - **3.3** `stop()`: set the commanded speed to 0 and send `controls.DutyCycleOut(0.0)`.
+  - **3.4** `periodic()`: check the state flags of the robot in this order. The first `True` one wins: `self.robot.clear_jam` runs at `JAM_SPEED`, `self.robot.shoot_intent` runs at `FEED_SPEED`, anything else calls `stop()`.
+  - **3.5** `log()`: put `"Hopper/Commanded Speed"` and `"Hopper/Actual Speed"` on the dashboard.
+
+  Do not call `periodic()` yourself. The checks run the scheduler, and the scheduler calls it in every loop.
+starter: |
+  from phoenix6 import configs, controls, hardware, signals
+  from wpilib import SmartDashboard
+  from wpilibextra.coroutine.subsystem import Subsystem
+
+  INDEXER_MOTOR_ID = 23
+  FEED_SPEED = 40.0   # rotations per second, toward the shooter
+  JAM_SPEED = -20.0   # rotations per second, backwards
+
+  class Hopper(Subsystem):
+      def __init__(self, robot):
+          super().__init__()
+          self.robot = robot
+          self.commanded_speed = 0.0
+          self.indexer_motor = hardware.TalonFX(INDEXER_MOTOR_ID, "rio")
+          config = configs.TalonFXConfiguration()
+          config.motor_output.inverted = signals.InvertedValue(1)
+          config.slot0.k_p = 15.0
+          config.slot0.k_v = 0.55
+          self.indexer_motor.configurator.apply(config)
+
+      def set_speed(self, speed):
+          # 3.1
+          raise NotImplementedError("write set_speed()")
+
+      def get_speed(self):
+          # 3.2
+          raise NotImplementedError("write get_speed()")
+
+      def stop(self):
+          # 3.3
+          raise NotImplementedError("write stop()")
+
+      def periodic(self):
+          # 3.4
+          pass
+
+      def log(self):
+          # 3.5
+          pass
+setup: |
+  import cz_sim as sim
+  from wpilib import SmartDashboard
+tests:
+- name: 3.1 set_speed saves the command
+  code: |
+    sim.reset()
+    hopper = Hopper(sim.FakeRobot())
+    hopper.set_speed(12.5)
+    assert hopper.commanded_speed == 12.5, f"set_speed(12.5) must save 12.5 in self.commanded_speed, got {hopper.commanded_speed}"
+- name: 3.2 get_speed in simulation
+  code: |
+    sim.reset()
+    hopper = Hopper(sim.FakeRobot())
+    hopper.set_speed(30)
+    assert hopper.get_speed() == 30, f"in simulation get_speed() returns the commanded speed (30), got {hopper.get_speed()}"
+- name: 3.3 stop
+  code: |
+    sim.reset()
+    hopper = Hopper(sim.FakeRobot())
+    hopper.set_speed(30)
+    hopper.stop()
+    assert hopper.commanded_speed == 0, f"stop() must set commanded_speed to 0, got {hopper.commanded_speed}"
+- name: 3.4 the scheduler runs periodic()
+  code: |
+    sim.reset()
+    robot = sim.FakeRobot()
+    hopper = Hopper(robot)
+    robot.shoot_intent = True
+    sim.step()  # one robot loop: the scheduler calls hopper.periodic()
+    assert hopper.get_speed() == FEED_SPEED, (
+        f"shoot_intent is True, so after one loop the hopper should feed at {FEED_SPEED}, got {hopper.get_speed()}")
+- name: 3.4 clear_jam wins over shoot_intent
+  code: |
+    sim.reset()
+    robot = sim.FakeRobot()
+    hopper = Hopper(robot)
+    robot.shoot_intent = True
+    robot.clear_jam = True
+    sim.step()
+    assert hopper.get_speed() == JAM_SPEED, f"clear_jam is checked first, so expect {JAM_SPEED}, got {hopper.get_speed()}"
+- name: 3.4 no flags means stop
+  code: |
+    sim.reset()
+    robot = sim.FakeRobot()
+    hopper = Hopper(robot)
+    robot.shoot_intent = True
+    sim.step()
+    robot.shoot_intent = False
+    sim.step()
+    assert hopper.get_speed() == 0, f"with no flags set the hopper must stop, got {hopper.get_speed()}"
+- name: 3.5 log puts numbers on the dashboard
+  code: |
+    sim.reset()
+    hopper = Hopper(sim.FakeRobot())
+    hopper.set_speed(17)
+    hopper.log()
+    commanded = SmartDashboard.getNumber("Hopper/Commanded Speed", -999)
+    actual = SmartDashboard.getNumber("Hopper/Actual Speed", -999)
+    assert commanded == 17, f'"Hopper/Commanded Speed" should be 17, got {commanded}'
+    assert actual == 17, f'"Hopper/Actual Speed" should be 17 in simulation, got {actual}'
+hints:
+- '3.2: if self.robot.isSimulation(): return self.commanded_speed, else return the velocity.'
+- '3.4: use if, elif and else, in the order of the list.'
+- '3.5: SmartDashboard.putNumber("Hopper/Commanded Speed", self.commanded_speed)'
+solution: |
+  from phoenix6 import configs, controls, hardware, signals
+  from wpilib import SmartDashboard
+  from wpilibextra.coroutine.subsystem import Subsystem
+
+  INDEXER_MOTOR_ID = 23
+  FEED_SPEED = 40.0   # rotations per second, toward the shooter
+  JAM_SPEED = -20.0   # rotations per second, backwards
+
+  class Hopper(Subsystem):
+      def __init__(self, robot):
+          super().__init__()
+          self.robot = robot
+          self.commanded_speed = 0.0
+          self.indexer_motor = hardware.TalonFX(INDEXER_MOTOR_ID, "rio")
+          config = configs.TalonFXConfiguration()
+          config.motor_output.inverted = signals.InvertedValue(1)
+          config.slot0.k_p = 15.0
+          config.slot0.k_v = 0.55
+          self.indexer_motor.configurator.apply(config)
+
+      def set_speed(self, speed):
+          self.commanded_speed = speed
+          self.indexer_motor.set_control(controls.VelocityVoltage(speed))
+
+      def get_speed(self):
+          if self.robot.isSimulation():
+              return self.commanded_speed
+          else:
+              return self.indexer_motor.get_velocity().value
+
+      def stop(self):
+          self.commanded_speed = 0.0
+          self.indexer_motor.set_control(controls.DutyCycleOut(0.0))
+
+      def periodic(self):
+          if self.robot.clear_jam:
+              self.set_speed(JAM_SPEED)
+          elif self.robot.shoot_intent:
+              self.set_speed(FEED_SPEED)
+          else:
+              self.stop()
+
+      def log(self):
+          SmartDashboard.putNumber("Hopper/Commanded Speed", self.commanded_speed)
+          SmartDashboard.putNumber("Hopper/Actual Speed", self.get_speed())
+locked: false

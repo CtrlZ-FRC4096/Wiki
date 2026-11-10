@@ -1,0 +1,115 @@
+title: Joystick math, a heading PID, and ChassisSpeeds
+library: robotpy
+prompt: |
+  The drivetrain default command in `oi.py` turns the sticks into a field velocity. Then `drive_with_pid()` turns the robot to a heading with a `PIDController`, and `drive()` makes `ChassisSpeeds`.
+
+  - **7.1** `square(x)`: `abs(x) * x`. It keeps the sign.
+  - **7.2** `drive_translation(stick_x, stick_y, should_flip)`: a stick gives -1 when pushed forward or left. On the field, forward is +x and left is +y. So `forward_back = -square(stick_y)` and `left_right = -square(stick_x)`. On red, multiply both by -1. Return `Translation2d(forward_back, left_right) * SWERVE_MAX_SPEED`.
+  - **7.3** `make_heading_pid()`: `PIDController(0.0275, 0.0, 0.0001)`, then `enableContinuousInput(0, 360)` and `setTolerance(2)`. From `drivetrain.py`.
+  - **7.4** `field_to_robot_speeds(vx, vy, omega, heading_degrees)`: `ChassisSpeeds.fromFieldRelativeSpeeds(vx, vy, omega, rotation)`, where the rotation is a `Rotation2d`.
+starter: |
+  from wpimath.controller import PIDController
+  from wpimath.geometry import Rotation2d, Translation2d
+  from wpimath.kinematics import ChassisSpeeds
+
+  SWERVE_MAX_SPEED = 4.75  # meters per second, from const.py
+
+  def square(x):
+      # 7.1
+      raise NotImplementedError("write square()")
+
+  def drive_translation(stick_x, stick_y, should_flip):
+      # 7.2
+      raise NotImplementedError("write drive_translation()")
+
+  def make_heading_pid():
+      # 7.3
+      raise NotImplementedError("write make_heading_pid()")
+
+  def field_to_robot_speeds(vx, vy, omega, heading_degrees):
+      # 7.4
+      raise NotImplementedError("write field_to_robot_speeds()")
+setup: |
+  from wpimath.controller import PIDController
+  from wpimath.geometry import Translation2d
+  from wpimath.kinematics import ChassisSpeeds
+
+  def close(a, b, tol=1e-6):
+      return abs(a - b) <= tol
+tests:
+- name: 7.1 square keeps the sign
+  code: |
+    for x, expected in [(0.5, 0.25), (-0.5, -0.25), (1.0, 1.0), (0.0, 0.0)]:
+        got = square(x)
+        assert close(got, expected), f"square({x}) should be {expected}, got {got}"
+- name: 7.2 full stick forward
+  code: |
+    got = drive_translation(0.0, -1.0, False)
+    assert isinstance(got, Translation2d), f"return a Translation2d, got {type(got).__name__}"
+    assert close(got.X(), 4.75) and close(got.Y(), 0.0), (
+        f"stick forward (y = -1) is full speed +x: expected (4.75, 0), got ({got.X():.2f}, {got.Y():.2f})")
+- name: 7.2 half stick left
+  code: |
+    got = drive_translation(-0.5, 0.0, False)
+    assert close(got.X(), 0.0) and close(got.Y(), 0.25 * 4.75), (
+        f"half stick left is +y at 0.25 of full speed: expected (0, 1.19), got ({got.X():.2f}, {got.Y():.2f})")
+- name: 7.2 red flips the directions
+  code: |
+    got = drive_translation(0.0, -1.0, True)
+    assert close(got.X(), -4.75), f"on red, stick forward drives -x: expected -4.75, got {got.X():.2f}"
+- name: 7.3 the heading PID turns the short way
+  code: |
+    pid = make_heading_pid()
+    assert isinstance(pid, PIDController), f"return a PIDController, got {type(pid).__name__}"
+    assert (pid.getP(), pid.getI(), pid.getD()) == (0.0275, 0.0, 0.0001), (
+        f"gains should be (0.0275, 0, 0.0001), got {(pid.getP(), pid.getI(), pid.getD())}")
+    out = pid.calculate(350, 10)
+    assert 0 < out < 1, (
+        f"from 350 to 10 degrees the short way is +20 degrees, so the output must be small and positive. "
+        f"Got {out:.2f}. Did you call enableContinuousInput(0, 360)?")
+- name: 7.3 the heading PID tolerance
+  code: |
+    pid = make_heading_pid()
+    pid.calculate(11.5, 10)
+    assert pid.atSetpoint(), "1.5 degrees from the target is inside a tolerance of 2: atSetpoint() should be True"
+    pid.calculate(13, 10)
+    assert not pid.atSetpoint(), "3 degrees from the target is outside the tolerance: atSetpoint() should be False"
+- name: 7.4 field speeds to robot speeds
+  code: |
+    got = field_to_robot_speeds(1.0, 0.0, 0.5, 90)
+    assert isinstance(got, ChassisSpeeds), f"return ChassisSpeeds, got {type(got).__name__}"
+    assert close(got.vx, 0.0) and close(got.vy, -1.0), (
+        f"the robot faces +y (90 degrees). Field +x is on the right side of the robot, so expect "
+        f"vx = 0, vy = -1. Got vx = {got.vx:.2f}, vy = {got.vy:.2f}")
+    assert close(got.omega, 0.5), f"the turn rate does not change: expected 0.5, got {got.omega}"
+hints:
+- '7.2: a Translation2d can be multiplied by a number: Translation2d(1, 0) * 4.75'
+- '7.3: make the controller, call the two methods on it, then return it.'
+- '7.4: Rotation2d.fromDegrees(heading_degrees)'
+solution: |
+  from wpimath.controller import PIDController
+  from wpimath.geometry import Rotation2d, Translation2d
+  from wpimath.kinematics import ChassisSpeeds
+
+  SWERVE_MAX_SPEED = 4.75  # meters per second, from const.py
+
+  def square(x):
+      return abs(x) * x
+
+  def drive_translation(stick_x, stick_y, should_flip):
+      forward_back = -square(stick_y)
+      left_right = -square(stick_x)
+      if should_flip:
+          forward_back *= -1
+          left_right *= -1
+      return Translation2d(forward_back, left_right) * SWERVE_MAX_SPEED
+
+  def make_heading_pid():
+      pid = PIDController(0.0275, 0.0, 0.0001)
+      pid.enableContinuousInput(0, 360)
+      pid.setTolerance(2)
+      return pid
+
+  def field_to_robot_speeds(vx, vy, omega, heading_degrees):
+      return ChassisSpeeds.fromFieldRelativeSpeeds(vx, vy, omega, Rotation2d.fromDegrees(heading_degrees))
+locked: false

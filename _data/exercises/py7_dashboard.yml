@@ -1,0 +1,96 @@
+title: The dashboard, the auto chooser, and match/case
+library: robotpy
+prompt: |
+  - **8.1** `log_shooter`: put `"Shooter/Fly Speed"` and `"Shooter/Hood Angle"` (numbers) and `"Shooter/Ready"` (a boolean) on the dashboard.
+  - **8.2** `make_auto_chooser`: make a `wpilib.SendableChooser`. The default option is `"Default (no auto)"` with the value 0. Add `"Right Trench"` (5) and `"Left Trench"` (6). Put it on the dashboard as `"Auto Chooser"`, then return it. From `robot.py`.
+  - **8.3** `pick_auto(choice)`: use `match`/`case`, as in `hopper.py`. 5 gives `"right_trench"`, 6 gives `"left_trench"`, and any other value gives `"no_auto"`.
+  - **8.4** `read_test_fly_speed`: read `"Test/Test fly speed"` from the dashboard, with the default 60.
+starter: |
+  import wpilib
+  from wpilib import SmartDashboard
+
+  def log_shooter(fly_speed, hood_angle, ready):
+      # 8.1
+      pass
+
+  def make_auto_chooser():
+      # 8.2
+      raise NotImplementedError("write make_auto_chooser()")
+
+  def pick_auto(choice):
+      # 8.3
+      raise NotImplementedError("write pick_auto()")
+
+  def read_test_fly_speed():
+      # 8.4
+      raise NotImplementedError("write read_test_fly_speed()")
+setup: |
+  import cz_sim as sim
+  import wpilib
+  from wpilib import SmartDashboard
+tests:
+- name: 8.1 log the shooter
+  code: |
+    log_shooter(55.0, 36.5, True)
+    speed = SmartDashboard.getNumber("Shooter/Fly Speed", -1)
+    hood = SmartDashboard.getNumber("Shooter/Hood Angle", -1)
+    ready = SmartDashboard.getBoolean("Shooter/Ready", False)
+    assert speed == 55.0, f'"Shooter/Fly Speed" should be 55.0, got {speed}. Check the key spelling.'
+    assert hood == 36.5, f'"Shooter/Hood Angle" should be 36.5, got {hood}'
+    assert ready is True, '"Shooter/Ready" should be True. Use putBoolean() for True/False values.'
+- name: 8.2 the default is no auto
+  code: |
+    chooser = make_auto_chooser()
+    assert isinstance(chooser, wpilib.SendableChooser), f"return a SendableChooser, got {type(chooser).__name__}"
+    assert chooser.getSelected() == 0, f"nothing picked yet: getSelected() should be the default 0, got {chooser.getSelected()}"
+- name: 8.2 the drive team picks Left Trench
+  code: |
+    chooser = make_auto_chooser()
+    assert "Left Trench" in sim.chooser_options("Auto Chooser"), (
+        'the chooser is not on the dashboard with a "Left Trench" option. '
+        'Did you call SmartDashboard.putData("Auto Chooser", chooser)?')
+    sim.choose("Auto Chooser", "Left Trench")
+    assert chooser.getSelected() == 6, f'"Left Trench" was picked: getSelected() should be 6, got {chooser.getSelected()}'
+- name: 8.3 pick the auto
+  code: |
+    for choice, expected in [(5, "right_trench"), (6, "left_trench"), (0, "no_auto"), (14, "no_auto")]:
+        got = pick_auto(choice)
+        assert got == expected, f"pick_auto({choice}) should be {expected!r}, got {got!r}"
+- name: 8.4 the default, then the dashboard value
+  code: |
+    assert read_test_fly_speed() == 60, "the key is not on the dashboard yet, so return the default 60"
+    SmartDashboard.putNumber("Test/Test fly speed", 62.5)
+    assert read_test_fly_speed() == 62.5, "a mentor typed 62.5 on the dashboard: return 62.5"
+hints:
+- '8.1: SmartDashboard.putNumber("Shooter/Fly Speed", fly_speed), and putBoolean for the last one.'
+- '8.2: chooser = wpilib.SendableChooser(), then setDefaultOption, addOption, and SmartDashboard.putData'
+- '8.3: match choice: then case 5: return "right_trench", ..., case _: return "no_auto"'
+solution: |
+  import wpilib
+  from wpilib import SmartDashboard
+
+  def log_shooter(fly_speed, hood_angle, ready):
+      SmartDashboard.putNumber("Shooter/Fly Speed", fly_speed)
+      SmartDashboard.putNumber("Shooter/Hood Angle", hood_angle)
+      SmartDashboard.putBoolean("Shooter/Ready", ready)
+
+  def make_auto_chooser():
+      chooser = wpilib.SendableChooser()
+      chooser.setDefaultOption("Default (no auto)", 0)
+      chooser.addOption("Right Trench", 5)
+      chooser.addOption("Left Trench", 6)
+      SmartDashboard.putData("Auto Chooser", chooser)
+      return chooser
+
+  def pick_auto(choice):
+      match choice:
+          case 5:
+              return "right_trench"
+          case 6:
+              return "left_trench"
+          case _:
+              return "no_auto"
+
+  def read_test_fly_speed():
+      return SmartDashboard.getNumber("Test/Test fly speed", 60)
+locked: false

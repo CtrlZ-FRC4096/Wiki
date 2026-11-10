@@ -8,10 +8,10 @@ last_modified_date: 2026-11-10
 # 7. RobotPy in Our Robot Code
 {: .no_toc }
 
-Lessons 1 to 6 teach Python with fake motors in your browser. This lesson
-uses the real libraries. It goes through all the RobotPy code that our robots
-used from 2024 to 2026, file by file. For each part, you write code on your
-own computer and run tests that tell you if it is correct.
+Lessons 1 to 6 teach Python with fake motors. This lesson uses the robot
+libraries: WPILib, wpimath, commands2, Phoenix 6 and our `wpilibextra`. It
+goes through all the RobotPy code that our robots used from 2024 to 2026, file
+by file. For each part, you write code on this page, and the page checks it.
 
 <details open markdown="block">
   <summary>Contents</summary>
@@ -40,57 +40,44 @@ Therefore what you learn here applies to all three robots.
 | 2024 | [Robot-2024-Public](https://github.com/CtrlZ-FRC4096/Robot-2024-Public/tree/main/robot) | Shooter and two intakes. Many `yield from` commands |
 
 {: .note }
-> Each behavior that this page describes was tested with RobotPy 2026, and
-> the practice tests check it again on your computer. If the page and a test
-> do not agree, the test is correct. Tell a code mentor.
+> The real RobotPy libraries cannot run in a browser. The exercises load a
+> small copy of them, written in plain Python, with the same names and the
+> same behavior for everything on this page. A wiki tool also runs every
+> check against the real RobotPy 2026. If the page and a check do not agree,
+> tell a code mentor.
 
-## Get the practice pack
+## How the exercises work
 
-The practice pack is in the wiki repository, in
-[`practice/robotpy`](https://github.com/CtrlZ-FRC4096/Wiki/tree/main/practice/robotpy).
-Do this one time, in PowerShell:
+The exercises work like the ones in lessons 1 to 6:
 
-```powershell
-git clone https://github.com/CtrlZ-FRC4096/Wiki.git
-cd Wiki\practice\robotpy
-py -3.14 -m venv .venv
-.\.venv\Scripts\python -m pip install --upgrade pip
-.\.venv\Scripts\python -m pip install -r requirements.txt
-```
+- Write your code in the box, then press **Run checks** (or Ctrl+Enter).
+- Each check shows ✓ when your code passes it, and ✗ with a message when it
+  does not.
+- **Hint** shows one hint at a time. **Show solution** shows an answer.
+- Your work is saved on this computer.
 
-This installs RobotPy 2026, commands2 and Phoenix 6 in a `.venv` folder.
-pytest, the test tool, comes with RobotPy. In VS Code, open the
-`practice/robotpy` folder and select `.venv\Scripts\python.exe` as the
-interpreter.
+The first run downloads Python and the copy of the robot libraries. This needs
+some seconds. Later runs start immediately.
 
-Run the tests for the first exercise:
+The checks use `cz_sim`, a wiki helper. It is not part of RobotPy. It moves
+the robot clock, presses buttons on a simulated controller, and runs a robot
+class mode by mode. See [How the checks work](#how-the-checks-work).
 
-```powershell
-.\.venv\Scripts\python -m pytest checks\test_ex1_geometry.py
-```
+Try it first:
 
-Most tests fail, because you did not write the code yet. Read the output:
+{% include interactive/python-exercise.html id="py7_try" %}
 
-- Each `.` is a test that passed. Each `F` is a test that failed.
-- Under `FAILURES`, each failed test shows the line of the test that failed.
-  The line that starts with `E` tells you what is wrong.
-- `NotImplementedError: Exercise 1.1` means that you did not write part 1.1
-  yet.
-
-Open the exercise file, replace each `TODO` with your code, and run the tests
-again. Continue until every test passes. Then go to the next exercise.
-
-| Exercise | File | Section of this page |
-|:---------|:-----|:---------------------|
-| 1 | `ex1_geometry.py` | [Field geometry](#field-geometry-wpimathgeometry) |
-| 2 | `ex2_phoenix.py` | [Phoenix 6](#phoenix-6-motors-and-sensors) |
-| 3 | `ex3_hopper.py` | [Subsystems](#subsystems) |
-| 4 | `ex4_oi.py` | [The operator interface](#the-operator-interface-oipy) |
-| 5 | `ex5_commands.py` | [Commands and coroutines](#commands-and-coroutines-coroutinespy) |
-| 6 | `ex6_autos.py` | [Autos](#autos-autoroutinespy) |
-| 7 | `ex7_drive_math.py` | [Drive math](#drive-math-pid-filters-and-kinematics) |
-| 8 | `ex8_dashboard.py` | [Dashboard and time](#dashboard-logging-and-time) |
-| R | `robot/` | [Run a whole robot](#run-a-whole-robot) |
+| Exercise | Section of this page |
+|:---------|:---------------------|
+| 1 | [Field geometry](#field-geometry-wpimathgeometry) |
+| 2 | [Phoenix 6](#phoenix-6-motors-and-sensors) |
+| 3 | [Subsystems](#subsystems) |
+| 4 | [The operator interface](#the-operator-interface-oipy) |
+| 5 | [Commands and coroutines](#commands-and-coroutines-coroutinespy) |
+| 6 | [Autos](#autos-autoroutinespy) |
+| 7 | [Drive math](#drive-math-pid-filters-and-kinematics) |
+| 8 | [Dashboard and time](#dashboard-logging-and-time) |
+| R | [Run a whole robot](#run-a-whole-robot) |
 
 ## The libraries
 
@@ -303,7 +290,8 @@ Two facts that surprise people:
 - **`periodic()` runs in every mode, also when the robot is disabled.** On
   the field, a disabled robot cannot move its motors. But a flag that stays
   `True` makes `periodic()` command the motor again in the next loop. The
-  practice robot clears its flags in `disabled_mode()` for this reason.
+  robot in the last exercise clears its flags in `disabled_mode()` for this
+  reason.
 - **`registerSubsystem()` is not necessary.** `robot.py` calls
   `self.scheduler.registerSubsystem(subsystem)` for each subsystem. A
   `Subsystem` already did that in `super().__init__()`. RobotPy 2026 prints
@@ -320,8 +308,12 @@ The second line replaces the first. Our `Subsystem` is the commands2
 `Subsystem` plus one feature: `setDefaultCommand` works as a decorator. See
 [default commands](#default-commands).
 
-**Exercise 3** writes this hopper. Its tests run the scheduler, so you can
-see that `periodic()` runs without a call from you.
+### Exercise 3: write the hopper
+
+The checks run the scheduler, so you can see that `periodic()` runs without a
+call from you.
+
+{% include interactive/python-exercise.html id="py7_hopper" %}
 
 ## Phoenix 6: motors and sensors
 
@@ -354,8 +346,8 @@ for the drivetrain.
 
 {: .note }
 > Phoenix 6 for 2026 prints a `DeprecationWarning` for the bus string. In
-> 2027 the code must use a `CANBus` object instead. The practice pack hides
-> the warning, because the 2026 robot code uses strings.
+> 2027 the code must use a `CANBus` object instead. The browser copy does
+> not print the warning.
 
 ### Configs
 
@@ -453,7 +445,9 @@ Each `get_...()` returns a status signal. `.value` is the number in it.
 Phoenix units are rotations, not degrees or meters. Convert them with the gear
 ratio. See [Unit Conversions](../../Tutorials/unit-conversions/).
 
-**Exercise 2** builds requests and configs, and its tests look inside them.
+### Exercise 2: requests and configs
+
+{% include interactive/python-exercise.html id="py7_phoenix" %}
 
 ## const.py
 
@@ -555,8 +549,9 @@ def flip_Translation2d(self, translation):
 self.tag_map = AprilTagFieldLayout.loadField(AprilTagField.k2026RebuiltWelded)
 ```
 
-**Exercise 1** writes the distance to the hub, the flip, and the point in
-front of the intake.
+### Exercise 1: distance, flip, and the point in front
+
+{% include interactive/python-exercise.html id="py7_geometry" %}
 
 ## Drive math: PID, filters and kinematics
 
@@ -643,8 +638,9 @@ The pose estimator (`SwerveDrive4PoseEstimator` in `poseEstimator.py`)
 combines the wheels, the gyro and the cameras with `addVisionMeasurement()`.
 That code is long. Read it after this lesson.
 
-**Exercise 7** writes the stick math, the heading PID and the field-to-robot
-speed change.
+### Exercise 7: stick math, heading PID, ChassisSpeeds
+
+{% include interactive/python-exercise.html id="py7_drive_math" %}
 
 ## The operator interface (oi.py)
 
@@ -770,7 +766,9 @@ A default command runs when no other command uses the subsystem. Our
 drivetrain starts, the default command stops. When that command ends, the
 default command starts again.
 
-**Exercise 4** writes a toggle, a trigger pair, the rumble and a held loop.
+### Exercise 4: bind the buttons
+
+{% include interactive/python-exercise.html id="py7_oi" %}
 
 ## Commands and coroutines (coroutines.py)
 
@@ -825,8 +823,9 @@ while not robot.shooter.shoot_ready:   # wait for a condition
 yield from self.wait(0.65)             # wait for time (2024)
 ```
 
-**Exercise 5** writes a shoot command that waits for the shooter, feeds for
-0.3 s, and stops.
+### Exercise 5: shoot, stop, and empty the hopper
+
+{% include interactive/python-exercise.html id="py7_commands" %}
 
 ## Autos (autoroutines.py)
 
@@ -909,8 +908,12 @@ value. `match`/`case` compares one value with each `case`, from the top.
 `case _:` matches anything. Then `autonomous_mode()` calls
 `self.scheduler.schedule(self.auto)`.
 
-**Exercise 6** builds three autos and makes the one-group error happen, so you
-know it when you see it.
+### Exercise 6: three autos
+
+The last part makes the one-group error happen, so you know it when you see
+it.
+
+{% include interactive/python-exercise.html id="py7_autos" %}
 
 ## Dashboard, logging and time
 
@@ -970,8 +973,9 @@ DriverStation.isFMSAttached()      # True on the competition field
 DriverStation.getBatteryVoltage()
 ```
 
-**Exercise 8** logs values, makes the auto chooser, picks an auto with
-`match`/`case`, and reads a value from the dashboard.
+### Exercise 8: log, choose, and read
+
+{% include interactive/python-exercise.html id="py7_dashboard" %}
 
 ## Python features in our code
 
@@ -1003,98 +1007,76 @@ explain all of them.
 
 ## Run a whole robot
 
-`practice/robotpy/robot` is a small robot with the same layout as
-`Robot-2026/robot`: `robot.py`, `oi.py`, `const.py`, `subsystems/`,
-`tests/`, and a copy of `wpilibextra`. It has one intake and one auto.
+The last exercise is a small robot with the same parts as Robot-2026: the
+constants, an intake subsystem, an OI, and a `Robot` class on
+`CoroutineRobot`. It has one intake and one auto. The checks start the robot
+and run it mode by mode, 50 loops each second, the same way the robot tests
+in RobotPy do.
 
-Do the three parts, then run the robot:
+{% include interactive/python-exercise.html id="py7_robot" %}
 
-1. **R.1** in `subsystems/intake.py`: write `periodic()`.
-2. **R.2** in `oi.py`: bind the left trigger.
-3. **R.3** in `robot.py`: write `make_auto()`.
+### The same robot on your computer
 
-From `practice\robotpy\robot`:
+Robot-2026 runs on your computer in the RobotPy simulator. Follow section 4 of
+the [Setup](../../Getting%20Started/setup/) page, then from
+`Robot-2026/robot`:
 
 ```powershell
-..\.venv\Scripts\python -m robotpy sim
+.\.venv\Scripts\python -m robotpy sim
 ```
-
-The simulator window opens:
 
 1. Drag **Keyboard 0** from **System Joysticks** into **Joystick 0**.
 2. Select **Teleop**.
-3. Hold the key for axis 2. On an Xbox controller, axis 2 is the left
-   trigger. The keyboard settings window shows which key it is.
-4. In the **NetworkTables** view, watch `Intake/Commanded Speed` change.
-5. Press Ctrl+C in the terminal to stop.
+3. Use the keyboard settings window to see which keys move each axis. On an
+   Xbox controller, axis 2 is the left trigger.
+4. Watch the values change in the **NetworkTables** view.
 
 Until a joystick is connected, the terminal prints warnings that a joystick
 is missing. This is normal.
 
-Then run the robot tests:
-
-```powershell
-..\.venv\Scripts\python -m robotpy test
-```
-
-`robotpy test` runs the tests in `robot/tests`. `pyfrc_test.py` is the same
-file as in Robot-2026: it starts the robot in each mode and fails if the code
-crashes. `test_practice_robot.py` drives the robot. It holds the left trigger
-and checks the intake speed, and runs the auto two times.
-
 {: .note }
-> The copy of `wpilibextra` in the practice pack has one change. In Robot-2026,
-> `CoroutineRobot` makes `robotInit()` and the other mode methods inside
-> `__init__`. pyfrc cannot see when the robot started, so every
-> `robotpy test` test times out. The copy makes them normal methods. The
-> robot behaves the same way. Ask a mentor before you change this in the
-> robot code.
+> `python -m robotpy test` cannot run the Robot-2026 tests yet. In
+> Robot-2026, `CoroutineRobot` makes `robotInit()` and the other mode
+> methods inside `__init__`. The test runner cannot see when the robot
+> started, so every test times out. The robot itself runs correctly. Ask a
+> mentor before you change this.
 
-## How the tests work
+## How the checks work
 
-The tests are normal Python files. A function whose name starts with `test_`
-is one test. It fails if an `assert` is false or an error occurs:
+Each check is a short Python program that runs after your code. A check
+passes if it raises no error. This is one check from exercise 3:
 
 ```python
-def test_3_4_scheduler_runs_periodic(robot, step):
-    hopper = ex.Hopper(robot)
-    robot.shoot_intent = True
-    step()  # one robot loop: the scheduler calls hopper.periodic()
-    assert hopper.get_speed() == ex.FEED_SPEED, "shoot_intent is True, so ..."
+sim.reset()
+robot = sim.FakeRobot()
+hopper = Hopper(robot)
+robot.shoot_intent = True
+sim.step()  # one robot loop: the scheduler calls hopper.periodic()
+assert hopper.get_speed() == FEED_SPEED, "shoot_intent is True, so ..."
 ```
 
-The arguments `robot` and `step` are **fixtures**. pytest makes them before
-the test, from `checks/conftest.py`:
+`sim` is `cz_sim`, the wiki helper:
 
-| Fixture | What it gives the test |
-|:--------|:-----------------------|
-| `robot` | A `FakeRobot` with the state flags that the exercises use |
-| `step` | `step()` runs one 20 ms loop, `step(10)` runs ten, `step.seconds(0.5)` runs 25 |
-| `driver1` | A simulated controller on port 0: `press("A")`, `set_axis("RightTrigger", 0.8)`, `set_pov(180)` |
+| Helper | What it does |
+|:-------|:-------------|
+| `sim.reset()` | Makes a new scheduler, starts the clock at 0, and enables the robot in teleop |
+| `sim.step()`, `sim.step(10)` | Moves the clock 20 ms and runs the scheduler, one time or 10 times |
+| `sim.step_seconds(0.5)` | The same, for 0.5 seconds (25 loops) |
+| `sim.Gamepad(0)` | A simulated controller on port 0: `press("A")`, `set_axis("RightTrigger", 0.8)`, `set_pov(180)`, `rumble()` |
+| `sim.FakeRobot()` | An object with the state flags that the exercises use, in place of the `Robot` from `robot.py` |
+| `sim.choose("Auto Chooser", "Left Trench")` | Picks an option in a chooser, as the drive team does on the dashboard |
+| `sim.RobotRunner(Robot)` | Makes the robot and runs it: `step_timing(seconds=1.0, autonomous=True, enabled=True)` |
 
-Before each test, `conftest.py` resets the Driver Station, makes a new
-scheduler, enables the robot, and stops the clock. Time moves only when a
-test calls `step`. Therefore a test gives the same result on every computer.
-
-Useful pytest options:
-
-```powershell
-.\.venv\Scripts\python -m pytest checks\test_ex4_oi.py -k rumble   # only tests with "rumble" in the name
-.\.venv\Scripts\python -m pytest -x                                 # stop at the first failure
-.\.venv\Scripts\python -m pytest -v                                 # one line for each test
-```
-
-The robot tests in `robot/tests` use two fixtures from pyfrc instead:
-`robot`, the real `Robot` object, and `control`, which runs it:
-`control.step_timing(seconds=1.0, autonomous=True, enabled=True)`.
+The clock moves only when a check calls `step`. Therefore a check gives the
+same result every time. Use `cz_sim` in the **Try it** box to test your own
+ideas.
 
 ## Common errors
 
 | You see | The cause |
 |:--------|:----------|
-| `NotImplementedError: Exercise 3.1` | You did not write that part yet |
-| `ModuleNotFoundError: No module named 'wpilib'` | The wrong Python. Use `.\.venv\Scripts\python` |
-| `ModuleNotFoundError: No module named 'wpilibextra'` | The wrong folder. Run pytest in `practice\robotpy` |
+| `NotImplementedError: write set_speed()` | You did not write that part yet |
+| `AttributeError: ... has no attribute ...` in the browser | A typing error, or a part of the library that the browser copy does not have. The copy has only what our code uses |
 | `IllegalCommandUse: Commands that have been composed ...` | One command object is in two groups |
 | `TypeError: 'generator' object is not callable` | You called a `@commandify` command: `x()` instead of `x` |
 | A `whenHeld` binding does its work one time only | A plain function runs one time. Use `while True: ... yield` |
@@ -1106,11 +1088,13 @@ The robot tests in `robot/tests` use two fixtures from pyfrc instead:
 
 ## Answers
 
-The solutions are in
-[`tools/robotpy-practice/solutions`](https://github.com/CtrlZ-FRC4096/Wiki/tree/main/tools/robotpy-practice/solutions).
-Try each exercise first. A test that fails tells you more than an answer
-that you read. Mentors check the pack with
-`python tools/validate-robotpy-practice.py`.
+**Show solution** in each exercise shows an answer. Try each exercise first.
+A check that fails tells you more than an answer that you read.
+
+Mentors: after you change an exercise or the browser copy, run two tools.
+`python3 tools/validate-exercises.py` checks every exercise.
+`python3 tools/validate-robotpy-browser.py --robotpy PATH/TO/python` also runs
+every check against the real RobotPy 2026. Give it a Python that has RobotPy.
 
 ## After this lesson
 

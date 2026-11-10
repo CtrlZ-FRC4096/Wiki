@@ -27,9 +27,3 @@ playwright-report/
 
 # Python bytecode from the validators
 __pycache__/
-
-# RobotPy practice pack (practice/robotpy): the local Python environment,
-# pytest's cache, and the files Phoenix 6 simulation writes
-.venv/
-.pytest_cache/
-ctre_sim/

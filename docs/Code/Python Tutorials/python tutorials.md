@@ -27,7 +27,7 @@ Learn the Python used in our robot code, one small piece at a time. Each lesson 
 {: .note }
 The robot libraries (WPILib, REV, Phoenix) are not available in the browser. This is why the exercises use plain Python and fake motors.
 
-Lesson 7 is different. It uses the real libraries, so you do it on your own computer. Its exercises are Python files with tests that you run with pytest.
+Lesson 7 is different. Its exercises load a small copy of the robot libraries, written in plain Python. You use the same imports and the same code as on the robot.
 
 ## The lessons
 

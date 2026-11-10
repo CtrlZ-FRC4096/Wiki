@@ -52,7 +52,7 @@
     }
   }
 
-  function runPython(src, code, tests, setup, handlers) {
+  function runPython(src, code, tests, setup, library, handlers) {
     var id = nextRunId++;
     pending[id] = {
       onStatus: handlers.onStatus,
@@ -67,7 +67,7 @@
         );
       }, RUN_TIMEOUT_MS)
     };
-    getWorker(src).postMessage({ id: id, code: code, tests: tests, setup: setup });
+    getWorker(src).postMessage({ id: id, code: code, tests: tests, setup: setup, library: library });
   }
 
   /* ------------------------------------------------------------------ */
@@ -195,6 +195,7 @@
   function setup(root) {
     var id = root.getAttribute("data-exercise-id");
     var workerUrl = root.getAttribute("data-worker-url");
+    var libraryUrl = root.getAttribute("data-library-url") || "";
     var dataNode = root.querySelector(".cz-exercise__data");
     if (!dataNode) return;
     var data = JSON.parse(dataNode.textContent);
@@ -230,7 +231,7 @@
       output.innerHTML = "";
       status.textContent = "Starting…";
 
-      runPython(workerUrl, textarea.value, data.tests || [], data.setup || "", {
+      runPython(workerUrl, textarea.value, data.tests || [], data.setup || "", libraryUrl, {
         onStatus: function (message) { status.textContent = message; },
         onResult: function (payload) {
           runBtn.disabled = false;

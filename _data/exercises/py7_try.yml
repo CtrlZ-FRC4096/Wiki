@@ -1,0 +1,29 @@
+title: 'Try it: the robot libraries in your browser'
+library: robotpy
+prompt: |
+  This code uses the same imports as our robot code. Run it. Then change the robot position or the number of loops, and run it again.
+
+  `cz_sim` is not part of RobotPy. It is a wiki helper that moves the robot clock: `cz_sim.step(5)` runs five 20 ms loops of the scheduler.
+
+  `commandify` prints a line when it makes a command. The robot code prints the same line.
+starter: |
+  from wpimath.geometry import Pose2d, Rotation2d, Translation2d
+  from wpilibextra.coroutine import commandify
+  import cz_sim
+
+  robot_pose = Pose2d(2.0, 1.0, Rotation2d.fromDegrees(90))
+  hub = Translation2d(4.6, 4.0)
+  print('distance to the hub:', (hub - robot_pose.translation()).norm())
+
+  cz_sim.reset()   # a new scheduler, and the robot enabled in teleop
+
+  @commandify
+  def count_to_three():
+      for n in range(1, 4):
+          print('loop', n)
+          yield
+      print('the command is done')
+
+  count_to_three.schedule()
+  cz_sim.step(5)
+locked: false

@@ -1,0 +1,39 @@
+{
+  "about": "Files of the browser copy of RobotPy. The exercise page loads each one. Keep this list complete: tools/validate-robotpy-browser.py checks it.",
+  "packages": [
+    "commands2",
+    "cz_sim",
+    "phoenix6",
+    "wpilib",
+    "wpilibextra",
+    "wpimath"
+  ],
+  "files": [
+    "commands2/__init__.py",
+    "commands2/button.py",
+    "commands2/exceptions.py",
+    "cz_sim.py",
+    "phoenix6/__init__.py",
+    "phoenix6/configs.py",
+    "phoenix6/controls.py",
+    "phoenix6/hardware.py",
+    "phoenix6/signals.py",
+    "phoenix6/status_code.py",
+    "wpilib/__init__.py",
+    "wpilib/_sim.py",
+    "wpilib/interfaces.py",
+    "wpilibextra/coroutine/__init__.py",
+    "wpilibextra/coroutine/coroutine_command.py",
+    "wpilibextra/coroutine/coroutine_robot.py",
+    "wpilibextra/coroutine/subsystem.py",
+    "wpilibextra/customcontroller/__init__.py",
+    "wpilibextra/customcontroller/custom_analog.py",
+    "wpilibextra/customcontroller/custom_button.py",
+    "wpilibextra/customcontroller/xbox_command_controller.py",
+    "wpimath/__init__.py",
+    "wpimath/controller.py",
+    "wpimath/geometry.py",
+    "wpimath/kinematics.py",
+    "wpimath/units.py"
+  ]
+}

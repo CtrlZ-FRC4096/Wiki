@@ -1,0 +1,169 @@
+title: Commands as coroutines
+library: robotpy
+prompt: |
+  A short copy of `coroutines.py` in Robot-2026. `@commandify` makes a command from a function. Each `yield` ends one loop. The command finishes when the function reaches its end.
+
+  - **5.1** `stop_intake`: set `robot.is_intaking` to `False`. A plain function is fine.
+  - **5.2** `shoot`: set `robot.shoot_intent = True`, wait until `robot.shooter_ready` is `True`, set `robot.feeding = True`, wait 0.3 seconds, then set `feeding` and `shoot_intent` back to `False`.
+  - **5.3** `empty_hopper`: set `robot.shoot_intent = True`, wait while `robot.fuel_in_hopper` is more than 0, then set `shoot_intent` to `False`.
+
+  Store each command with `self.name = name`. **Do not call it**: `self.name = name()` makes a broken command.
+starter: |
+  from wpilib import Timer
+  from wpilibextra.coroutine import commandify
+
+  def wait(seconds):
+      # The same as Robot.wait() in robot.py.
+      timer = Timer()
+      timer.start()
+      while not timer.hasElapsed(seconds):
+          yield
+
+  class Coroutines:
+      def __init__(self, robot):
+          self.robot = robot
+
+          # Complete example.
+          @commandify
+          def intake():
+              robot.is_intaking = True
+              yield
+
+          self.intake = intake
+
+          # 5.1 stop_intake
+
+          # 5.2 shoot  (wait for time with: yield from wait(0.3))
+
+          # 5.3 empty_hopper
+setup: |
+  import cz_sim as sim
+  from commands2 import Command
+
+  def get_command(coroutines, name):
+      cmd = getattr(coroutines, name, None)
+      assert cmd is not None, f"store the command in self.{name}"
+      assert isinstance(cmd, Command), f"self.{name} must be a Command made by @commandify, got {type(cmd).__name__}"
+      return cmd
+
+  def run(loops=1):
+      try:
+          sim.step(loops)
+      except TypeError as e:
+          raise AssertionError(f"the command crashed: {e}. Did you write self.x = x()? Store the command itself: self.x = x")
+tests:
+- name: the example intake command still works
+  code: |
+    sim.reset(); robot = sim.FakeRobot(); co = Coroutines(robot)
+    co.intake.schedule()
+    run(2)
+    assert robot.is_intaking is True, "the example intake command must still set is_intaking"
+- name: 5.1 stop_intake
+  code: |
+    sim.reset(); robot = sim.FakeRobot(); co = Coroutines(robot)
+    robot.is_intaking = True
+    get_command(co, "stop_intake").schedule()
+    run(2)
+    assert robot.is_intaking is False, "stop_intake must set robot.is_intaking to False"
+- name: 5.2 shoot waits for the shooter
+  code: |
+    sim.reset(); robot = sim.FakeRobot(); co = Coroutines(robot)
+    shoot = get_command(co, "shoot")
+    shoot.schedule()
+    run(1)
+    assert robot.shoot_intent is True, "shoot must set shoot_intent = True first"
+    run(25)
+    assert robot.feeding is False, (
+        "the shooter is not ready yet, so shoot must NOT feed. Wait with: while not robot.shooter_ready: yield")
+    assert shoot.isScheduled(), "shoot must keep running while it waits for the shooter"
+- name: 5.2 shoot feeds for 0.3 seconds
+  code: |
+    sim.reset(); robot = sim.FakeRobot(); co = Coroutines(robot)
+    shoot = get_command(co, "shoot")
+    shoot.schedule()
+    run(3)
+    robot.shooter_ready = True
+    run(2)
+    assert robot.feeding is True, "the shooter is ready: shoot should set feeding = True"
+    sim.step_seconds(0.2)
+    assert robot.feeding is True, "0.2 s into the feed, feeding should still be True"
+    sim.step_seconds(0.2)
+    assert robot.feeding is False, "after 0.3 s, feeding should be False"
+    assert robot.shoot_intent is False, "at the end, shoot_intent should be False"
+    assert not shoot.isScheduled(), "shoot should be finished, so the scheduler removes it"
+- name: 5.3 empty_hopper runs until the hopper is empty
+  code: |
+    sim.reset(); robot = sim.FakeRobot(); co = Coroutines(robot)
+    empty = get_command(co, "empty_hopper")
+    robot.fuel_in_hopper = 3
+    empty.schedule()
+    run(2)
+    assert robot.shoot_intent is True, "empty_hopper must set shoot_intent = True"
+    for fuel in (2, 1):
+        robot.fuel_in_hopper = fuel
+        run(5)
+        assert empty.isScheduled(), f"{fuel} fuel left: empty_hopper must still be running"
+    robot.fuel_in_hopper = 0
+    run(2)
+    assert not empty.isScheduled(), "the hopper is empty: empty_hopper must finish"
+    assert robot.shoot_intent is False, "at the end, shoot_intent should be False"
+- name: 5.3 empty_hopper ends at once with no fuel
+  code: |
+    sim.reset(); robot = sim.FakeRobot(); co = Coroutines(robot)
+    empty = get_command(co, "empty_hopper")
+    robot.fuel_in_hopper = 0
+    empty.schedule()
+    run(3)
+    assert not empty.isScheduled(), "with no fuel, empty_hopper must finish at once"
+hints:
+- 'Each command: @commandify above def name():, then self.name = name after it.'
+- '5.2: while not robot.shooter_ready: yield'
+- '5.3: while robot.fuel_in_hopper > 0: yield'
+solution: |
+  from wpilib import Timer
+  from wpilibextra.coroutine import commandify
+
+  def wait(seconds):
+      timer = Timer()
+      timer.start()
+      while not timer.hasElapsed(seconds):
+          yield
+
+  class Coroutines:
+      def __init__(self, robot):
+          self.robot = robot
+
+          @commandify
+          def intake():
+              robot.is_intaking = True
+              yield
+
+          self.intake = intake
+
+          @commandify
+          def stop_intake():
+              robot.is_intaking = False
+
+          self.stop_intake = stop_intake
+
+          @commandify
+          def shoot():
+              robot.shoot_intent = True
+              while not robot.shooter_ready:
+                  yield
+              robot.feeding = True
+              yield from wait(0.3)
+              robot.feeding = False
+              robot.shoot_intent = False
+
+          self.shoot = shoot
+
+          @commandify
+          def empty_hopper():
+              robot.shoot_intent = True
+              while robot.fuel_in_hopper > 0:
+                  yield
+              robot.shoot_intent = False
+
+          self.empty_hopper = empty_hopper
+locked: false

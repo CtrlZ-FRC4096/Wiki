@@ -1,8 +1,0 @@
-# Everything the practice pack needs, from PyPI:
-#   python -m pip install -r requirements.txt
-#
-# RobotPy 2026 with commands2 (pytest and pyfrc come with RobotPy), and the
-# 2026 Phoenix 6 library. The "<2027" keeps the 2026 versions, the same season
-# as Robot-2026.
-robotpy[commands2]>=2026.2.2,<2027
-phoenix6>=26.1,<27

@@ -7,6 +7,9 @@
 
   The exercise itself lives in _data/exercises/<id>.yml so that contributors
   only ever edit Markdown and YAML. See docs/Style Guide for the format.
+
+  `library: robotpy` in the yml loads assets/py/robotpy (a browser copy of
+  the RobotPy libraries) before the student's code runs.
 {%- endcomment -%}
 
 {%- assign ex = site.data.exercises[include.id] -%}
@@ -27,9 +30,13 @@
   {%- assign cz_exercise_assets = true -%}
 {%- endunless -%}
 
+{%- if ex.library -%}
+  {%- capture cz_library_path -%}/assets/py/{{ ex.library }}/manifest.json{%- endcapture -%}
+{%- endif -%}
 <div class="cz-exercise cz-pyex"
      data-exercise-id="{{ include.id }}"
-     data-worker-url="{{ '/assets/js/interactive/python-worker.js' | relative_url }}?v={{ site.time | date: '%s' }}">
+     data-worker-url="{{ '/assets/js/interactive/python-worker.js' | relative_url }}?v={{ site.time | date: '%s' }}"
+     {%- if ex.library %} data-library-url="{{ cz_library_path | relative_url }}?v={{ site.time | date: '%s' }}"{% endif %}>
 
   <div class="cz-exercise__header">
     <span class="cz-exercise__badge">Try it</span>
