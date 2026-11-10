@@ -3,10 +3,10 @@ library: robotpy
 prompt: |
   A short copy of `oi.py` in Robot-2026. The POV DOWN binding is complete. Add four more:
 
-  - **4.1** When **A** is pressed, toggle `self.robot.is_intaking`.
-  - **4.2** While **the right trigger** is held, `self.robot.shoot_intent` is `True`. When it is released, set `shoot_intent` to `False` and `spin_down` to `True`. The trigger is analog, so use `RIGHT_TRIGGER_AS_BUTTON`.
-  - **4.3** When `self.rumble_button_d1` is pressed: rumble at 1, wait 0.5 s with a `Timer` and a loop that yields, rumble at 0, then set `self.robot.rumble_d1` to `False`. This is the rumble binding in Robot-2026.
-  - **4.4** While **Y** is held, add 2 to `self.robot.robot_oriented_angle` in every loop.
+  - **5.1** When **A** is pressed, toggle `self.robot.is_intaking`.
+  - **5.2** While **the right trigger** is held, `self.robot.shoot_intent` is `True`. When it is released, set `shoot_intent` to `False` and `spin_down` to `True`. The trigger is analog, so use `RIGHT_TRIGGER_AS_BUTTON`.
+  - **5.3** When `self.rumble_button_d1` is pressed: rumble at 1, wait 0.5 s with a `Timer` and a loop that yields, rumble at 0, then set `self.robot.rumble_d1` to `False`. This is the rumble binding in Robot-2026.
+  - **5.4** While **Y** is held, add 2 to `self.robot.robot_oriented_angle` in every loop.
 
   `whenHeld` starts the function when the button goes down and cancels it when the button goes up. A plain function runs **one** time. To do work in every loop, use `while True:` and `yield`.
 starter: |
@@ -29,13 +29,13 @@ starter: |
           def _():
               self.robot.robot_oriented_angle = 0.0
 
-          # 4.1 A toggles is_intaking
+          # 5.1 A toggles is_intaking
 
-          # 4.2 right trigger: held and released
+          # 5.2 right trigger: held and released
 
-          # 4.3 rumble for 0.5 seconds
+          # 5.3 rumble for 0.5 seconds
 
-          # 4.4 Y held turns 2 degrees each loop
+          # 5.4 Y held turns 2 degrees each loop
 setup: |
   import cz_sim as sim
 tests:
@@ -45,7 +45,7 @@ tests:
     pad.set_pov(180)
     sim.step()
     assert robot.robot_oriented_angle == 0.0, "POV DOWN must still set the angle to 0"
-- name: 4.1 A toggles the intake
+- name: 5.1 A toggles the intake
   code: |
     sim.reset(); pad = sim.Gamepad(0); robot = sim.FakeRobot(); OI(robot)
     pad.press("A"); sim.step()
@@ -53,13 +53,13 @@ tests:
     pad.release("A"); sim.step()
     pad.press("A"); sim.step()
     assert robot.is_intaking is False, "press A a second time: is_intaking should become False"
-- name: 4.1 holding A toggles one time
+- name: 5.1 holding A toggles one time
   code: |
     sim.reset(); pad = sim.Gamepad(0); robot = sim.FakeRobot(); OI(robot)
     pad.press("A"); sim.step(10)
     assert robot.is_intaking is True, (
         "hold A for 10 loops: is_intaking should toggle ONE time and stay True. Use whenPressed.")
-- name: 4.2 the trigger is held, then released
+- name: 5.2 the trigger is held, then released
   code: |
     sim.reset(); pad = sim.Gamepad(0); robot = sim.FakeRobot(); OI(robot)
     pad.set_axis("RightTrigger", 0.8); sim.step()
@@ -68,7 +68,7 @@ tests:
     pad.set_axis("RightTrigger", 0.0); sim.step()
     assert robot.shoot_intent is False, "right trigger released: shoot_intent should be False"
     assert robot.spin_down is True, "right trigger released: spin_down should be True"
-- name: 4.3 rumble for half a second
+- name: 5.3 rumble for half a second
   code: |
     sim.reset(); pad = sim.Gamepad(0); robot = sim.FakeRobot(); OI(robot)
     robot.rumble_d1 = True
@@ -79,7 +79,7 @@ tests:
     sim.step_seconds(0.3)
     assert pad.rumble() == 0.0, f"after 0.5 s the rumble should stop, got {pad.rumble()}"
     assert robot.rumble_d1 is False, "after the rumble, set robot.rumble_d1 back to False"
-- name: 4.3 other buttons work during the rumble
+- name: 5.3 other buttons work during the rumble
   code: |
     sim.reset(); pad = sim.Gamepad(0); robot = sim.FakeRobot(); OI(robot)
     robot.rumble_d1 = True
@@ -87,7 +87,7 @@ tests:
     pad.press("A"); sim.step()
     assert robot.is_intaking is True, (
         "other buttons must work while the controller rumbles. Wait with yield in a loop, never with time.sleep().")
-- name: 4.4 Y held turns in every loop
+- name: 5.4 Y held turns in every loop
   code: |
     sim.reset(); pad = sim.Gamepad(0); robot = sim.FakeRobot(); OI(robot)
     start = robot.robot_oriented_angle
@@ -99,9 +99,9 @@ tests:
     pad.release("Y"); sim.step(5)
     assert robot.robot_oriented_angle - start == 10, "after Y is released the angle must stop changing"
 hints:
-- '4.1: @self.driver1.A.whenPressed, then self.robot.is_intaking = not self.robot.is_intaking'
-- '4.2: two bindings on the same button: @self.driver1.RIGHT_TRIGGER_AS_BUTTON.whenHeld and .whenReleased'
-- '4.3: timer = Timer(), timer.start(), then: while not timer.hasElapsed(0.5): yield'
+- '5.1: @self.driver1.A.whenPressed, then self.robot.is_intaking = not self.robot.is_intaking'
+- '5.2: two bindings on the same button: @self.driver1.RIGHT_TRIGGER_AS_BUTTON.whenHeld and .whenReleased'
+- '5.3: timer = Timer(), timer.start(), then: while not timer.hasElapsed(0.5): yield'
 solution: |
   from wpilib import Timer
   from wpilibextra.customcontroller import XboxCommandController

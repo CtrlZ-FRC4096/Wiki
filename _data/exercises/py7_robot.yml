@@ -3,9 +3,9 @@ library: robotpy
 prompt: |
   This is a small robot with the same parts as Robot-2026: constants, a subsystem, an OI, and a `Robot` class built on `CoroutineRobot`. The checks start it and run it mode by mode, 50 loops each second, the same way RobotPy's robot tests do.
 
-  - **R.1** `Intake.periodic()`: the first `True` flag wins. `self.robot.clear_jam` runs at `JAM_SPEED`, `self.robot.is_intaking` runs at `INTAKE_SPEED`, and anything else calls `stop()`.
-  - **R.2** In `OI`: while the left trigger is held, `self.robot.is_intaking` is `True`. When it is released, it is `False`. Use `LEFT_TRIGGER_AS_BUTTON`.
-  - **R.3** `Robot.make_auto()`: intake for `AUTO_INTAKE_SECONDS`, then stop. Make two `@commandify` functions inside `make_auto()`, and return `SequentialCommandGroup(start_intake, WaitCommand(...), stop_intake)`. The checks run auto two times, so the commands must be new each time.
+  - **9.1** `Intake.periodic()`: the first `True` flag wins. `self.robot.clear_jam` runs at `JAM_SPEED`, `self.robot.is_intaking` runs at `INTAKE_SPEED`, and anything else calls `stop()`.
+  - **9.2** In `OI`: while the left trigger is held, `self.robot.is_intaking` is `True`. When it is released, it is `False`. Use `LEFT_TRIGGER_AS_BUTTON`.
+  - **9.3** `Robot.make_auto()`: intake for `AUTO_INTAKE_SECONDS`, then stop. Make two `@commandify` functions inside `make_auto()`, and return `SequentialCommandGroup(start_intake, WaitCommand(...), stop_intake)`. The checks run auto two times, so the commands must be new each time.
 starter: |
   from commands2 import CommandScheduler, SequentialCommandGroup, WaitCommand
   from phoenix6 import controls, hardware
@@ -43,7 +43,7 @@ starter: |
           self.motor.set_control(controls.DutyCycleOut(0.0))
 
       def periodic(self):
-          pass  # R.1
+          pass  # 9.1
 
       def log(self):
           SmartDashboard.putNumber("Intake/Commanded Speed", self.commanded_speed)
@@ -63,7 +63,7 @@ starter: |
           def _():
               self.robot.clear_jam = False
 
-          # R.2 the left trigger
+          # 9.2 the left trigger
 
   ### robot.py ###
   class Robot(CoroutineRobot):
@@ -99,7 +99,7 @@ starter: |
           self.scheduler.schedule(self.make_auto())
 
       def make_auto(self):
-          return SequentialCommandGroup()  # R.3
+          return SequentialCommandGroup()  # 9.3
 
       def teleop_mode(self):
           self.scheduler.cancelAll()
@@ -121,21 +121,21 @@ setup: |
   def auto(runner, seconds):
       runner.step_timing(seconds=seconds, autonomous=True, enabled=True)
 tests:
-- name: R.1 and R.2 the left trigger runs the intake
+- name: 9.1 and 9.2 the left trigger runs the intake
   code: |
     runner, robot, pad = start()
     teleop(runner, 0.5)
     assert robot.intake.get_speed() == 0, "the intake must be off at the start of teleop"
     pad.set_axis("LeftTrigger", 1.0)
     teleop(runner, 0.2)
-    assert robot.is_intaking, "R.2: holding the left trigger should set robot.is_intaking"
+    assert robot.is_intaking, "9.2: holding the left trigger should set robot.is_intaking"
     assert robot.intake.get_speed() == 0.85, (
-        f"R.1: is_intaking is True, so the intake should run at 85% (0.85), got {robot.intake.get_speed()}")
+        f"9.1: is_intaking is True, so the intake should run at 85% (0.85), got {robot.intake.get_speed()}")
     pad.set_axis("LeftTrigger", 0.0)
     teleop(runner, 0.2)
-    assert not robot.is_intaking, "R.2: releasing the left trigger should set robot.is_intaking to False"
-    assert robot.intake.get_speed() == 0, "R.1: with no flags set, the intake must stop"
-- name: R.1 clear_jam wins
+    assert not robot.is_intaking, "9.2: releasing the left trigger should set robot.is_intaking to False"
+    assert robot.intake.get_speed() == 0, "9.1: with no flags set, the intake must stop"
+- name: 9.1 clear_jam wins
   code: |
     runner, robot, pad = start()
     teleop(runner, 0.5)
@@ -143,15 +143,15 @@ tests:
     pad.set_pov(270)  # POV LEFT
     teleop(runner, 0.2)
     assert robot.intake.get_speed() == -0.30, (
-        f"R.1: clear_jam is checked first, so the intake should run at -30% (-0.30), got {robot.intake.get_speed()}")
-- name: R.3 auto intakes, then stops
+        f"9.1: clear_jam is checked first, so the intake should run at -30% (-0.30), got {robot.intake.get_speed()}")
+- name: 9.3 auto intakes, then stops
   code: |
     runner, robot, pad = start()
     auto(runner, 1.0)
-    assert robot.intake.get_speed() == 0.85, f"R.3: 1 s into auto the intake should run at 0.85, got {robot.intake.get_speed()}"
+    assert robot.intake.get_speed() == 0.85, f"9.3: 1 s into auto the intake should run at 0.85, got {robot.intake.get_speed()}"
     auto(runner, 1.5)
-    assert robot.intake.get_speed() == 0, f"R.3: after 2 s of auto the intake should stop, got {robot.intake.get_speed()}"
-- name: R.3 auto works two times
+    assert robot.intake.get_speed() == 0, f"9.3: after 2 s of auto the intake should stop, got {robot.intake.get_speed()}"
+- name: 9.3 auto works two times
   code: |
     runner, robot, pad = start()
     auto(runner, 2.5)
@@ -160,8 +160,8 @@ tests:
         auto(runner, 1.0)
     except Exception as e:
         raise AssertionError(
-            f"R.3: the second auto crashed: {type(e).__name__}. Make new commands inside make_auto() each time")
-    assert robot.intake.get_speed() == 0.85, "R.3: the second auto should intake too"
+            f"9.3: the second auto crashed: {type(e).__name__}. Make new commands inside make_auto() each time")
+    assert robot.intake.get_speed() == 0.85, "9.3: the second auto should intake too"
 - name: disabled stops everything
   code: |
     runner, robot, pad = start()
@@ -171,9 +171,9 @@ tests:
     runner.step_timing(seconds=0.2, autonomous=False, enabled=False)
     assert robot.intake.get_speed() == 0, "when the robot is disabled, every subsystem must stop and stay stopped"
 hints:
-- 'R.1: the same if / elif / else as the hopper in exercise 3, with set_speed(JAM_SPEED) and set_speed(INTAKE_SPEED).'
-- 'R.2: @self.driver1.LEFT_TRIGGER_AS_BUTTON.whenHeld and @self.driver1.LEFT_TRIGGER_AS_BUTTON.whenReleased'
-- 'R.3: inside make_auto(): @commandify above def start_intake(): self.is_intaking = True, and the same for stop_intake.'
+- '9.1: the same if / elif / else as the hopper in exercise 1, with set_speed(JAM_SPEED) and set_speed(INTAKE_SPEED).'
+- '9.2: @self.driver1.LEFT_TRIGGER_AS_BUTTON.whenHeld and @self.driver1.LEFT_TRIGGER_AS_BUTTON.whenReleased'
+- '9.3: inside make_auto(): @commandify above def start_intake(): self.is_intaking = True, and the same for stop_intake.'
 solution: |
   from commands2 import CommandScheduler, SequentialCommandGroup, WaitCommand
   from phoenix6 import controls, hardware

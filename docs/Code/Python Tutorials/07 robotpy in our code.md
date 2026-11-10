@@ -69,15 +69,15 @@ Try it first:
 
 | Exercise | Section of this page |
 |:---------|:---------------------|
-| 1 | [Field geometry](#field-geometry-wpimathgeometry) |
+| 1 | [Subsystems](#subsystems) |
 | 2 | [Phoenix 6](#phoenix-6-motors-and-sensors) |
-| 3 | [Subsystems](#subsystems) |
-| 4 | [The operator interface](#the-operator-interface-oipy) |
-| 5 | [Commands and coroutines](#commands-and-coroutines-coroutinespy) |
-| 6 | [Autos](#autos-autoroutinespy) |
-| 7 | [Drive math](#drive-math-pid-filters-and-kinematics) |
+| 3 | [Field geometry](#field-geometry-wpimathgeometry) |
+| 4 | [Drive math](#drive-math-pid-filters-and-kinematics) |
+| 5 | [The operator interface](#the-operator-interface-oipy) |
+| 6 | [Commands and coroutines](#commands-and-coroutines-coroutinespy) |
+| 7 | [Autos](#autos-autoroutinespy) |
 | 8 | [Dashboard and time](#dashboard-logging-and-time) |
-| R | [Run a whole robot](#run-a-whole-robot) |
+| 9 | [Run a whole robot](#run-a-whole-robot) |
 
 ## The libraries
 
@@ -308,7 +308,7 @@ The second line replaces the first. Our `Subsystem` is the commands2
 `Subsystem` plus one feature: `setDefaultCommand` works as a decorator. See
 [default commands](#default-commands).
 
-### Exercise 3: write the hopper
+### Exercise 1: write the hopper
 
 The checks run the scheduler, so you can see that `periodic()` runs without a
 call from you.
@@ -549,7 +549,7 @@ def flip_Translation2d(self, translation):
 self.tag_map = AprilTagFieldLayout.loadField(AprilTagField.k2026RebuiltWelded)
 ```
 
-### Exercise 1: distance, flip, and the point in front
+### Exercise 3: distance, flip, and the point in front
 
 {% include interactive/python-exercise.html id="py7_geometry" %}
 
@@ -638,7 +638,7 @@ The pose estimator (`SwerveDrive4PoseEstimator` in `poseEstimator.py`)
 combines the wheels, the gyro and the cameras with `addVisionMeasurement()`.
 That code is long. Read it after this lesson.
 
-### Exercise 7: stick math, heading PID, ChassisSpeeds
+### Exercise 4: stick math, heading PID, ChassisSpeeds
 
 {% include interactive/python-exercise.html id="py7_drive_math" %}
 
@@ -689,7 +689,7 @@ def _():
 ```
 
 Each decorator makes a command from your function and binds it to the button.
-This is how they behave in our framework. The tests in exercise 4 check each
+This is how they behave in our framework. The tests in exercise 5 check each
 row:
 
 | Decorator | What happens |
@@ -766,7 +766,7 @@ A default command runs when no other command uses the subsystem. Our
 drivetrain starts, the default command stops. When that command ends, the
 default command starts again.
 
-### Exercise 4: bind the buttons
+### Exercise 5: bind the buttons
 
 {% include interactive/python-exercise.html id="py7_oi" %}
 
@@ -813,7 +813,7 @@ self.drive_to_zone_trench = drive_to_zone_trench
 
 A closed generator raises `GeneratorExit` at the `yield` where it stopped.
 Therefore `try: ... finally:` in the function runs when the command is
-cancelled. The stand-in intake in exercise 6 uses this to turn itself off.
+cancelled. The stand-in intake in exercise 7 uses this to turn itself off.
 
 ### Wait in a command
 
@@ -823,7 +823,7 @@ while not robot.shooter.shoot_ready:   # wait for a condition
 yield from self.wait(0.65)             # wait for time (2024)
 ```
 
-### Exercise 5: shoot, stop, and empty the hopper
+### Exercise 6: shoot, stop, and empty the hopper
 
 {% include interactive/python-exercise.html id="py7_commands" %}
 
@@ -908,7 +908,7 @@ value. `match`/`case` compares one value with each `case`, from the top.
 `case _:` matches anything. Then `autonomous_mode()` calls
 `self.scheduler.schedule(self.auto)`.
 
-### Exercise 6: three autos
+### Exercise 7: three autos
 
 The last part makes the one-group error happen, so you know it when you see
 it.
@@ -996,7 +996,7 @@ explain all of them.
 | `enumerate`, `zip` | `for idx, waypoint in enumerate(waypoints):` | A loop with the index, or over two lists |
 | Unpacking | `[*self.get_module_positions()]` | Puts the values of one list into a new list |
 | `*args`, `**kwargs` | `wpilibextra` | Any number of arguments |
-| `try` / `finally` | the intake in exercise 6 | The `finally` code always runs |
+| `try` / `finally` | the intake in exercise 7 | The `finally` code always runs |
 | numpy | `np.array([...])` in `const.py` | Camera calibration numbers |
 
 {: .warning }
@@ -1012,6 +1012,8 @@ constants, an intake subsystem, an OI, and a `Robot` class on
 `CoroutineRobot`. It has one intake and one auto. The checks start the robot
 and run it mode by mode, 50 loops each second, the same way the robot tests
 in RobotPy do.
+
+### Exercise 9: run the robot
 
 {% include interactive/python-exercise.html id="py7_robot" %}
 
@@ -1044,7 +1046,7 @@ is missing. This is normal.
 ## How the checks work
 
 Each check is a short Python program that runs after your code. A check
-passes if it raises no error. This is one check from exercise 3:
+passes if it raises no error. This is one check from exercise 1:
 
 ```python
 sim.reset()
