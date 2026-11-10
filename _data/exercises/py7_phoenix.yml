@@ -1,0 +1,110 @@
+title: Phoenix 6 requests and configs
+library: robotpy
+prompt: |
+  These functions build Phoenix 6 objects. They do not need a motor, so the checks can look inside what you return.
+
+  - **2.1** `intake_request(speed_percent)`: a `controls.DutyCycleOut`. It wants a fraction from -1 to 1, so 85 percent is 0.85. From `intake.set_intake_speed()`.
+  - **2.2** `flywheel_request(rps)`: a `controls.VelocityTorqueCurrentFOC`. The flywheel motor is mounted backwards, so send the negative of the speed. From `shooter.set_fly_speed()`.
+  - **2.3** `follower_request(leader_id, opposed)`: a `controls.Follower(leader_id, alignment)`. Use `signals.MotorAlignmentValue.OPPOSED` when `opposed` is `True`, and `ALIGNED` when it is `False`.
+  - **2.4** `get_motor_config(...)`: finish the config. Set brake mode, the three gains in `slot0`, and the current limits that the comment lists.
+starter: |
+  from phoenix6 import configs, controls, signals
+
+  def intake_request(speed_percent):
+      # 2.1
+      raise NotImplementedError("write intake_request()")
+
+  def flywheel_request(rotations_per_second):
+      # 2.2
+      raise NotImplementedError("write flywheel_request()")
+
+  def follower_request(leader_id, opposed):
+      # 2.3
+      raise NotImplementedError("write follower_request()")
+
+  def get_motor_config(inverted=0, k_p=0.0, k_v=0.0, k_s=0.0, supply_limit=40.0):
+      # 2.4 A shorter copy of robot.get_motor_config() in Robot-2026. Also set:
+      #   motor_output.neutral_mode                = signals.NeutralModeValue.BRAKE
+      #   slot0.k_p, slot0.k_v, slot0.k_s          = the gains passed in
+      #   current_limits.supply_current_limit        = supply_limit
+      #   current_limits.supply_current_limit_enable = True
+      #   current_limits.stator_current_limit        = 100
+      config = configs.TalonFXConfiguration()
+      config.motor_output.inverted = signals.InvertedValue(inverted)
+      return config
+setup: |
+  from phoenix6 import configs, controls, signals
+tests:
+- name: 2.1 the intake request is a fraction
+  code: |
+    req = intake_request(85)
+    assert isinstance(req, controls.DutyCycleOut), f"return controls.DutyCycleOut(...), got {type(req).__name__}"
+    assert abs(req.output - 0.85) < 1e-9, f"85 percent is an output of 0.85, got {req.output}"
+    assert abs(intake_request(-30).output + 0.30) < 1e-9, "-30 percent is an output of -0.30"
+- name: 2.2 the flywheel speed is sent negative
+  code: |
+    req = flywheel_request(50)
+    assert isinstance(req, controls.VelocityTorqueCurrentFOC), (
+        f"return controls.VelocityTorqueCurrentFOC(...), got {type(req).__name__}")
+    assert req.velocity == -50, f"the flywheel motor is mounted backwards: 50 rps must be sent as -50, got {req.velocity}"
+- name: 2.3 an opposed follower
+  code: |
+    req = follower_request(18, True)
+    assert isinstance(req, controls.Follower), f"return controls.Follower(...), got {type(req).__name__}"
+    assert req.leader_id == 18, f"the follower must follow motor 18, got {req.leader_id}"
+    assert req.motor_alignment == signals.MotorAlignmentValue.OPPOSED, (
+        f"opposed=True needs MotorAlignmentValue.OPPOSED, got {req.motor_alignment}")
+- name: 2.3 an aligned follower
+  code: |
+    req = follower_request(25, False)
+    assert req.motor_alignment == signals.MotorAlignmentValue.ALIGNED, (
+        f"opposed=False needs MotorAlignmentValue.ALIGNED, got {req.motor_alignment}")
+- name: 2.4 the gains go in slot0
+  code: |
+    config = get_motor_config(inverted=1, k_p=24.5, k_v=0.07, k_s=4.0)
+    assert isinstance(config, configs.TalonFXConfiguration), "return a TalonFXConfiguration"
+    got = (config.slot0.k_p, config.slot0.k_v, config.slot0.k_s)
+    assert got == (24.5, 0.07, 4.0), f"slot0 (k_p, k_v, k_s) should be (24.5, 0.07, 4.0), got {got}"
+    assert config.motor_output.inverted == signals.InvertedValue.CLOCKWISE_POSITIVE, (
+        "inverted=1 is InvertedValue.CLOCKWISE_POSITIVE")
+- name: 2.4 brake mode and current limits
+  code: |
+    config = get_motor_config(supply_limit=55)
+    assert config.motor_output.neutral_mode == signals.NeutralModeValue.BRAKE, (
+        f"set motor_output.neutral_mode to BRAKE, got {config.motor_output.neutral_mode}")
+    limits = config.current_limits
+    assert limits.supply_current_limit == 55, f"supply_current_limit should be 55, got {limits.supply_current_limit}"
+    assert limits.supply_current_limit_enable is True, "set supply_current_limit_enable to True"
+    assert limits.stator_current_limit == 100, f"stator_current_limit should be 100, got {limits.stator_current_limit}"
+hints:
+- '2.1: return controls.DutyCycleOut(speed_percent / 100)'
+- '2.3: choose the alignment with an if, then return controls.Follower(leader_id, alignment)'
+- '2.4: config.slot0.k_p = k_p, and so on. Set each field on its own line.'
+solution: |
+  from phoenix6 import configs, controls, signals
+
+  def intake_request(speed_percent):
+      return controls.DutyCycleOut(speed_percent / 100)
+
+  def flywheel_request(rotations_per_second):
+      return controls.VelocityTorqueCurrentFOC(-1 * rotations_per_second)
+
+  def follower_request(leader_id, opposed):
+      if opposed:
+          alignment = signals.MotorAlignmentValue.OPPOSED
+      else:
+          alignment = signals.MotorAlignmentValue.ALIGNED
+      return controls.Follower(leader_id, alignment)
+
+  def get_motor_config(inverted=0, k_p=0.0, k_v=0.0, k_s=0.0, supply_limit=40.0):
+      config = configs.TalonFXConfiguration()
+      config.motor_output.inverted = signals.InvertedValue(inverted)
+      config.motor_output.neutral_mode = signals.NeutralModeValue.BRAKE
+      config.slot0.k_p = k_p
+      config.slot0.k_v = k_v
+      config.slot0.k_s = k_s
+      config.current_limits.supply_current_limit = supply_limit
+      config.current_limits.supply_current_limit_enable = True
+      config.current_limits.stator_current_limit = 100
+      return config
+locked: false

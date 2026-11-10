@@ -116,6 +116,12 @@ compress_html:
   # ignore:
   #   envs: all
 
+# Jekyll leaves out files whose names start with "_". The browser copy of
+# RobotPy in assets/py/robotpy needs its Python package files on the site.
+include:
+  - __init__.py
+  - _sim.py
+
 exclude:
   - _site
   - node_modules

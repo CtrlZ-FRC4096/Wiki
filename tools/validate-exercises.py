@@ -12,12 +12,17 @@ grader in the browser, so a pass here means a pass on the page:
   - the starter must fail at least one check, or the exercise teaches nothing
   - every check must carry a message on its assert, because that message is
     the only feedback a student sees
+
+An exercise with `library: robotpy` runs with the browser copy of RobotPy in
+assets/py/robotpy, imported fresh for each run, the same as on the page. A
+"Try it" block (no tests and no solution) only has to run without an error.
 """
 
 import ast
 import contextlib
 import glob
 import io
+import json
 import os
 import sys
 import traceback
@@ -30,7 +35,36 @@ except ImportError:
 ROOT = os.path.join(os.path.dirname(os.path.abspath(__file__)), "..")
 
 
-def run(source, checks, setup=""):
+@contextlib.contextmanager
+def library(name):
+    """Make a library in assets/py importable, with fresh modules, as the page does."""
+    if not name:
+        yield
+        return
+    folder = os.path.join(ROOT, "assets", "py", name)
+    with open(os.path.join(folder, "manifest.json"), encoding="utf-8") as fp:
+        packages = json.load(fp)["packages"]
+
+    def forget():
+        for module in list(sys.modules):
+            if any(module == p or module.startswith(p + ".") for p in packages):
+                del sys.modules[module]
+
+    forget()
+    sys.path.insert(0, folder)
+    try:
+        yield
+    finally:
+        sys.path.remove(folder)
+        forget()
+
+
+def run(source, checks, setup="", lib=None):
+    with library(lib):
+        return _run(source, checks, setup)
+
+
+def _run(source, checks, setup=""):
     """Run one snippet, then each check against it. Same as the page does."""
     namespace = {"__name__": "__main__"}
     sink = io.StringIO()
@@ -82,6 +116,18 @@ def main():
     for path in paths:
         name = os.path.basename(path)
         exercise = yaml.safe_load(open(path, encoding="utf-8"))
+        lib = exercise.get("library")
+
+        if "tests" not in exercise and "solution" not in exercise:
+            # A "Try it" block: nothing to grade, but the starter must run.
+            result = run(exercise.get("starter", ""), [], "", lib)
+            broken = [r for r in result if not r[1]]
+            status = "FAIL" if broken else "ok  "
+            if broken:
+                problems += 1
+            print("%s  %-26s try-it block, the starter %s"
+                  % (status, name, "fails: " + broken[0][2][:80] if broken else "runs"))
+            continue
 
         for field in ("title", "starter", "tests", "solution"):
             if field not in exercise:
@@ -90,9 +136,9 @@ def main():
 
         checks = exercise.get("tests", [])
         setup = exercise.get("setup", "")
-        solved = run(exercise.get("solution", ""), checks, setup)
+        solved = run(exercise.get("solution", ""), checks, setup, lib)
         failed = [r for r in solved if not r[1]]
-        starter_failures = sum(1 for r in run(exercise.get("starter", ""), checks, setup) if not r[1])
+        starter_failures = sum(1 for r in run(exercise.get("starter", ""), checks, setup, lib) if not r[1])
 
         # A check with no message tells the student nothing useful. Read the
         # syntax tree rather than looking for a comma: a comma inside a call

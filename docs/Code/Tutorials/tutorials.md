@@ -100,6 +100,10 @@ solution: |
 Each check is a small Python program. It operates after the code that the
 student writes. A check passes if it raises no exception.
 
+To use the robot libraries in an exercise, add `library: robotpy` to the YAML
+file. The page then loads a browser copy of RobotPy from `assets/py/robotpy`
+before the code operates. Its README lists what the copy contains.
+
 **Put a message on every `assert`.** The student sees only that message.
 Therefore the message must give the expected value and the actual value.
 
@@ -151,6 +155,7 @@ PyYAML for the first one.
 | `python3 tools/validate-shoot.py` | The shoot-on-the-fly challenge. Measures how close each number of corrections gets |
 | `python3 tools/validate-vision.py` | The vision challenge. Only an answer that rewinds to the moment of the picture passes |
 | `python3 tools/validate-swerve2.py` | The second-order swerve challenge, including the case that divides by zero |
+| `python3 tools/validate-robotpy-browser.py --robotpy PATH/TO/python` | The browser copy of RobotPy in `assets/py/robotpy`, used by Python lesson 7. Runs every lesson 7 check with the copy and with the real RobotPy 2026. Both must agree. Needs a Python that has RobotPy, commands2 and Phoenix 6 |
 | `node tools/check-ste.js` | Sentence length, paragraph length and word use on the tutorial pages |
 | `node tools/lock-answers.js --check` | Every answer has an up-to-date encrypted copy |
 | `node tools/lock-answers.js --audit` | No answer reached the built site. Build first |

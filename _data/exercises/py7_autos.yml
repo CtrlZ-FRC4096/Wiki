@@ -1,0 +1,204 @@
+title: Build autos from command groups
+library: robotpy
+prompt: |
+  `autoroutines.py` in Robot-2026 builds every auto from command groups. The stand-in commands at the top are complete. Each one writes to `robot.events`, so the checks can see what ran and when.
+
+  - **6.1** `shoot_and_leave`: shoot, **then** drive the `"Leave"` path (1.5 s).
+  - **6.2** `grab_and_score`: drive path `P1` (2.0 s) and run the intake at the same time. Stop the intake when the path ends. **Then** shoot. The intake never ends by itself. Which group ends when **one** command ends?
+  - **6.3** `empty_then_park`: run `empty_hopper`, but give up after 1.0 s with `.withTimeout(1.0)`. **Then** drive the `"Park"` path (1.0 s).
+  - **6.4** The checks build `grab_and_score()` two times. A command object can be in **one** group only, so `self.p1` crashes the second time. Make a new path command each time.
+starter: |
+  from commands2 import ParallelCommandGroup, ParallelRaceGroup, SequentialCommandGroup
+  from wpilib import Timer
+  from wpilibextra.coroutine import CoroutineCommand
+
+  # ---- Stand-in commands. Complete. ----
+  def wait(seconds):
+      timer = Timer()
+      timer.start()
+      while not timer.hasElapsed(seconds):
+          yield
+
+  def drive_path(robot, name, seconds):
+      def path():
+          robot.events.append("start " + name)
+          yield from wait(seconds)
+          robot.events.append("end " + name)
+      return CoroutineCommand(path)
+
+  def intake(robot):
+      def run():
+          robot.is_intaking = True
+          try:
+              while True:
+                  yield
+          finally:  # runs when the command is cancelled
+              robot.is_intaking = False
+      return CoroutineCommand(run)
+
+  def shoot(robot):
+      def run():
+          robot.events.append("shoot")
+          yield from wait(0.5)
+      return CoroutineCommand(run)
+
+  def empty_hopper(robot):
+      def run():
+          robot.events.append("empty")
+          while robot.fuel_in_hopper > 0:
+              yield
+      return CoroutineCommand(run)
+
+  # ---- Your autos ----
+  class AutoRoutines:
+      def __init__(self, robot):
+          self.robot = robot
+          # Robot-2026 makes each path command one time and keeps it.
+          self.p1 = drive_path(robot, "P1", 2.0)
+
+      def shoot_and_leave(self):
+          # 6.1
+          raise NotImplementedError("write shoot_and_leave()")
+
+      def grab_and_score(self):
+          # 6.2 and 6.4
+          raise NotImplementedError("write grab_and_score()")
+
+      def empty_then_park(self):
+          # 6.3
+          raise NotImplementedError("write empty_then_park()")
+setup: |
+  import cz_sim as sim
+  from commands2 import Command
+
+  def start(auto):
+      assert isinstance(auto, Command), f"return a command group, got {type(auto).__name__}"
+      auto.schedule()
+      return auto
+tests:
+- name: 6.1 shoot, then leave
+  code: |
+    sim.reset(); robot = sim.FakeRobot()
+    auto = start(AutoRoutines(robot).shoot_and_leave())
+    sim.step_seconds(0.2)
+    assert robot.events == ["shoot"], f"first shoot, and only shoot. Events so far: {robot.events}"
+    sim.step_seconds(0.5)
+    assert robot.events == ["shoot", "start Leave"], f"after the 0.5 s shot, start the Leave path. Events: {robot.events}"
+    sim.step_seconds(1.6)
+    assert robot.events == ["shoot", "start Leave", "end Leave"], f"then the path ends. Events: {robot.events}"
+    assert not auto.isScheduled(), "the auto should be finished after the path"
+- name: 6.2 the intake stops when the path ends
+  code: |
+    sim.reset(); robot = sim.FakeRobot()
+    auto = start(AutoRoutines(robot).grab_and_score())
+    sim.step(2)
+    assert robot.events == ["start P1"], f"start with path P1. Events: {robot.events}"
+    assert robot.is_intaking, "the intake must run during the path"
+    sim.step_seconds(2.1)
+    assert "end P1" in robot.events, f"P1 takes 2 s and should be done. Events: {robot.events}"
+    assert not robot.is_intaking, (
+        "the path ended, so the intake must be cancelled. "
+        "ParallelCommandGroup waits for BOTH. Which group ends when ONE ends?")
+    sim.step_seconds(0.2)
+    assert robot.events[-1] == "shoot", f"after the path, shoot. Events: {robot.events}"
+    sim.step_seconds(0.5)
+    assert not auto.isScheduled(), "the auto should be finished after the shot"
+- name: 6.3 give up after one second
+  code: |
+    sim.reset(); robot = sim.FakeRobot()
+    robot.fuel_in_hopper = 1  # stuck: empty_hopper never ends by itself
+    auto = start(AutoRoutines(robot).empty_then_park())
+    sim.step_seconds(0.5)
+    assert robot.events == ["empty"], f"first empty the hopper. Events: {robot.events}"
+    sim.step_seconds(0.6)
+    assert robot.events == ["empty", "start Park"], (
+        f"after 1.0 s, give up on the hopper and park. Use .withTimeout(1.0). Events: {robot.events}")
+    sim.step_seconds(1.1)
+    assert not auto.isScheduled(), "the auto should be finished after the Park path"
+- name: 6.4 build the same auto two times
+  code: |
+    from commands2.exceptions import IllegalCommandUse
+    sim.reset(); robot = sim.FakeRobot()
+    autos = AutoRoutines(robot)
+    first = autos.grab_and_score()
+    try:
+        second = autos.grab_and_score()
+    except IllegalCommandUse:
+        raise AssertionError(
+            "IllegalCommandUse: the same command object is in two groups. "
+            "Make a new path command inside grab_and_score() each time it is called.")
+    start(second)
+    sim.step(2)
+    assert robot.events == ["start P1"], f"the second copy of the auto must run. Events: {robot.events}"
+hints:
+- '6.1: return SequentialCommandGroup(shoot(self.robot), drive_path(self.robot, "Leave", 1.5))'
+- '6.2: a ParallelRaceGroup ends when one of its commands ends.'
+- '6.4: use drive_path(self.robot, "P1", 2.0) inside grab_and_score(), not self.p1.'
+solution: |
+  from commands2 import ParallelCommandGroup, ParallelRaceGroup, SequentialCommandGroup
+  from wpilib import Timer
+  from wpilibextra.coroutine import CoroutineCommand
+
+  def wait(seconds):
+      timer = Timer()
+      timer.start()
+      while not timer.hasElapsed(seconds):
+          yield
+
+  def drive_path(robot, name, seconds):
+      def path():
+          robot.events.append("start " + name)
+          yield from wait(seconds)
+          robot.events.append("end " + name)
+      return CoroutineCommand(path)
+
+  def intake(robot):
+      def run():
+          robot.is_intaking = True
+          try:
+              while True:
+                  yield
+          finally:
+              robot.is_intaking = False
+      return CoroutineCommand(run)
+
+  def shoot(robot):
+      def run():
+          robot.events.append("shoot")
+          yield from wait(0.5)
+      return CoroutineCommand(run)
+
+  def empty_hopper(robot):
+      def run():
+          robot.events.append("empty")
+          while robot.fuel_in_hopper > 0:
+              yield
+      return CoroutineCommand(run)
+
+  class AutoRoutines:
+      def __init__(self, robot):
+          self.robot = robot
+          self.p1 = drive_path(robot, "P1", 2.0)
+
+      def shoot_and_leave(self):
+          return SequentialCommandGroup(
+              shoot(self.robot),
+              drive_path(self.robot, "Leave", 1.5),
+          )
+
+      def grab_and_score(self):
+          # a new path command each time, not self.p1
+          return SequentialCommandGroup(
+              ParallelRaceGroup(
+                  drive_path(self.robot, "P1", 2.0),
+                  intake(self.robot),
+              ),
+              shoot(self.robot),
+          )
+
+      def empty_then_park(self):
+          return SequentialCommandGroup(
+              empty_hopper(self.robot).withTimeout(1.0),
+              drive_path(self.robot, "Park", 1.0),
+          )
+locked: false
