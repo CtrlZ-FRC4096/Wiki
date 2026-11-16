@@ -82,6 +82,8 @@ setup: |
      "piece": False, "drift": 0.6, "path": [(0, 40), (9, 40)]},
   ]
 
+  _fired = {}   # where the game piece was at the moment the detector fired
+
   def play(run):
       """Play one run through your detector.
 
@@ -92,12 +94,14 @@ setup: |
       if "JamDetector" not in globals():
           raise AssertionError("There is no class called JamDetector in your code.")
       detector = JamDetector()
+      _fired.clear()
       for i in range(SAMPLES):
           t = i * DT
           pos = _at(run["path"], t)
           going_in = pos - _at(run["path"], t + DT) > 0
           answer = detector.update(_amps(run, i, pos), DT)
           if answer is True:
+              _fired.update(at=pos, going_in=going_in)
               return t, (pos if going_in else START_AT)
           if answer is not False and answer is not None:
               raise AssertionError(
@@ -117,14 +121,31 @@ setup: |
       assert fired is not None, (
           "On the run %r your detector never stopped the indexer, so the game "
           "piece went all the way to the Jamomatic." % run["name"])
+      at, going_in = _fired["at"], _fired["going_in"]
+      if not going_in and at >= 30.0:
+          assert False, (
+              "On the run %r your detector stopped the indexer at %.2f s, before "
+              "any game piece had reached the indexer (it was %.1f cm away)."
+              % (run["name"], fired, at))
+      if not going_in and at <= JAM_AT:
+          assert False, (
+              "On the run %r your detector stopped the indexer at %.2f s. By then "
+              "the game piece had already stopped at %.1f cm, hard against the "
+              "Jamomatic. It has to stop before %.0f cm."
+              % (run["name"], fired, at, JAM_AT))
+      assert going_in, (
+          "On the run %r your detector stopped the indexer at %.2f s, when the "
+          "game piece was at %.1f cm but moving back out, so it fell out of the "
+          "robot. That was a piece brushing past, not one going in."
+          % (run["name"], fired, at))
       assert ended <= IN_AT, (
           "On the run %r your detector stopped the indexer at %.2f s, when the game "
-          "piece was still %.0f cm away. It has to be %.0f cm or less to be inside, "
+          "piece was still %.1f cm away. It has to be %.0f cm or less to be inside, "
           "so the piece fell back out." % (run["name"], fired, ended, IN_AT))
       assert ended > JAM_AT, (
           "On the run %r your detector stopped the indexer at %.2f s. By then the "
-          "game piece was at %.0f cm, hard against the Jamomatic."
-          % (run["name"], fired, ended))
+          "game piece was at %.1f cm, hard against the Jamomatic. It has to stop "
+          "before %.0f cm." % (run["name"], fired, ended, JAM_AT))
 starter: |
   class JamDetector:
       """Decide when the game piece is inside the robot.
@@ -169,12 +190,12 @@ tests:
     code: |
         check(RUNS[6])
 hints:
-  - You cannot know the idle current in advance, so measure it. The indexer is empty at the start of every run.
-  - Do not measure during the first fifth of a second. That is the motor starting, not the mechanism.
-  - The middle value of your samples is safer than the average. One odd sample cannot move the middle value.
-  - Look for a rise above the value you measured, not for a fixed number of amps.
-  - Noise crosses any line for a single sample. A game piece keeps pushing. Make the rise last several samples in a row.
-  - Now find the edges. If the sagging battery run fires, the margin is too small or the rise is not held long enough. If the weak motor run never fires, the margin is too big. Pick a value in the middle of the band that works.
+  - "Look at the data first. Print the time, the position and the current of RUNS[0], as the page shows. Find the inrush at the start, the idle current, and the rise while the piece is between 18 cm and 5 cm."
+  - "Your detector needs its own clock and three phases. Add dt to a counter in update(). Ignore the first 0.3 s, then collect samples for a while, then compare each new sample with what you collected."
+  - "To get the middle value, sort the samples and take the one at index len(samples) // 2. Do it one time, when the collecting phase ends, and keep the result."
+  - "Fire when the current has stayed above that value plus a margin for several samples in a row. Keep a timer that adds dt while the current is above the line, and goes back to 0 when it drops below."
+  - "Now find the edges. If the sagging battery run fires, the margin is too small or the rise is not held long enough. If the weak motor run never fires, the margin is too big. Pick a value in the middle of the band that works."
+
 solution: |
   class JamDetector:
       BLANK = 0.30      # let the starting current die away first

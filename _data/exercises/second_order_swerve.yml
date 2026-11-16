@@ -119,7 +119,12 @@ tests:
   - name: Your code has a command function that returns three numbers
     code: |
         assert "command" in dir(), "There is no function called command in your code."
-        answer = command(0.0, 1.0, 0.0, 0.0, DT)
+        try:
+            answer = command(0.0, 1.0, 0.0, 0.0, DT)
+        except ZeroDivisionError:
+            raise AssertionError(
+                "command() divided by zero when omega was 0. A robot that is not "
+                "spinning must still drive. Read The trap in the exact answer on the page.")
         assert answer is not None and len(answer) == 3, "command() must return (vx, vy, omega). It returned %r." % (answer,)
         vx, vy, w = answer
         assert abs(vx - 1.0) < 1e-6 and abs(vy) < 1e-6, "With the robot pointing along the field x and not spinning, a field speed of (1, 0) is (1, 0) in the robot frame. Your code returned (%.3f, %.3f)." % (vx, vy)
@@ -145,12 +150,12 @@ tests:
     code: |
         check(CASES[6])
 hints:
-  - Work out where the robot really goes when it holds a robot-frame speed for a whole period while turning. It is not speed times dt.
-  - The easy version: the wheels point in the right direction half way through the period, not at the start. Use the heading you will have then.
-  - That is worth trying, and it is nearly right. It is the first term of the exact answer.
-  - For the exact answer, integrate the rotation over the period. A robot-frame speed held for dt while turning through theta lands rotated by theta/2 and shortened by sin(theta/2)/(theta/2).
-  - Then invert that, because you know where you want to land and you need the speed that gets you there.
-  - Whatever you write, look at it again with omega set to zero. WPILib calls this ChassisSpeeds.discretize, and this is the bug people hit in it.
+  - "Try the easy version first. In the starter, rotate by the heading the robot will have half way through the period, heading + omega * dt / 2, not by heading. It passes, within 0.007 m."
+  - "For the exact answer, first rotate the field speed into the robot frame at the start of the period, as the starter does. Call the result (bx, by)."
+  - "Work out theta = omega * dt, then a = sin(theta) / theta and c = (1 - cos(theta)) / theta. The matrix A on the page is then [[a, -c], [c, a]]."
+  - "You need the speed v that A turns into (bx, by). A is a turn and a scale, so its inverse is [[a, c], [-c, a]] divided by (a * a + c * c)."
+  - "When omega is 0, theta is 0 and a and c divide by zero. If abs(omega) is tiny, return (bx, by) with no change."
+
 solution: |
   import math
 

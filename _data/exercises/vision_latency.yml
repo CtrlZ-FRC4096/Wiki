@@ -143,19 +143,24 @@ setup: |
 
   def check_accuracy(case):
       got = report(case)["steady"]
+      oldest = case["latency"][0] + case["latency"][1]
       assert got <= STEADY_LIMIT, (
           "On %r the estimate was %.3f m out on average once it had settled. It "
-          "has to be within %.2f m. A camera picture is taken up to 0.14 s before "
-          "you get it, and this robot moves at 4.9 m/s, so a picture can be 0.69 m "
-          "out of date by the time it reaches you."
-          % (case["name"], got, STEADY_LIMIT))
+          "has to be within %.2f m. On this run each picture is %.0f ms to %.0f ms "
+          "old when you get it, and the robot moves at up to 4.9 m/s, so a picture "
+          "can be %.2f m out of date. If the recovery check fails too, look at your "
+          "gate and your gain as well."
+          % (case["name"], got, STEADY_LIMIT, case["latency"][0] * 1000,
+             oldest * 1000, oldest * 4.9))
 
   def check_outliers(case):
       got = report(case)["late"]
       assert got <= OUTLIER_LIMIT, (
           "On %r the estimate was %.2f m out at its worst, late in the run, when "
           "nothing else was happening. Some of the pictures put the robot metres "
-          "from where it is. It has to stay within %.2f m."
+          "from where it is. It has to stay within %.2f m. If the recovery check "
+          "fails too, do not make your gate tighter: after the shove the camera is "
+          "right and your estimate is wrong."
           % (case["name"], got, OUTLIER_LIMIT))
 
   def check_recovery(case):
@@ -227,12 +232,12 @@ tests:
     code: |
         check_recovery(CASES[2])
 hints:
-  - Do not compare the picture with where you are now. Compare it with where you thought you were when the picture was taken.
-  - So keep a history: the time and the pose, every update. A second of it is plenty.
-  - Hold the estimate as two parts: what the wheels have added up, plus a correction. The camera changes the correction, not the wheels.
-  - That is why the history helps. The correction you work out for a moment 0.14 s ago is just as true now, because the wheels have been counting the whole time.
-  - Move only part of the way towards each picture, not all of it. Somewhere near half is good.
-  - Throw away a picture that disagrees by more than a couple of metres. Do not make that limit tight: after the shove, the camera is right and you are wrong, and you still have to believe it.
+  - "Keep your own clock, and a list of (time, x, y) for every update(). One second of history is plenty, so drop the older rows."
+  - "When a picture arrives, find the row in your history with the time closest to the timestamp. Compare the picture with that old pose, not with the pose now."
+  - "Hold the estimate as two parts, the sum of the wheel moves plus a correction. pose() returns the two added together. The camera changes only the correction."
+  - "The disagreement is the picture minus (the old wheel pose plus the correction). Add only part of it to the correction each time, somewhere near half."
+  - "Throw away a picture that disagrees by more than about 2 m. A tight gate, such as 0.35 m, never recovers from the shove, because after it the camera is right and you are wrong."
+
 solution: |
   import math
 

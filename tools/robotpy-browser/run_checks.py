@@ -60,6 +60,7 @@ def main():
     if helpers is not None and hasattr(helpers, "_cz_shutdown"):
         with contextlib.redirect_stdout(sink), contextlib.redirect_stderr(sink):
             helpers._cz_shutdown()  # the real robot loop runs in a thread
+    result["stdout"] = sink.getvalue()  # what the page shows as "Printed output"
     sys.__stdout__.write("CZ-RESULT " + json.dumps(result) + "\n")
     sys.__stdout__.flush()
 

@@ -150,11 +150,12 @@ tests:
     code: |
         check(CASES[8])
 hints:
-  - Aiming straight at the goal misses by metres. Work out how far the robot travels while the game piece is in the air, and move the aim point back by that much.
-  - That gives a new aim point, which is a new distance, which is a new flight time. Your first correction used the wrong flight time.
-  - So do it again, with the flight time for the new distance. And again.
-  - Stop when the distance stops changing. Two rounds are not enough; the worst case is still 0.37 m out.
-  - Guard the loop. Stop after a fixed number of rounds even if it never settles, or a bad number would hang the robot.
+  - "In the starter, dx and dy point from the robot to the goal. Move the aim point back by how far the robot travels while the piece flies: take vx * tof off dx, and vy * tof off dy."
+  - "Return the angle and the length of that corrected arrow, with math.atan2 and math.hypot. Both must come from the same corrected arrow."
+  - "One correction is not enough, because it used the flight time for the wrong distance. Put the correction in a loop, and each time look up the flight time for the newest distance."
+  - "Start each correction from the original dx and dy, the goal minus the robot. Do not correct an arrow that you already corrected."
+  - "Stop when the distance changes by less than about a millimetre, and also after a fixed number of rounds, such as 20, whatever happens. Two rounds still miss by 0.37 m."
+
 solution: |
   import math
 

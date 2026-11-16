@@ -59,12 +59,15 @@ Two details make it work:
 ## When you are stuck
 
 Print things. Put the code at the bottom of your answer, under your class.
-`RUNS` is the list of the seven runs. This prints the time and the current of
-the first run, every half second:
+`RUNS` is the list of the seven runs. This prints the time in seconds, where
+the game piece is in cm, and the current in amps, for the first run, every half
+second:
 
 ```python
+run = RUNS[0]
 for i in range(0, 450, 25):
-    print(i * DT, _amps(RUNS[0], i, _at(RUNS[0]["path"], i * DT)))
+    where = _at(run["path"], i * DT)
+    print(i * DT, where, _amps(run, i, where))
 ```
 
 `play(RUNS[0])` plays that run through your `JamDetector`. It gives back the

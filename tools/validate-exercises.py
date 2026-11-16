@@ -137,6 +137,17 @@ def main():
                   % (status, name, "fails: " + broken[0][2][:80] if broken else "runs"))
             continue
 
+        # A hint or a prompt that YAML reads as something other than text shows
+        # as "[object Object]" on the page. An unquoted "word: text" does that.
+        for field in ("title", "prompt", "starter", "setup", "solution"):
+            if field in exercise and not isinstance(exercise[field], str):
+                print("FAIL  %-26s '%s' is not text. Quote it in the YAML" % (name, field))
+                problems += 1
+        for number, hint in enumerate(exercise.get("hints") or [], 1):
+            if not isinstance(hint, str):
+                print("FAIL  %-26s hint %d is not text (%r). Quote it in the YAML" % (name, number, hint))
+                problems += 1
+
         for field in ("title", "starter", "tests", "solution"):
             if field not in exercise:
                 print("FAIL  %-26s missing '%s'" % (name, field))
