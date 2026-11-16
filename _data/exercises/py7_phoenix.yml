@@ -5,16 +5,18 @@ prompt: |
 
   **What you need**
 
-  - Make a request with its class and its value: `controls.DutyCycleOut(0.5)` asks for 50% output.
-  - `signals.MotorAlignmentValue.OPPOSED` and `signals.MotorAlignmentValue.ALIGNED` are the two directions of a follower.
+  - `controls.DutyCycleOut(output)`: a fraction of full output, from -1 to 1.
+  - `controls.VelocityTorqueCurrentFOC(velocity)`: a speed in rotations per second.
+  - `controls.Follower(leader_id, alignment)`: copy the motor with the CAN ID `leader_id`. The alignment is `signals.MotorAlignmentValue.OPPOSED` (turn the other way) or `signals.MotorAlignmentValue.ALIGNED` (turn the same way).
   - Fill in a config one field at a time, for example `config.slot0.k_p = 2.4`.
 
   **The parts**
 
-  - **2.1** `intake_request(speed_percent)`: return `controls.DutyCycleOut(output)`. The output is a fraction from -1 to 1, so divide the percent by 100: 85 percent is 0.85. From `intake.set_intake_speed()`.
-  - **2.2** `flywheel_request(rotations_per_second)`: return `controls.VelocityTorqueCurrentFOC(velocity)`. The flywheel motor is mounted backwards, so the velocity is the negative of the speed: 50 becomes -50. From `shooter.set_fly_speed()`.
-  - **2.3** `follower_request(leader_id, opposed)`: return `controls.Follower(leader_id, alignment)`. The alignment is `signals.MotorAlignmentValue.OPPOSED` when `opposed` is `True`, and `signals.MotorAlignmentValue.ALIGNED` when it is `False`.
-  - **2.4** `get_motor_config(...)`: the starter makes the config, sets `inverted`, and returns it. Before `return config`, set each field that the comment lists, one line each. Use the arguments of the function, for example `config.slot0.k_p = k_p`.
+  - **2.1** `intake_request(speed_percent)`: return the `DutyCycleOut` request for this speed. `speed_percent` goes from -100 to 100. From `intake.set_intake_speed()`.
+  - **2.2** `flywheel_request(rotations_per_second)`: return the `VelocityTorqueCurrentFOC` request for this speed. The flywheel motor is mounted backwards, so the motor must get the negative of the speed. From `shooter.set_fly_speed()`.
+  - **2.3** `follower_request(leader_id, opposed)`: return a `Follower` request for `leader_id`. It is opposed when `opposed` is `True`, and aligned when it is `False`.
+  - **2.4** `get_motor_config(...)`: the starter makes the config, sets `inverted`, and returns it. Before `return config`, set each field that the comment lists. Use the arguments of the function.
+
 starter: |
   from phoenix6 import configs, controls, signals
 
@@ -85,9 +87,11 @@ tests:
     assert limits.supply_current_limit_enable is True, "set supply_current_limit_enable to True"
     assert limits.stator_current_limit == 100, f"stator_current_limit should be 100, got {limits.stator_current_limit}"
 hints:
-- '2.1: return controls.DutyCycleOut(speed_percent / 100)'
-- '2.3: choose the alignment with an if, then return controls.Follower(leader_id, alignment)'
-- '2.4: config.slot0.k_p = k_p, and so on. Set each field on its own line.'
+- "2.1: divide by 100. 85 percent is an output of 0.85."
+- "2.2: the velocity is -1 * rotations_per_second."
+- "2.3: choose the alignment with an if, then return controls.Follower(leader_id, alignment)."
+- "2.4: one line for each field, for example config.slot0.k_p = k_p and config.current_limits.stator_current_limit = 100."
+
 solution: |
   from phoenix6 import configs, controls, signals
 

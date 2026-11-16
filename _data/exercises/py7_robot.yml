@@ -5,17 +5,12 @@ prompt: |
 
   The flags `is_intaking` and `clear_jam` belong to the `Robot`. `robot_start()` makes them. The intake and the OI reach them as `self.robot.is_intaking` and `self.robot.clear_jam`.
 
-  - **9.1** `Intake.periodic()`: the same shape as the hopper in exercise 1. Use `if`, `elif` and `else`, in this order:
-    1. If `self.robot.clear_jam` is `True`: call `self.set_speed(JAM_SPEED)`.
-    2. Else, if `self.robot.is_intaking` is `True`: call `self.set_speed(INTAKE_SPEED)`.
-    3. Else: call `self.stop()`.
-  - **9.2** In `OI.__init__`: while the left trigger is held, `self.robot.is_intaking` is `True`. When it is released, `self.robot.is_intaking` is `False`. Copy the shape of the POV LEFT pair, with `self.driver1.LEFT_TRIGGER_AS_BUTTON` as the button.
-  - **9.3** `Robot.make_auto()`: intake for `AUTO_INTAKE_SECONDS`, then stop.
-    1. Inside `make_auto()`, write a `@commandify` function `start_intake` that sets `self.is_intaking = True`.
-    2. Write another one, `stop_intake`, that sets `self.is_intaking = False`.
-    3. Return `SequentialCommandGroup(start_intake, WaitCommand(AUTO_INTAKE_SECONDS), stop_intake)`.
+  You have the tools from exercises 1, 5, 6 and 7. One more: `WaitCommand(seconds)` is a command that waits.
 
-    The checks run auto two times. A command can be in one group only, so the two functions must be inside `make_auto()`. Then each auto gets new commands.
+  - **9.1** `Intake.periodic()`: if `clear_jam` is `True`, run at `JAM_SPEED`. If `is_intaking` is `True`, run at `INTAKE_SPEED`. If neither, stop. `clear_jam` wins.
+  - **9.2** In `OI.__init__`: hold the left trigger to intake. Release it to stop. The button is `self.driver1.LEFT_TRIGGER_AS_BUTTON`.
+  - **9.3** `Robot.make_auto()`: return an auto that intakes for `AUTO_INTAKE_SECONDS`, then stops. The checks run auto two times, and a command can be in one group only.
+
 starter: |
   from commands2 import CommandScheduler, SequentialCommandGroup, WaitCommand
   from phoenix6 import controls, hardware
@@ -181,9 +176,11 @@ tests:
     runner.step_timing(seconds=0.2, autonomous=False, enabled=False)
     assert robot.intake.get_speed() == 0, "when the robot is disabled, every subsystem must stop and stay stopped"
 hints:
-- '9.1: the same if / elif / else as the hopper in exercise 1, with set_speed(JAM_SPEED) and set_speed(INTAKE_SPEED).'
-- '9.2: @self.driver1.LEFT_TRIGGER_AS_BUTTON.whenHeld and @self.driver1.LEFT_TRIGGER_AS_BUTTON.whenReleased'
-- '9.3: inside make_auto(): @commandify above def start_intake(): self.is_intaking = True, and the same for stop_intake.'
+- "9.1: the same shape as periodic() in exercise 1, with self.set_speed(...) and self.stop()."
+- "9.2: copy the POV LEFT pair of bindings, with the left trigger as the button and is_intaking as the flag."
+- "9.3: inside make_auto(), write two @commandify functions: start_intake sets self.is_intaking = True, and stop_intake sets it to False."
+- "9.3: return SequentialCommandGroup(start_intake, WaitCommand(AUTO_INTAKE_SECONDS), stop_intake). The functions are inside make_auto(), so each auto gets new commands. Making them again is fine: the new command replaces the old one under the same name."
+
 solution: |
   from commands2 import CommandScheduler, SequentialCommandGroup, WaitCommand
   from phoenix6 import controls, hardware
