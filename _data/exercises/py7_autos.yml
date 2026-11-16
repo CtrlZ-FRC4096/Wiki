@@ -5,19 +5,20 @@ prompt: |
 
   **What you need**
 
-  - Make a stand-in command: call its function with the robot. For example `shoot(self.robot)`, `intake(self.robot)`, `empty_hopper(self.robot)`, or `drive_path(self.robot, "Leave", 1.5)`. For a path, the last number is how many seconds it takes.
+  - Make a stand-in command: call its function with the robot, for example `shoot(self.robot)` or `drive_path(self.robot, "Leave", 1.5)`. For a path, the last number is how many seconds it takes.
   - `SequentialCommandGroup(a, b)` runs `a`, then `b`.
   - `ParallelCommandGroup(a, b)` runs both at the same time. It ends when **both** have ended.
   - `ParallelRaceGroup(a, b)` runs both at the same time. It ends when **one** has ended, and cancels the other one.
   - `a.withTimeout(1.0)` is `a`, but cancelled after 1.0 seconds.
-  - A group can go inside another group. Each method must `return` its group.
+  - A group can go inside another group. Each method returns its group.
 
   **The parts**
 
   - **7.1** `shoot_and_leave`: shoot, **then** drive the `"Leave"` path (1.5 seconds).
   - **7.2** `grab_and_score`: drive the `"P1"` path (2.0 seconds) and run the intake at the same time. The intake never ends by itself, so it must stop when the path ends. **Then** shoot.
   - **7.3** `empty_then_park`: empty the hopper, but give up after 1.0 second. **Then** drive the `"Park"` path (1.0 second).
-  - **7.4** The checks call `grab_and_score()` two times. A command object can be in **one** group only. `self.p1` is one object, so it crashes the second time. Make a new path command inside `grab_and_score()` each time.
+  - **7.4** The checks call `grab_and_score()` two times. A command object can be in **one** group only, and `self.p1` is one object. Make `grab_and_score()` work when it is called two times.
+
 starter: |
   from commands2 import ParallelCommandGroup, ParallelRaceGroup, SequentialCommandGroup
   from wpilib import Timer
@@ -142,9 +143,11 @@ tests:
     sim.step(2)
     assert robot.events == ["start P1"], f"the second copy of the auto must run. Events: {robot.events}"
 hints:
-- '7.1: return SequentialCommandGroup(shoot(self.robot), drive_path(self.robot, "Leave", 1.5))'
-- '7.2: a ParallelRaceGroup ends when one of its commands ends.'
-- '7.4: use drive_path(self.robot, "P1", 2.0) inside grab_and_score(), not self.p1.'
+- "7.1: return SequentialCommandGroup(shoot(self.robot), drive_path(self.robot, \"Leave\", 1.5))"
+- "7.2: a ParallelRaceGroup ends when one of its commands ends. Put the path and the intake in one, and put that race first in a SequentialCommandGroup."
+- "7.3: empty_hopper(self.robot).withTimeout(1.0) is the first command of the sequence."
+- "7.4: do not use self.p1. Make a new path with drive_path(self.robot, \"P1\", 2.0) inside grab_and_score()."
+
 solution: |
   from commands2 import ParallelCommandGroup, ParallelRaceGroup, SequentialCommandGroup
   from wpilib import Timer

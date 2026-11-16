@@ -5,26 +5,22 @@ prompt: |
 
   **What you need**
 
-  - Each command is a function inside `__init__`, with `@commandify` on the line above it. After the function, store the command: `self.stop_intake = stop_intake`. **Do not call it**: `self.stop_intake = stop_intake()` makes a broken command. The `intake` example shows the shape.
-  - Inside these functions, use `robot`, not `self.robot`. The example does the same.
-  - To wait until something is true: `while not condition:` with `yield` inside the loop.
-  - To wait while something is true: `while condition:` with `yield` inside the loop.
-  - To wait for time: `yield from wait(0.3)`. The `wait()` function is at the top of the code.
+  - Each command is a function inside `__init__`, with `@commandify` on the line above it. After the function, store the command, for example `self.stop_intake = stop_intake`. **Do not call it**: `self.stop_intake = stop_intake()` makes a broken command. The `intake` example shows the shape.
+  - Inside these functions, use `robot`, not `self.robot`, as the example does.
+  - `yield from wait(0.3)` waits 0.3 seconds. The `wait()` function is at the top of the code.
   - In the checks, `robot` is a stand-in robot. Its flags `is_intaking`, `shoot_intent`, `shooter_ready` and `feeding` start as `False`. `robot.fuel_in_hopper` is a number.
 
   **The parts**
 
-  - **6.1** `stop_intake`: set `robot.is_intaking` to `False`. It needs no `yield`.
+  - **6.1** `stop_intake`: set `robot.is_intaking` to `False`.
   - **6.2** `shoot`, in this order:
     1. Set `robot.shoot_intent` to `True`.
     2. Wait until `robot.shooter_ready` is `True`.
     3. Set `robot.feeding` to `True`.
     4. Wait 0.3 seconds.
-    5. Set `robot.feeding` to `False` and `robot.shoot_intent` to `False`.
-  - **6.3** `empty_hopper`, in this order:
-    1. Set `robot.shoot_intent` to `True`.
-    2. Wait while `robot.fuel_in_hopper` is more than 0.
-    3. Set `robot.shoot_intent` to `False`.
+    5. Set `robot.feeding` and `robot.shoot_intent` to `False`.
+  - **6.3** `empty_hopper`: set `robot.shoot_intent` to `True`, wait while `robot.fuel_in_hopper` is more than 0, then set `robot.shoot_intent` to `False`.
+
 starter: |
   from wpilib import Timer
   from wpilibextra.coroutine import commandify
@@ -133,9 +129,10 @@ tests:
     run(3)
     assert not empty.isScheduled(), "with no fuel, empty_hopper must finish at once"
 hints:
-- 'Each command: @commandify above def name():, then self.name = name after it.'
-- '6.2: while not robot.shooter_ready: yield'
-- '6.3: while robot.fuel_in_hopper > 0: yield'
+- "6.1: it needs no yield. @commandify, then def stop_intake():, then self.stop_intake = stop_intake after the function."
+- "6.2: to wait until something is true, loop while it is not true: while not robot.shooter_ready: yield"
+- "6.3: while robot.fuel_in_hopper > 0: yield"
+
 solution: |
   from wpilib import Timer
   from wpilibextra.coroutine import commandify

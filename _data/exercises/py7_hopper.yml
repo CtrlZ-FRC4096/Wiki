@@ -10,16 +10,20 @@ prompt: |
   - `self.commanded_speed` holds the last speed that the code asked for.
   - `FEED_SPEED` and `JAM_SPEED` are at the top of the code, in rotations per second.
 
+  **What you need**
+
+  - `motor.set_control(request)` sends a request to a motor. `controls.VelocityVoltage(speed)` asks for a speed in rotations per second. `controls.DutyCycleOut(0.0)` asks for 0% output.
+  - `motor.get_velocity().value` reads the speed of a real motor.
+  - `self.robot.isSimulation()` is `True` in the browser and in the simulator, and `False` on the real robot.
+  - `SmartDashboard.putNumber(key, value)` puts a number on the dashboard.
+
   **The parts**
 
-  - **1.1** `set_speed(speed)`: first save the speed with `self.commanded_speed = speed`. Then send it to the motor with `self.indexer_motor.set_control(controls.VelocityVoltage(speed))`.
-  - **1.2** `get_speed()`: a simulated motor does not turn, so its sensor always reads 0. If `self.robot.isSimulation()` is `True`, return `self.commanded_speed`. Else return `self.indexer_motor.get_velocity().value`.
-  - **1.3** `stop()`: set `self.commanded_speed` to `0.0`. Then send `controls.DutyCycleOut(0.0)` to the motor with `set_control()`.
-  - **1.4** `periodic()`: decide what the hopper does from the flags. Use `if`, `elif` and `else`, in this order. The first rule that is true wins:
-    1. If `self.robot.clear_jam` is `True`: call `self.set_speed(JAM_SPEED)`.
-    2. Else, if `self.robot.shoot_intent` is `True`: call `self.set_speed(FEED_SPEED)`.
-    3. Else: call `self.stop()`.
-  - **1.5** `log()`: call `SmartDashboard.putNumber(key, value)` two times. Put `self.commanded_speed` as `"Hopper/Commanded Speed"`, and `self.get_speed()` as `"Hopper/Actual Speed"`.
+  - **1.1** `set_speed(speed)`: remember the speed in `self.commanded_speed`, and send it to the motor as a `VelocityVoltage` request.
+  - **1.2** `get_speed()`: a simulated motor does not turn, so its sensor always reads 0. In simulation, return the commanded speed. On the real robot, return the speed that the motor measures.
+  - **1.3** `stop()`: set the commanded speed to 0, and send the motor 0% output.
+  - **1.4** `periodic()`: decide what the hopper does from the flags. If `clear_jam` is `True`, run at `JAM_SPEED`. If `shoot_intent` is `True`, run at `FEED_SPEED`. If neither is `True`, stop. If both are `True`, `clear_jam` wins. Use the methods from 1.1 and 1.3.
+  - **1.5** `log()`: put the commanded speed on the dashboard as `"Hopper/Commanded Speed"`, and the speed from `get_speed()` as `"Hopper/Actual Speed"`.
 
   This is the same shape in `periodic()` of `intake.py` in Robot-2026, shorter:
 
@@ -36,6 +40,7 @@ prompt: |
   ```
 
   Do not call `periodic()` yourself. The checks run the scheduler, and the scheduler calls `periodic()` one time in every loop.
+
 starter: |
   from phoenix6 import configs, controls, hardware, signals
   from wpilib import SmartDashboard
@@ -138,9 +143,12 @@ tests:
     assert commanded == 17, f'"Hopper/Commanded Speed" should be 17, got {commanded}'
     assert actual == 17, f'"Hopper/Actual Speed" should be 17 in simulation, got {actual}'
 hints:
-- '1.2: if self.robot.isSimulation(): return self.commanded_speed, else return the velocity.'
-- '1.4: use if, elif and else, in the order of the list.'
-- '1.5: SmartDashboard.putNumber("Hopper/Commanded Speed", self.commanded_speed)'
+- "1.1: two lines. First self.commanded_speed = speed, then self.indexer_motor.set_control(controls.VelocityVoltage(speed))."
+- "1.2: if self.robot.isSimulation(): return self.commanded_speed. Else return self.indexer_motor.get_velocity().value."
+- "1.4: one if, one elif and one else. Check clear_jam first, because the first branch that is true wins."
+- "1.4: in the branches, call self.set_speed(JAM_SPEED), self.set_speed(FEED_SPEED) and self.stop()."
+- "1.5: SmartDashboard.putNumber(\"Hopper/Commanded Speed\", self.commanded_speed), then the same with the other key and self.get_speed()."
+
 solution: |
   from phoenix6 import configs, controls, hardware, signals
   from wpilib import SmartDashboard

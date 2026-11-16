@@ -15,15 +15,11 @@ prompt: |
 
   **The parts**
 
-  - **3.1** `hub_distance(robot_pose, hub)`: return the distance in meters from the robot to the hub. `hub` is a `Translation2d`. Subtract the position of the robot from the hub, or the other way, then use `.norm()`. From `drivetrain.get_hub_distance()`.
-  - **3.2** `flip_translation(point, should_flip)`: if `should_flip` is `False` (blue), return `point` with no change. If it is `True` (red), return `Translation2d(FIELD_LENGTH - x, FIELD_WIDTH - y)`, where x and y are the numbers of `point`.
-  - **3.3** `flip_pose(pose, should_flip)`: if `should_flip` is `False`, return `pose` with no change. If it is `True`, return a new `Pose2d`. Its translation is `flip_translation(pose.translation(), True)`. Its rotation is `pose.rotation().rotateBy(Rotation2d.fromDegrees(180))`. For a pose that faces 30 degrees, the flipped pose faces 210 degrees. `rotateBy()` gives this as -150 degrees, which is the same heading.
-  - **3.4** `point_in_front(robot_pose, distance_inches)`: return the field point that is `distance_inches` in front of the robot, as a `Translation2d`:
-    1. Make the arrow `Translation2d(meters, 0)`, with the distance changed to meters. It points forward for a robot that faces 0 degrees.
-    2. Turn the arrow by the heading of the robot, and save the result: `arrow = arrow.rotateBy(robot_pose.rotation())`.
-    3. Add the arrow to the position of the robot, and return the sum.
+  - **3.1** `hub_distance(robot_pose, hub)`: return the distance in meters from the robot to the hub. `hub` is a `Translation2d`. From `drivetrain.get_hub_distance()`.
+  - **3.2** `flip_translation(point, should_flip)`: on blue (`should_flip` is `False`), return `point` with no change. On red, return the point `(FIELD_LENGTH - x, FIELD_WIDTH - y)`.
+  - **3.3** `flip_pose(pose, should_flip)`: on blue, return `pose` with no change. On red, flip its translation with your `flip_translation()`, and turn its heading by 180 degrees. A pose that faces 30 degrees then faces 210 degrees. `rotateBy()` gives this as -150 degrees, which is the same heading.
+  - **3.4** `point_in_front(robot_pose, distance_inches)`: return the field point that is `distance_inches` in front of the robot, as a `Translation2d`. The arrow `Translation2d(meters, 0)` points forward for a robot that faces 0 degrees. For any other heading, turn the arrow by the heading of the robot first. From `intake.intake_pose_in_trench()`.
 
-    From `intake.intake_pose_in_trench()`.
 starter: |
   from wpimath.geometry import Pose2d, Rotation2d, Translation2d
   from wpimath.units import inchesToMeters
@@ -99,9 +95,12 @@ tests:
             f"({expected[0]:.3f}, {expected[1]:.3f}), got ({got.X():.3f}, {got.Y():.3f}). "
             "Did you convert inches to meters, and rotate by the heading of the robot?")
 hints:
-- '3.1: robot_pose.translation() gives the Translation2d of the robot.'
-- '3.3: the new pose is Pose2d(flip_translation(pose.translation(), True), pose.rotation().rotateBy(...)).'
-- '3.4: 10 inches is inchesToMeters(10), which is 0.254 m. Use .rotateBy(robot_pose.rotation()).'
+- "3.1: subtract the hub from robot_pose.translation(), then use .norm() on the result."
+- "3.2: Translation2d(FIELD_LENGTH - point.X(), FIELD_WIDTH - point.Y())"
+- "3.3: Pose2d(flip_translation(pose.translation(), True), pose.rotation().rotateBy(Rotation2d.fromDegrees(180)))"
+- "3.4: wpimath uses meters, so change the inches first: Translation2d(inchesToMeters(distance_inches), 0)."
+- "3.4: arrow = arrow.rotateBy(robot_pose.rotation()), then return robot_pose.translation() + arrow."
+
 solution: |
   from wpimath.geometry import Pose2d, Rotation2d, Translation2d
   from wpimath.units import inchesToMeters
