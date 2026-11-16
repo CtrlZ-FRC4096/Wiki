@@ -912,8 +912,8 @@ value. `match`/`case` compares one value with each `case`, from the top.
 
 ### Exercise 7: three autos
 
-The last part makes the one-group error happen, so you know it when you see
-it.
+The last part checks that the same auto can be built two times without the
+one-group error.
 
 {% include interactive/python-exercise.html id="py7_autos" %}
 

@@ -5,11 +5,11 @@ prompt: |
 
   **What you need**
 
-  - Make a stand-in command: call its function with the robot, for example `shoot(self.robot)` or `drive_path(self.robot, "Leave", 1.5)`. For a path, the last number is how many seconds it takes.
+  - Make a stand-in command: call its function with the robot. `shoot`, `intake` and `empty_hopper` take only the robot, for example `intake(self.robot)`. A path also takes a name and a time: `drive_path(self.robot, name, seconds)`.
   - `SequentialCommandGroup(a, b)` runs `a`, then `b`.
   - `ParallelCommandGroup(a, b)` runs both at the same time. It ends when **both** have ended.
   - `ParallelRaceGroup(a, b)` runs both at the same time. It ends when **one** has ended, and cancels the other one.
-  - `a.withTimeout(1.0)` is `a`, but cancelled after 1.0 seconds.
+  - `a.withTimeout(seconds)` is `a`, but cancelled after that many seconds.
   - A group can go inside another group. Each method returns its group.
 
   **The parts**

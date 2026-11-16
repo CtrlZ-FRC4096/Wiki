@@ -179,7 +179,7 @@ hints:
 - "9.1: the same shape as periodic() in exercise 1, with self.set_speed(...) and self.stop()."
 - "9.2: copy the POV LEFT pair of bindings, with the left trigger as the button and is_intaking as the flag."
 - "9.3: inside make_auto(), write two @commandify functions: start_intake sets self.is_intaking = True, and stop_intake sets it to False."
-- "9.3: return SequentialCommandGroup(start_intake, WaitCommand(AUTO_INTAKE_SECONDS), stop_intake). The functions are inside make_auto(), so each auto gets new commands."
+- "9.3: return SequentialCommandGroup(start_intake, WaitCommand(AUTO_INTAKE_SECONDS), stop_intake). The functions are inside make_auto(), so each auto gets new commands. Making them again is fine: the new command replaces the old one under the same name."
 
 solution: |
   from commands2 import CommandScheduler, SequentialCommandGroup, WaitCommand

@@ -5,9 +5,9 @@ prompt: |
 
   **What you need**
 
-  - Each command is a function inside `__init__`, with `@commandify` on the line above it. After the function, store the command, for example `self.stop_intake = stop_intake`. **Do not call it**: `self.stop_intake = stop_intake()` makes a broken command. The `intake` example shows the shape.
+  - Each command is a function inside `__init__`, with `@commandify` on the line above it. After the function, store the command the same way as the `intake` example: `self.intake = intake`. **Do not call it**: `self.x = x()` makes a broken command.
   - Inside these functions, use `robot`, not `self.robot`, as the example does.
-  - `yield from wait(0.3)` waits 0.3 seconds. The `wait()` function is at the top of the code.
+  - `yield from wait(seconds)` waits that many seconds. The `wait()` function is at the top of the code.
   - In the checks, `robot` is a stand-in robot. Its flags `is_intaking`, `shoot_intent`, `shooter_ready` and `feeding` start as `False`. `robot.fuel_in_hopper` is a number.
 
   **The parts**
@@ -46,7 +46,7 @@ starter: |
 
           # 6.1 stop_intake
 
-          # 6.2 shoot  (wait for time with: yield from wait(0.3))
+          # 6.2 shoot
 
           # 6.3 empty_hopper
 setup: |
