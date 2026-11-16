@@ -3,10 +3,14 @@ library: robotpy
 prompt: |
   The drivetrain default command in `oi.py` turns the sticks into a field velocity. Then `drive_with_pid()` turns the robot to a heading with a `PIDController`, and `drive()` makes `ChassisSpeeds`.
 
-  - **4.1** `square(x)`: `abs(x) * x`. It keeps the sign.
-  - **4.2** `drive_translation(stick_x, stick_y, should_flip)`: a stick gives -1 when pushed forward or left. On the field, forward is +x and left is +y. So `forward_back = -square(stick_y)` and `left_right = -square(stick_x)`. On red, multiply both by -1. Return `Translation2d(forward_back, left_right) * SWERVE_MAX_SPEED`.
-  - **4.3** `make_heading_pid()`: `PIDController(0.0275, 0.0, 0.0001)`, then `enableContinuousInput(0, 360)` and `setTolerance(2)`. From `drivetrain.py`.
-  - **4.4** `field_to_robot_speeds(vx, vy, omega, heading_degrees)`: `ChassisSpeeds.fromFieldRelativeSpeeds(vx, vy, omega, rotation)`, where the rotation is a `Rotation2d`.
+  - **4.1** `square(x)`: return `abs(x) * x`. This squares the value but keeps its sign.
+  - **4.2** `drive_translation(stick_x, stick_y, should_flip)`: a stick gives -1 when it is pushed forward or left. On the field, forward is +x and left is +y. So:
+    1. `forward_back = -square(stick_y)`
+    2. `left_right = -square(stick_x)`
+    3. If `should_flip` is `True` (red alliance), multiply both by -1.
+    4. Return `Translation2d(forward_back, left_right) * SWERVE_MAX_SPEED`.
+  - **4.3** `make_heading_pid()`: make `pid = PIDController(0.0275, 0.0, 0.0001)`. Then call `pid.enableContinuousInput(0, 360)` and `pid.setTolerance(2)`. Return `pid`. From `drivetrain.py`.
+  - **4.4** `field_to_robot_speeds(vx, vy, omega, heading_degrees)`: return `ChassisSpeeds.fromFieldRelativeSpeeds(vx, vy, omega, rotation)`. The rotation must be a `Rotation2d`. Make it with `Rotation2d.fromDegrees(heading_degrees)`.
 starter: |
   from wpimath.controller import PIDController
   from wpimath.geometry import Rotation2d, Translation2d

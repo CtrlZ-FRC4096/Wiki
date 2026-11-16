@@ -1,11 +1,21 @@
 title: Run a whole robot
 library: robotpy
 prompt: |
-  This is a small robot with the same parts as Robot-2026: constants, a subsystem, an OI, and a `Robot` class built on `CoroutineRobot`. The checks start it and run it mode by mode, 50 loops each second, the same way RobotPy's robot tests do.
+  This is a small robot with the same parts as Robot-2026: constants, a subsystem, an OI, and a `Robot` class built on `CoroutineRobot`. The checks start it and run it mode by mode, 50 loops each second, the same way the robot tests in RobotPy do.
 
-  - **9.1** `Intake.periodic()`: the first `True` flag wins. `self.robot.clear_jam` runs at `JAM_SPEED`, `self.robot.is_intaking` runs at `INTAKE_SPEED`, and anything else calls `stop()`.
-  - **9.2** In `OI`: while the left trigger is held, `self.robot.is_intaking` is `True`. When it is released, it is `False`. Use `LEFT_TRIGGER_AS_BUTTON`.
-  - **9.3** `Robot.make_auto()`: intake for `AUTO_INTAKE_SECONDS`, then stop. Make two `@commandify` functions inside `make_auto()`, and return `SequentialCommandGroup(start_intake, WaitCommand(...), stop_intake)`. The checks run auto two times, so the commands must be new each time.
+  The flags `is_intaking` and `clear_jam` belong to the `Robot`. `robot_start()` makes them. The intake and the OI reach them as `self.robot.is_intaking` and `self.robot.clear_jam`.
+
+  - **9.1** `Intake.periodic()`: the same shape as the hopper in exercise 1. Use `if`, `elif` and `else`, in this order:
+    1. If `self.robot.clear_jam` is `True`: call `self.set_speed(JAM_SPEED)`.
+    2. Else, if `self.robot.is_intaking` is `True`: call `self.set_speed(INTAKE_SPEED)`.
+    3. Else: call `self.stop()`.
+  - **9.2** In `OI.__init__`: while the left trigger is held, `self.robot.is_intaking` is `True`. When it is released, `self.robot.is_intaking` is `False`. Copy the shape of the POV LEFT pair, with `self.driver1.LEFT_TRIGGER_AS_BUTTON` as the button.
+  - **9.3** `Robot.make_auto()`: intake for `AUTO_INTAKE_SECONDS`, then stop.
+    1. Inside `make_auto()`, write a `@commandify` function `start_intake` that sets `self.is_intaking = True`.
+    2. Write another one, `stop_intake`, that sets `self.is_intaking = False`.
+    3. Return `SequentialCommandGroup(start_intake, WaitCommand(AUTO_INTAKE_SECONDS), stop_intake)`.
+
+    The checks run auto two times. A command can be in one group only, so the two functions must be inside `make_auto()`. Then each auto gets new commands.
 starter: |
   from commands2 import CommandScheduler, SequentialCommandGroup, WaitCommand
   from phoenix6 import controls, hardware

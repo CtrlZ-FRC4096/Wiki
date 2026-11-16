@@ -1,15 +1,41 @@
 title: Write a subsystem
 library: robotpy
 prompt: |
-  This is a short copy of `subsystems/hopper.py` in Robot-2026. Finish it.
+  This is a short copy of `subsystems/hopper.py` in Robot-2026. The motor setup in `__init__` is complete. Write the other five methods.
 
-  - **1.1** `set_speed(speed)`: save `speed` in `self.commanded_speed`, then send the motor `controls.VelocityVoltage(speed)` with `set_control()`.
-  - **1.2** `get_speed()`: in simulation the motor does not turn, so return the commanded speed. On the robot, return `self.indexer_motor.get_velocity().value`. `self.robot.isSimulation()` tells you which.
-  - **1.3** `stop()`: set the commanded speed to 0 and send `controls.DutyCycleOut(0.0)`.
-  - **1.4** `periodic()`: check the state flags of the robot in this order. The first `True` one wins: `self.robot.clear_jam` runs at `JAM_SPEED`, `self.robot.shoot_intent` runs at `FEED_SPEED`, anything else calls `stop()`.
-  - **1.5** `log()`: put `"Hopper/Commanded Speed"` and `"Hopper/Actual Speed"` on the dashboard.
+  **What you have**
 
-  Do not call `periodic()` yourself. The checks run the scheduler, and the scheduler calls it in every loop.
+  - `self.robot` is the robot object. The OI sets True/False flags on it. In the checks, `self.robot` is a stand-in robot. Two of its flags matter here: `self.robot.clear_jam` and `self.robot.shoot_intent`. Both start as `False`.
+  - `self.indexer_motor` is the TalonFX motor of the hopper.
+  - `self.commanded_speed` holds the last speed that the code asked for.
+  - `FEED_SPEED` and `JAM_SPEED` are at the top of the code, in rotations per second.
+
+  **The parts**
+
+  - **1.1** `set_speed(speed)`: first save the speed with `self.commanded_speed = speed`. Then send it to the motor with `self.indexer_motor.set_control(controls.VelocityVoltage(speed))`.
+  - **1.2** `get_speed()`: a simulated motor does not turn, so its sensor always reads 0. If `self.robot.isSimulation()` is `True`, return `self.commanded_speed`. Else return `self.indexer_motor.get_velocity().value`.
+  - **1.3** `stop()`: set `self.commanded_speed` to `0.0`. Then send `controls.DutyCycleOut(0.0)` to the motor with `set_control()`.
+  - **1.4** `periodic()`: decide what the hopper does from the flags. Use `if`, `elif` and `else`, in this order. The first rule that is true wins:
+    1. If `self.robot.clear_jam` is `True`: call `self.set_speed(JAM_SPEED)`.
+    2. Else, if `self.robot.shoot_intent` is `True`: call `self.set_speed(FEED_SPEED)`.
+    3. Else: call `self.stop()`.
+  - **1.5** `log()`: call `SmartDashboard.putNumber(key, value)` two times. Put `self.commanded_speed` as `"Hopper/Commanded Speed"`, and `self.get_speed()` as `"Hopper/Actual Speed"`.
+
+  This is the same shape in `periodic()` of `intake.py` in Robot-2026, shorter:
+
+  ```python
+  def periodic(self):
+      if self.robot.intake_at_default:
+          self.stop_intake()
+      elif self.robot.clear_jam:
+          self.set_intake_speed(-0.3 * 100)
+      elif self.robot.is_intaking:
+          self.set_intake_speed(0.85 * 100)
+      else:
+          self.stop_intake()
+  ```
+
+  Do not call `periodic()` yourself. The checks run the scheduler, and the scheduler calls `periodic()` one time in every loop.
 starter: |
   from phoenix6 import configs, controls, hardware, signals
   from wpilib import SmartDashboard

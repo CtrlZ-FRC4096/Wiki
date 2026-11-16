@@ -3,10 +3,18 @@ library: robotpy
 prompt: |
   These functions build Phoenix 6 objects. They do not need a motor, so the checks can look inside what you return.
 
-  - **2.1** `intake_request(speed_percent)`: a `controls.DutyCycleOut`. It wants a fraction from -1 to 1, so 85 percent is 0.85. From `intake.set_intake_speed()`.
-  - **2.2** `flywheel_request(rps)`: a `controls.VelocityTorqueCurrentFOC`. The flywheel motor is mounted backwards, so send the negative of the speed. From `shooter.set_fly_speed()`.
-  - **2.3** `follower_request(leader_id, opposed)`: a `controls.Follower(leader_id, alignment)`. Use `signals.MotorAlignmentValue.OPPOSED` when `opposed` is `True`, and `ALIGNED` when it is `False`.
-  - **2.4** `get_motor_config(...)`: finish the config. Set brake mode, the three gains in `slot0`, and the current limits that the comment lists.
+  **What you need**
+
+  - Make a request with its class and its value: `controls.DutyCycleOut(0.5)` asks for 50% output.
+  - `signals.MotorAlignmentValue.OPPOSED` and `signals.MotorAlignmentValue.ALIGNED` are the two directions of a follower.
+  - Fill in a config one field at a time, for example `config.slot0.k_p = 2.4`.
+
+  **The parts**
+
+  - **2.1** `intake_request(speed_percent)`: return `controls.DutyCycleOut(output)`. The output is a fraction from -1 to 1, so divide the percent by 100: 85 percent is 0.85. From `intake.set_intake_speed()`.
+  - **2.2** `flywheel_request(rotations_per_second)`: return `controls.VelocityTorqueCurrentFOC(velocity)`. The flywheel motor is mounted backwards, so the velocity is the negative of the speed: 50 becomes -50. From `shooter.set_fly_speed()`.
+  - **2.3** `follower_request(leader_id, opposed)`: return `controls.Follower(leader_id, alignment)`. The alignment is `signals.MotorAlignmentValue.OPPOSED` when `opposed` is `True`, and `signals.MotorAlignmentValue.ALIGNED` when it is `False`.
+  - **2.4** `get_motor_config(...)`: the starter makes the config, sets `inverted`, and returns it. Before `return config`, set each field that the comment lists, one line each. Use the arguments of the function, for example `config.slot0.k_p = k_p`.
 starter: |
   from phoenix6 import configs, controls, signals
 

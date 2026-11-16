@@ -3,10 +3,26 @@ library: robotpy
 prompt: |
   Write four functions from our robot code. Positions are in meters. Positions in our code are for the blue alliance, and the code flips them for red.
 
-  - **3.1** `hub_distance`: the distance from the robot to the hub. From `drivetrain.get_hub_distance()`: subtract two `Translation2d` objects, then use `.norm()`.
-  - **3.2** `flip_translation`: on red (`should_flip` is `True`), the point is `(FIELD_LENGTH - x, FIELD_WIDTH - y)`. On blue, return the point with no change.
-  - **3.3** `flip_pose`: flip the translation, and turn the rotation by 180 degrees with `rotateBy(Rotation2d.fromDegrees(180))`.
-  - **3.4** `point_in_front`: the field point `distance_inches` in front of the robot. Make the arrow `Translation2d(meters, 0)`, turn it by the heading of the robot, and add it to the position of the robot. From `intake.intake_pose_in_trench()`.
+  **What you need**
+
+  - `pose.translation()` gives the position of a `Pose2d` as a `Translation2d`. `pose.rotation()` gives its heading as a `Rotation2d`.
+  - `point.X()` and `point.Y()` give the two numbers of a `Translation2d`. `Translation2d(x, y)` makes a new one.
+  - `a - b` and `a + b` work on two `Translation2d` objects. `arrow.norm()` gives the length of a `Translation2d`.
+  - `Pose2d(translation, rotation)` makes a pose from a `Translation2d` and a `Rotation2d`.
+  - `rotation.rotateBy(Rotation2d.fromDegrees(180))` turns a `Rotation2d` by 180 degrees. `arrow.rotateBy(rotation)` turns a `Translation2d` by a `Rotation2d`.
+  - `inchesToMeters(inches)` changes inches to meters.
+
+  **The parts**
+
+  - **3.1** `hub_distance(robot_pose, hub)`: return the distance in meters from the robot to the hub. `hub` is a `Translation2d`. Subtract the position of the robot from the hub, or the other way, then use `.norm()`. From `drivetrain.get_hub_distance()`.
+  - **3.2** `flip_translation(point, should_flip)`: if `should_flip` is `False` (blue), return `point` with no change. If it is `True` (red), return `Translation2d(FIELD_LENGTH - x, FIELD_WIDTH - y)`, where x and y are the numbers of `point`.
+  - **3.3** `flip_pose(pose, should_flip)`: if `should_flip` is `False`, return `pose` with no change. If it is `True`, return a new `Pose2d`. Its translation is `flip_translation(pose.translation(), True)`. Its rotation is `pose.rotation()` turned by 180 degrees.
+  - **3.4** `point_in_front(robot_pose, distance_inches)`: return the field point that is `distance_inches` in front of the robot, as a `Translation2d`:
+    1. Make the arrow `Translation2d(meters, 0)`, with the distance changed to meters. It points forward for a robot that faces 0 degrees.
+    2. Turn the arrow by the heading of the robot: `.rotateBy(robot_pose.rotation())`.
+    3. Add the arrow to the position of the robot.
+
+    From `intake.intake_pose_in_trench()`.
 starter: |
   from wpimath.geometry import Pose2d, Rotation2d, Translation2d
   from wpimath.units import inchesToMeters

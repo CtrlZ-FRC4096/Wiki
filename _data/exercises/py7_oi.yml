@@ -1,14 +1,26 @@
 title: Bind the controller buttons
 library: robotpy
 prompt: |
-  A short copy of `oi.py` in Robot-2026. The POV DOWN binding is complete. Add four more:
+  A short copy of `oi.py` in Robot-2026. The POV DOWN binding is complete. Copy its shape for four new bindings.
 
-  - **5.1** When **A** is pressed, toggle `self.robot.is_intaking`.
-  - **5.2** While **the right trigger** is held, `self.robot.shoot_intent` is `True`. When it is released, set `shoot_intent` to `False` and `spin_down` to `True`. The trigger is analog, so use `RIGHT_TRIGGER_AS_BUTTON`.
-  - **5.3** When `self.rumble_button_d1` is pressed: rumble at 1, wait 0.5 s with a `Timer` and a loop that yields, rumble at 0, then set `self.robot.rumble_d1` to `False`. This is the rumble binding in Robot-2026.
+  **What you need**
+
+  - A binding is a decorator on a function named `_`, inside `__init__`. The POV DOWN example shows the shape.
+  - The buttons: `self.driver1.A`, `self.driver1.Y`, `self.driver1.RIGHT_TRIGGER_AS_BUTTON` and `self.rumble_button_d1`.
+  - The decorators:
+    - `.whenPressed` starts the function one time, when the button goes down.
+    - `.whenReleased` starts the function one time, when the button goes up.
+    - `.whenHeld` starts the function when the button goes down, and cancels it when the button goes up. A plain function runs **one** time. To do work in every loop while the button is held, write `while True:`, then the work, then `yield`.
+  - `self.driver1.setRumble(1)` starts the rumble. `self.driver1.setRumble(0)` stops it.
+  - To wait 0.5 seconds: `timer = Timer()`, then `timer.start()`, then `while not timer.hasElapsed(0.5):` with `yield` inside the loop.
+  - In the checks, `self.robot` is a stand-in robot. Its flags `is_intaking`, `shoot_intent`, `spin_down` and `rumble_d1` start as `False`. `robot_oriented_angle` starts at 90.0.
+
+  **The parts**
+
+  - **5.1** When **A** is pressed, toggle `self.robot.is_intaking`: `True` becomes `False`, and `False` becomes `True`. Use `not`.
+  - **5.2** While **the right trigger** is held, `self.robot.shoot_intent` is `True`. When it is released, set `self.robot.shoot_intent` to `False` and `self.robot.spin_down` to `True`. This needs two bindings on `RIGHT_TRIGGER_AS_BUTTON`: one with `whenHeld` and one with `whenReleased`.
+  - **5.3** When `self.rumble_button_d1` is pressed: start the rumble, wait 0.5 seconds, stop the rumble, then set `self.robot.rumble_d1` to `False`. This is the rumble binding in Robot-2026.
   - **5.4** While **Y** is held, add 2 to `self.robot.robot_oriented_angle` in every loop.
-
-  `whenHeld` starts the function when the button goes down and cancels it when the button goes up. A plain function runs **one** time. To do work in every loop, use `while True:` and `yield`.
 starter: |
   from wpilib import Timer
   from wpilibextra.customcontroller import XboxCommandController
