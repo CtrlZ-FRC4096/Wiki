@@ -7,70 +7,68 @@ nav_order: 4
 # Drive Straight While You Spin
 {: .no_toc }
 
-Every swerve example contains a line like this:
+Most swerve examples contain this line:
 
 ```python
 speeds = ChassisSpeeds.fromFieldRelativeSpeeds(vx, vy, omega, heading)
 ```
 
-It takes the speed you want in the field and rotates it into the robot's own
-frame, because the wheels are bolted to the robot and not to the field. It is
-correct. It is also correct for **one instant only**, and your robot does not
-live in an instant.
+This line rotates the field speed into the frame of the robot, because the
+wheels are attached to the robot, not to the field. The line is correct only for
+one instant. The robot holds the command for a full period, and the robot turns
+during that period.
 
 ## What a period is
 
-The roboRIO decides once every 20 ms. It sends a speed to the drive, and the
-drive holds that speed until the next decision. Nothing changes in between.
+The roboRIO calculates a new command every 20 ms. The drive holds that command
+until the next calculation. The command does not change during the period.
 
-Now spin the robot while that speed is held. The speed is in the robot's frame,
-so **it turns with the robot**. At the start of the period the wheels push north.
-Ten milliseconds later the robot has turned, and the same wheel command pushes
-slightly east of north. By the end of the period it is pushing further east
-still.
+The command is a speed in the frame of the robot. If the robot turns during the
+period, the direction of that speed on the field turns with the robot. For
+example, at the start of the period the wheels push to the north. 10 ms later,
+the robot has turned, and the same command pushes at a small angle east of
+north. At the end of the period, the angle is larger.
 
-Add that up over one period and the robot has gone somewhere that is not what
-the maths says. Add it up over 150 periods and the robot has slid **0.63 m**
-off a straight line.
+After one period, the robot is not at the position that the calculation gave.
+After 150 periods, the robot is 0.63 m from the straight line.
 
-This is not wheel slip. It is not a bad gyro, or a loose module, or a bad kP.
-It is the difference between a speed that is right for an instant and a speed
-that is held for a period.
+The cause is not wheel slip, an incorrect gyro, a loose module, or an incorrect
+kP. The cause is that a speed that is correct for one instant is held for a full
+period.
 
-## What is really happening
+## The mathematics
 
-Hold a robot-frame speed for a period `dt` while turning at `omega`. The robot
-frame sweeps through an angle of `theta = omega * dt` during that time. The
-field displacement is not `speed * dt` in the starting direction. It is that
-displacement **turned by half of theta** and **shortened**, because the
-direction was sweeping the whole time and the ends do not line up with the
-middle.
+Hold a robot-frame speed for a period `dt` while the robot turns at `omega`.
+During the period, the robot frame turns through the angle `theta = omega * dt`.
+The movement on the field is not `speed * dt` in the direction at the start of
+the period. It is that movement, turned by `theta / 2` and made shorter. The
+direction changes during the full period, so the movement at the ends is not in
+the same direction as the movement in the middle.
 
-The whole answer is one small matrix:
+This matrix gives the result:
 
 ```
 A = (1 / theta) * [[ sin theta,      -(1 - cos theta) ],
                    [ 1 - cos theta,   sin theta       ]]
 ```
 
-Hold the robot-frame speed `v` for the period and you land at `A * v * dt`
-(in the frame the robot had at the start of the period), not at `v * dt`. So if
-you know where you want to land, ask for `A` inverse times the speed you
-wanted.
+If the robot holds the robot-frame speed `v` for the period, it moves
+`A * v * dt`, in the frame of the robot at the start of the period. It does not
+move `v * dt`. To get to a specified position, command the speed `A` inverse
+multiplied by the speed that you want.
 
-WPILib calls this `ChassisSpeeds.discretize`. Now you know what it is for.
+WPILib calls this calculation `ChassisSpeeds.discretize`.
 
-If that matrix is too much at first, there is a good approximation that will
-pass: **use the heading from the middle of the period, not the start**. It gets
-within 0.007 m, and it is the first term of the exact answer.
+There is also an approximate method that passes the checks. Use the heading
+from the middle of the period, not the heading at the start. The error of this
+method is less than 0.007 m. This method is the first term of the exact answer.
 
-## The trap in the exact answer
+## The division by zero in the exact answer
 
-Look at that matrix again with `theta` at zero.
-
-`sin(0) / 0`. A robot that is not turning divides by zero and the whole drive
-stops. One of the seven cases does not spin at all, and it is there for exactly
-this reason. This is the bug people hit in real `discretize` code.
+When `theta` is zero, the matrix contains `sin(0) / 0`. If the robot does not
+turn, the calculation divides by zero, and the drive stops. One of the seven
+cases has no rotation, to test this condition. This is a known error in
+`discretize` code.
 
 ## The task
 
@@ -78,28 +76,28 @@ this reason. This is the bug people hit in real `discretize` code.
 
 ## Why the obvious answer fails
 
-`tools/validate-swerve2.py` measures each answer over all seven cases:
+`tools/validate-swerve2.py` tests each answer on the seven cases:
 
-| Answer | Worst distance off the path | Cases scored |
-|:-------|:----------------------------|:-------------|
+| Answer | Largest distance from the path | Cases scored |
+|:-------|:-------------------------------|:-------------|
 | Rotate by the heading | 0.627 m | 1 of 7 |
-| Rotate by the heading in the middle | 0.007 m | 7 of 7 |
-| Undo the turn exactly | 0.003 m | 7 of 7 |
+| Rotate by the heading in the middle of the period | 0.007 m | 7 of 7 |
+| Use the inverse of `A` | 0.003 m | 7 of 7 |
 
-The usual answer is nearly 200 times worse than the exact one. The one case it
-gets right is the one where the robot never spins.
+The error of the usual answer is approximately 200 times larger than the error
+of the exact answer. The usual answer passes only the case with no rotation.
 
-## Where this goes next
+## A related problem
 
-The same "right for an instant, wrong for a period" problem returns in the
-modules themselves. `optimize()` reverses a module to turn 30° instead of 150°.
-It assumes the module turns instantly. It does not. Give the module a steering
-rate limit and the shorter turn is not always the faster one. The module also
-drives in the wrong direction while it gets there.
+The same problem occurs in the swerve modules. `optimize()` reverses a module,
+so that the module turns 30° and not 150°. This calculation assumes that the
+module turns immediately, but it does not. If the steering has a rate limit,
+the smaller turn is not always the faster turn. Also, during the turn, the
+module drives in an incorrect direction.
 
-That one is not built yet. Build it.
+There is no challenge for this problem yet. You can write one.
 
 {: .note }
-> There is a simpler version of the module problem in
-> [Swerve Module Optimization](../../Tutorials/swerve-module-optimization), which
-> assumes instant steering. Do that one first if you have not.
+> [Swerve Module Optimization](../../Tutorials/swerve-module-optimization)
+> contains a simpler version of the module problem, with immediate steering. Do
+> that tutorial first.

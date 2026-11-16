@@ -7,36 +7,35 @@ nav_order: 8
 # Challenges
 {: .no_toc }
 
-The tutorials teach one idea at a time. These do not.
+Each tutorial teaches one idea. Each challenge uses more than one idea.
 
-Each challenge here is a problem this team has actually had to solve. The
-obvious answer to every one of them passes the case you can see and fails the
-cases you cannot. That is the point. A robot works in the shop and then loses a
-match, and the difference is always one of these.
+Each challenge is a problem that this team had on a robot. In each challenge,
+the obvious answer passes the simple case and fails other cases. The same
+thing occurs on a robot: code that operates correctly in the shop can fail
+during a match.
 
-You need to have finished the [tutorials](../../Tutorials/tutorials) first. You
-also need to be able to write Python without help.
+Before you start a challenge, do the [tutorials](../../Tutorials/tutorials).
+You must be able to write Python without help.
 
 ## The challenges
 
-| Challenge | What it is really about |
-|:----------|:------------------------|
-| [Find the game piece with the motor current](../jam-detector) | A signal that is never clean, on a robot that is never the same twice |
-| [Shoot while you are moving](../shoot-on-the-fly) | An answer that depends on itself |
-| [Trust a camera that tells you the past](../vision-latency) | Measurements that arrive late, and some that are wrong |
-| [Drive straight while you spin](../second-order-swerve) | The maths that is right for an instant and wrong for a period |
+| Challenge | Subject |
+|:----------|:--------|
+| [Find the game piece with the motor current](../jam-detector) | A noisy signal, on robots that are all different |
+| [Shoot while you are moving](../shoot-on-the-fly) | A calculation that uses its own result |
+| [Use camera measurements that arrive late](../vision-latency) | Measurements that arrive late, and some that are incorrect |
+| [Drive straight while you spin](../second-order-swerve) | Mathematics that is correct for one instant, but not for a full period |
 
-## How they are graded
+## How the checks operate
 
-Every challenge runs your code against a set of runs. Some of the runs are
-there to catch an answer that only works on the easy case. You have to pass all
-of them.
+Each challenge operates your code on a set of runs. Some runs find answers
+that operate only on the simple case. Your code must pass all the runs.
 
-The checks tell you what the robot did, not only that you failed. Read them.
-A check names the moment it stopped and where the game piece was. That tells
-you which way to move.
+When a check fails, its message tells you what the robot did. For example, it
+gives the time when the robot stopped and the position of the game piece. Use
+this data to find the cause of the failure.
 
 {: .note }
-> These are hard. Getting one wrong twenty times is normal. If you are stuck,
-> the hints are there, and each page ends with the reason the obvious answer
-> fails.
+> If you cannot find a solution, use the hints. The hints start with the
+> general method and end near the code. Each page also has a section, "Why the
+> obvious answers fail", that compares possible answers with measurements.

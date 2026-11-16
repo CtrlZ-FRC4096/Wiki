@@ -1,43 +1,48 @@
-title: Trust a camera that tells you the past
+title: Use camera measurements that arrive late
 prompt: |
-  The wheels always tell you something, and it is always slowly wrong. The camera
-  tells you the truth, and it tells you late.
+  The robot drives a lap at speeds up to 4.9 m/s. Two sources give its position:
 
-  Your robot drives a lap at up to 4.9 m/s. Two things describe where it is:
+  - **The wheels.** `update(dt, vx, vy)` runs every 20 ms, with the velocity from
+    the wheels in m/s. This data is smooth and always available. But its error
+    increases slowly, because the diameter of a wheel is never exactly correct.
+    Also, the wheels measure only the movement of the wheels.
+  - **The camera.** `add_vision(timestamp, x, y)` runs approximately twelve times
+    each second. The camera reads an AprilTag and calculates the position of the
+    robot. `timestamp` is the time when the camera **took the image**. This time
+    is 90 ms to 230 ms before your code gets the measurement.
 
-  - **The wheels.** `update(dt, vx, vy)` runs every 20 ms. Smooth, always there,
-    and it drifts, because wheels are never quite the size you think. It also
-    misses anything that is not the wheels turning.
-  - **The camera.** `add_vision(timestamp, x, y)` runs about twelve times a
-    second. It reads an AprilTag and works out where the robot was. `timestamp`
-    is when the **picture was taken**, which is 90 ms to 230 ms before you get it.
+  `pose()` returns your estimate of the position now, as (x, y).
 
-  `pose()` returns your best guess right now.
+  The time is 0 at the start of the run. Each `update()` call is `dt` (20 ms)
+  after the previous call. `timestamp` is in seconds, on the same clock. To keep
+  your own clock, add `dt` in `update()`.
 
-  Time starts at 0 at the start of the run, and each `update()` call is `dt`
-  (20 ms) later. A `timestamp` is in seconds on that same clock. Keep your own
-  clock by adding `dt` in `update()`.
+  There are three problems:
 
-  Three things go wrong:
+  1. **The image is old.** At 4.9 m/s, an image that is 0.14 s old is incorrect
+     by 0.69 m. If you set your pose to the measurement, the pose moves back
+     along the path.
+  2. **Some measurements are incorrect.** If the camera reads a tag as a
+     different tag, the position is incorrect by many metres. A small error of
+     this type does not occur.
+  3. **At 6 s, a defender pushes the robot.** The wheels do not measure this
+     movement. Only the camera measures it. Thus, you must not discard all the
+     measurements that are different from your estimate.
 
-  1. **The picture is old.** At 4.9 m/s a 0.14 s old picture is 0.69 m out of
-     date. Snap to it and the robot jumps backwards down its own path.
-  2. **Some pictures are wrong.** A tag read as the wrong tag puts the robot
-     metres away. It is never a little bit wrong.
-  3. **At 6 s a defender shoves the robot.** The wheels keep turning and never
-     notice. Only the camera knows, so you cannot simply stop believing it.
+  The checks measure three values in each of three runs:
 
-  You are judged on three things in each of three runs:
-
-  - **Settled:** after the first second, and not counting the 2 s after the
-    shove, the estimate must be within 0.15 m on average (root mean square).
-  - **Worst:** from 8 s to the end, it must never be more than 0.30 m out.
-  - **Recovery:** after the shove at 6 s, it must be back within 0.15 m in
+  - **Settled error:** The root mean square of the error must be 0.15 m or less.
+    This value does not include the first second, or the 2 s after the push.
+  - **Largest error:** From 8 s to the end, the error must never be more than
+    0.30 m.
+  - **Recovery:** After the push at 6 s, the error must be 0.15 m or less in
     1.5 s or less.
 
   {: .note }
-  > The simulator shares your namespace, so you can read it. `_truth` is in there.
-  > Calling it passes every check and teaches you nothing.
+  > The simulator is in the same namespace as your code, so you can read it. It
+  > contains `_truth`. If you use `_truth`, all the checks pass, but you learn
+  > nothing.
+
 setup: |
   import math
 

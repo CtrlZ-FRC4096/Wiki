@@ -1,33 +1,36 @@
-title: Find the game piece with the motor current alone
+title: Find the game piece with the motor current
 prompt: |
-  You did this before with one number. On a real robot one number is not enough.
+  The indexer motor pulls more current when a game piece is in the indexer. Use
+  this current to find the game piece. The current is not a clean signal:
 
-  The indexer motor tells you when a game piece arrives, because a motor that
-  works harder pulls more current. The current is not a clean signal:
-
-  - **The motor starts.** For the first fifth of a second it pulls about 70 A
-    whatever is happening. This is inrush current.
-  - **Every robot idles differently.** A cold, full, stiff indexer pulls 30 A with
-    nothing in it. A loose one on a weak battery pulls 5 A. Your code must work on
-    both, so it cannot contain the number 20.
-  - **The battery matters.** The same mechanism on a tired battery pulls a fifth
+  - **Inrush current.** For the first 0.2 s, the motor pulls approximately 70 A,
+    also when no game piece is present.
+  - **Differences between robots.** A cold indexer with a tight chain pulls 30 A
+    when no game piece is in it. A loose indexer on a weak battery pulls 5 A.
+    Your code must operate on both robots. Thus, it cannot use one fixed number.
+  - **Battery voltage.** On a discharged battery, the same mechanism pulls 20%
     less current for the same work.
-  - **The signal is noisy**, and the battery sags slowly through the match.
-  - **A game piece can brush past** without going in.
+  - **Noise and drift.** The current changes at each sample. Also, the battery
+    voltage decreases slowly during the match.
+  - **A game piece that does not go in.** A game piece can touch the intake and
+    then move away.
 
-  `update(amps, dt)` runs every 20 ms. Return `True` once, at the moment the
-  indexer must stop. Return `False` the rest of the time.
+  `update(amps, dt)` runs every 20 ms. Return `True` one time, when the indexer
+  must stop. At all other times, return `False`.
 
-  The game piece is inside the robot between 18 cm and 5 cm. Stop too early and it
-  falls back out. Stop too late and it is against the Jamomatic.
+  The game piece is inside the robot when it is between 18 cm and 5 cm. If you
+  stop the indexer too early, the game piece falls out. If you stop it too late,
+  the game piece is against the Jamomatic.
 
-  There are seven runs. Get all seven.
+  There are seven runs. Your code must pass all seven.
 
-  To explore, put code at the bottom of your answer, under your class.
-  `RUNS` is the list of the seven runs, and `play(RUN)` plays one of them
-  through your `JamDetector`. It gives back the time your detector fired (or
-  `None`) and where the game piece ended up, in cm. Delete the exploring code
-  when you are done, because it runs every time you press **Run checks**.
+  To examine the data, put code at the bottom of your answer, below your class.
+  `RUNS` is the list of the seven runs. `play(RUNS[0])` operates your
+  `JamDetector` on the first run. It gives the time when your detector stopped
+  the indexer, or `None`. It also gives the position of the game piece at the
+  end, in cm. Remove this code when you finish, because it operates each time
+  that you push **Run checks**.
+
 setup: |
   DT = 0.02
   IN_AT, JAM_AT, START_AT = 18.0, 5.0, 40.0

@@ -1,31 +1,32 @@
 title: Shoot while you are moving
 prompt: |
-  A robot that stops to shoot wastes the whole match. Good teams shoot while they
-  drive. That is much harder than it sounds.
+  A game piece that leaves a moving robot **keeps the velocity of the robot**. If
+  the shooter gives the game piece 6 m/s forward, and the robot moves forward at
+  3 m/s, the game piece moves at 9 m/s. If the robot moves to the side, the game
+  piece also moves to the side.
 
-  A game piece leaving a moving robot **keeps the speed of the robot**. Throw it
-  forwards at 6 m/s from a robot doing 3 m/s, and it travels at 9 m/s. Drive
-  sideways and it goes sideways too.
+  Thus, do not aim at the goal. Aim at a point that puts the game piece in the
+  goal when it lands.
 
-  So do not aim at the goal. Aim at the place that puts the goal under the game
-  piece when it lands.
+  Write `aim(px, py, vx, vy)`. `px, py` is the position of the robot, in metres.
+  `vx, vy` is the velocity of the robot, in m/s. `GOAL` is the position of the
+  goal, (x, y) in metres. Return two values:
 
-  Write `aim(px, py, vx, vy)`. Return two things:
+  - the **heading** for the shooter, in radians
+  - the **distance** to use in the shot table, in metres
 
-  - the **heading** to point the shooter, in radians
-  - the **distance** to look up in the shot table
+  `flight_time(distance)` gives the time that a shot of that distance is in the
+  air. `shot(distance)` gives the speed and the time. The table is for distances
+  from 2 m to 14 m.
 
-  `flight_time(distance)` tells you how long a shot of that distance is in the
-  air. `shot(distance)` gives you the speed and the time together. The table
-  covers 2 m to 14 m.
+  In all nine cases, the game piece must land 0.20 m or less from the goal. The
+  robot moves at speeds up to 4 m/s. A shot can be in the air for more than one
+  second. Thus, the robot moves some metres while the game piece is in the air.
 
-  The game piece must land within 0.20 m of the goal in all nine cases. The robot
-  moves at up to 4 m/s, and a shot can be in the air for over a second, so the
-  robot travels several metres while the game piece flies.
+  This is the difficult part. To find the aim point, you must know the flight
+  time. To find the flight time, you must know the distance. To find the
+  distance, you must know the aim point. **The calculation uses its own result.**
 
-  Here is the part that makes this hard. To know where to aim, you need the
-  flight time. To know the flight time, you need the distance. To know the
-  distance, you need to know where to aim. **The answer depends on itself.**
 setup: |
   import math
 

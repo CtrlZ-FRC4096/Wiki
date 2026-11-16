@@ -7,61 +7,61 @@ nav_order: 1
 # Find the Game Piece with the Motor Current
 {: .no_toc }
 
-In [tutorial 3](../../Tutorials/first-rule) you stopped the indexer with one
-number. It worked, because everything in that tutorial was perfect.
+In [tutorial 3](../../Tutorials/first-rule), one fixed number stopped the
+indexer. That number operated because the tutorial has no noise and no
+differences between robots. A real robot has both.
 
-Nothing on a robot is perfect.
+## Why one fixed number fails
 
-## What is wrong with one number
+On the real robot, one fixed number fails for five reasons.
 
-Put the same code on the real robot and it fails for five separate reasons.
+**Inrush current.** When a motor starts, it pulls a large current for a short
+time. Until the motor turns, only the resistance of the motor limits the
+current. This inrush current can be 70 A on a motor that pulls less than 30 A
+during operation. A rule with a number less than 70 A stops the indexer when
+the indexer starts.
 
-**The motor starts.** A motor that begins to turn pulls a huge current for a
-moment, because it is not turning yet and nothing limits it except resistance.
-This is called **inrush current**, and it can be 70 A on a motor that never
-pulls more than 30 A while it works. Any rule with a number below 70 fires the
-moment the indexer starts.
+**Differences between robots.** A cold indexer with a tight chain pulls 30 A
+when no game piece is in it. The same design with a loose chain, on a weak
+battery, pulls 5 A. One fixed number cannot be correct for both.
 
-**Every robot idles differently.** A cold indexer, packed with game pieces,
-with a tight chain, pulls 30 A with nothing in the path. The same design, run
-in, on a weak battery, pulls 5 A. Your number cannot be right for both.
+**Battery voltage.** A motor on a discharged battery gets less voltage. Thus,
+it pulls less current for the same work. With the same game piece, the current
+is 20% lower.
 
-**The battery matters.** A motor on a tired battery gets less voltage, so it
-pulls less current for the same work. The same game piece reads a fifth lower.
+**Noise and drift.** The current changes by 1 A to 2 A at each sample. Also,
+the battery voltage decreases slowly during a match. Because of the noise and
+the drift, the current crosses any fixed line at some time, also when no game
+piece is present.
 
-**The signal is noisy.** The reading moves by an amp or two every sample, and
-the battery sags slowly through a match. Any line gets crossed sooner or later
-by noise alone.
+**A game piece that touches the intake and then moves away.** The current
+increases and then decreases. The robot must not stop the indexer for this
+game piece.
 
-**Not every touch is a game piece.** A piece can brush the intake and be
-knocked away. The current goes up and comes back down, and the robot must not
-stop for it.
+## The method
 
-## The idea you need
+You cannot know the idle current before the run. Thus, measure it on the robot
+at the start of each run. Then, look for an increase above the measured value.
+This method also solves many other problems on a robot.
 
-You cannot know the idle current in advance. So do not try to. **Measure it on
-the robot, at the start of every run, and look for a rise above what you
-measured.** That is the whole idea, and it is the answer to a great many
-problems on a robot, not only this one.
+Two details are necessary:
 
-Two details make it work:
-
-- **Measure it after the motor has settled**, or the inrush ends up in your
-  measurement.
-- **Use the middle value of your samples, not the average.** One strange sample
-  moves an average. It cannot move the middle value. This is a **median**, and
-  it is worth knowing.
+- Measure the idle current after the inrush current stops. If you measure too
+  early, the inrush current is in your measurement.
+- Use the median of your samples, not the mean. One incorrect sample changes
+  the mean. One incorrect sample does not change the median. To find the
+  median, sort the samples and use the middle value.
 
 ## The task
 
 {% include interactive/python-exercise.html id="jam_detector" %}
 
-## When you are stuck
+## How to examine the data
 
-Print things. Put the code at the bottom of your answer, under your class.
-`RUNS` is the list of the seven runs. This prints the time in seconds, where
-the game piece is in cm, and the current in amps, for the first run, every half
-second:
+Add the code at the bottom of your answer, below your class. `RUNS` is the list
+of the seven runs. This code shows the time in seconds, the position of the
+game piece in cm, and the current in A. It shows the first run, at intervals
+of 0.5 s:
 
 ```python
 run = RUNS[0]
@@ -70,27 +70,28 @@ for i in range(0, 450, 25):
     print(i * DT, where, _amps(run, i, where))
 ```
 
-`play(RUNS[0])` plays that run through your `JamDetector`. It gives back the
-time your detector fired, or `None`, and where the game piece ended up, in cm.
-Delete the exploring code when you are done, because it runs every time you
-press **Run checks**.
+`play(RUNS[0])` operates your `JamDetector` on that run. It gives the time when
+your detector stopped the indexer, or `None`. It also gives the position of the
+game piece at the end, in cm. Remove this code when you finish, because it
+operates each time that you push **Run checks**.
 
 ## Why the obvious answers fail
 
-`tools/validate-jam.py` runs whole families of wrong answers against the seven
-runs, so these are measured, not opinions:
+`tools/validate-jam.py` tests groups of incorrect answers on the seven runs.
+The table shows the results:
 
 | Answer | Result |
 |:-------|:-------|
-| The best possible fixed threshold, already ignoring the inrush | 5 of 7 |
-| An average baseline over the first 0.4 s | 5 of 7 |
-| A measured baseline, but firing on the first sample above it | 0 of 7 |
-| A measured baseline, a margin of 4 A to 10 A, held for 0.16 s | 7 of 7 |
+| The best possible fixed threshold, which ignores the inrush current | 5 of 7 |
+| A measured value that is the mean of the first 0.4 s, with the inrush current in it | 5 of 7 |
+| A measured value, but the detector stops the indexer at the first sample above it | 0 of 7 |
+| A measured value, a margin of 4 A to 10 A, and a hold time of 0.16 s | 7 of 7 |
 
-The margin has a band that works, from 4 A to 10 A. Below it the sagging
-battery trips the detector. Above it the weak motor never reaches the line. You
-are not meant to guess the number. You are meant to find the edges of the band,
-the same way you tuned a controller.
+A margin from 4 A to 10 A operates. With a margin of less than 4 A, the
+battery voltage decreases and the detector stops the indexer with no game
+piece present. If the margin is more than 10 A, the current of the weak
+motor does not get to the line. Do not guess the margin. Find the two limits of
+the band, as you did when you tuned a controller.
 
 ## Next
 
