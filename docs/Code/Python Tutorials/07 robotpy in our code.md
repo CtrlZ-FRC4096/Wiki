@@ -890,6 +890,8 @@ command requires every subsystem, so nothing else can run during the auto.
 
 ### Pick the auto
 
+`robot.py` makes the chooser, and `hopper.py` turns the choice into an auto:
+
 ```python
 self.auto_chooser = wpilib.SendableChooser()
 self.auto_chooser.addOption("Right Trench & Bump MVR PP", 5)
@@ -1072,6 +1074,13 @@ assert hopper.get_speed() == FEED_SPEED, "shoot_intent is True, so ..."
 The clock moves only when a check calls `step`. Therefore a check gives the
 same result every time. Use `cz_sim` in the **Try it** box to test your own
 ideas.
+
+The browser copy has only the parts of the libraries that the exercises use.
+For example, it has no `SlewRateLimiter`, `ProfiledPIDController` or
+`TrapezoidProfile`. If you import one of them in the **Try it** box, you get
+an `ImportError`. Its
+[README](https://github.com/CtrlZ-FRC4096/Wiki/blob/main/assets/py/robotpy/README.md)
+lists what it has.
 
 ## Common errors
 

@@ -10,17 +10,18 @@ prompt: |
   - `a - b` and `a + b` work on two `Translation2d` objects. `arrow.norm()` gives the length of a `Translation2d`.
   - `Pose2d(translation, rotation)` makes a pose from a `Translation2d` and a `Rotation2d`.
   - `rotation.rotateBy(Rotation2d.fromDegrees(180))` turns a `Rotation2d` by 180 degrees. `arrow.rotateBy(rotation)` turns a `Translation2d` by a `Rotation2d`.
+  - `rotateBy()`, `+` and `-` give back a **new** object. They do not change the object that you use them on. Save the result in a variable, for example `arrow = arrow.rotateBy(rotation)`.
   - `inchesToMeters(inches)` changes inches to meters.
 
   **The parts**
 
   - **3.1** `hub_distance(robot_pose, hub)`: return the distance in meters from the robot to the hub. `hub` is a `Translation2d`. Subtract the position of the robot from the hub, or the other way, then use `.norm()`. From `drivetrain.get_hub_distance()`.
   - **3.2** `flip_translation(point, should_flip)`: if `should_flip` is `False` (blue), return `point` with no change. If it is `True` (red), return `Translation2d(FIELD_LENGTH - x, FIELD_WIDTH - y)`, where x and y are the numbers of `point`.
-  - **3.3** `flip_pose(pose, should_flip)`: if `should_flip` is `False`, return `pose` with no change. If it is `True`, return a new `Pose2d`. Its translation is `flip_translation(pose.translation(), True)`. Its rotation is `pose.rotation()` turned by 180 degrees.
+  - **3.3** `flip_pose(pose, should_flip)`: if `should_flip` is `False`, return `pose` with no change. If it is `True`, return a new `Pose2d`. Its translation is `flip_translation(pose.translation(), True)`. Its rotation is `pose.rotation().rotateBy(Rotation2d.fromDegrees(180))`. For a pose that faces 30 degrees, the flipped pose faces 210 degrees. `rotateBy()` gives this as -150 degrees, which is the same heading.
   - **3.4** `point_in_front(robot_pose, distance_inches)`: return the field point that is `distance_inches` in front of the robot, as a `Translation2d`:
     1. Make the arrow `Translation2d(meters, 0)`, with the distance changed to meters. It points forward for a robot that faces 0 degrees.
-    2. Turn the arrow by the heading of the robot: `.rotateBy(robot_pose.rotation())`.
-    3. Add the arrow to the position of the robot.
+    2. Turn the arrow by the heading of the robot, and save the result: `arrow = arrow.rotateBy(robot_pose.rotation())`.
+    3. Add the arrow to the position of the robot, and return the sum.
 
     From `intake.intake_pose_in_trench()`.
 starter: |
@@ -80,8 +81,9 @@ tests:
     assert close(got.X(), FIELD_LENGTH - 1.0) and close(got.Y(), FIELD_WIDTH - 2.0), (
         f"the translation must flip too, got ({got.X():.2f}, {got.Y():.2f})")
     heading = got.rotation().degrees()
-    assert close(heading, -150.0, 1e-4), (
-        f"30 degrees turned by 180 is -150 degrees (rotateBy wraps to -180..180), got {heading:.1f}")
+    assert got.rotation() == Rotation2d.fromDegrees(210), (
+        f"a pose that faces 30 degrees must face 210 degrees (the same as -150) after the flip, "
+        f"got {heading:.1f} degrees. Did you turn the rotation by 180 degrees?")
 - name: 3.3 no flip on blue
   code: |
     got = flip_pose(Pose2d(1.0, 2.0, Rotation2d.fromDegrees(30)), False)

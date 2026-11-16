@@ -20,7 +20,7 @@ prompt: |
   - **5.1** When **A** is pressed, toggle `self.robot.is_intaking`: `True` becomes `False`, and `False` becomes `True`. Use `not`.
   - **5.2** While **the right trigger** is held, `self.robot.shoot_intent` is `True`. When it is released, set `self.robot.shoot_intent` to `False` and `self.robot.spin_down` to `True`. This needs two bindings on `RIGHT_TRIGGER_AS_BUTTON`: one with `whenHeld` and one with `whenReleased`.
   - **5.3** When `self.rumble_button_d1` is pressed: start the rumble, wait 0.5 seconds, stop the rumble, then set `self.robot.rumble_d1` to `False`. This is the rumble binding in Robot-2026.
-  - **5.4** While **Y** is held, add 2 to `self.robot.robot_oriented_angle` in every loop.
+  - **5.4** While **Y** is held, add 2 to `self.robot.robot_oriented_angle` in every loop. Put the `+= 2` before the `yield` in the loop, so the first 2 degrees are added in the loop where Y goes down.
 starter: |
   from wpilib import Timer
   from wpilibextra.customcontroller import XboxCommandController
@@ -105,9 +105,12 @@ tests:
     start = robot.robot_oriented_angle
     pad.press("Y"); sim.step(5)
     turned = robot.robot_oriented_angle - start
+    assert turned != 2, (
+        "Y held for 5 loops added only 2 degrees. A plain function under whenHeld runs one time. "
+        "Use while True:, then the += 2, then yield")
     assert turned == 10, (
         f"Y held for 5 loops should add 2 five times (10 degrees), got {turned}. "
-        "A plain function runs one time. Use while True: ... yield")
+        "Put the += 2 before the yield, inside while True:")
     pad.release("Y"); sim.step(5)
     assert robot.robot_oriented_angle - start == 10, "after Y is released the angle must stop changing"
 hints:
