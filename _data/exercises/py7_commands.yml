@@ -3,11 +3,28 @@ library: robotpy
 prompt: |
   A short copy of `coroutines.py` in Robot-2026. `@commandify` makes a command from a function. Each `yield` ends one loop. The command finishes when the function reaches its end.
 
-  - **5.1** `stop_intake`: set `robot.is_intaking` to `False`. A plain function is fine.
-  - **5.2** `shoot`: set `robot.shoot_intent = True`, wait until `robot.shooter_ready` is `True`, set `robot.feeding = True`, wait 0.3 seconds, then set `feeding` and `shoot_intent` back to `False`.
-  - **5.3** `empty_hopper`: set `robot.shoot_intent = True`, wait while `robot.fuel_in_hopper` is more than 0, then set `shoot_intent` to `False`.
+  **What you need**
 
-  Store each command with `self.name = name`. **Do not call it**: `self.name = name()` makes a broken command.
+  - Each command is a function inside `__init__`, with `@commandify` on the line above it. After the function, store the command: `self.stop_intake = stop_intake`. **Do not call it**: `self.stop_intake = stop_intake()` makes a broken command. The `intake` example shows the shape.
+  - Inside these functions, use `robot`, not `self.robot`. The example does the same.
+  - To wait until something is true: `while not condition:` with `yield` inside the loop.
+  - To wait while something is true: `while condition:` with `yield` inside the loop.
+  - To wait for time: `yield from wait(0.3)`. The `wait()` function is at the top of the code.
+  - In the checks, `robot` is a stand-in robot. Its flags `is_intaking`, `shoot_intent`, `shooter_ready` and `feeding` start as `False`. `robot.fuel_in_hopper` is a number.
+
+  **The parts**
+
+  - **6.1** `stop_intake`: set `robot.is_intaking` to `False`. It needs no `yield`.
+  - **6.2** `shoot`, in this order:
+    1. Set `robot.shoot_intent` to `True`.
+    2. Wait until `robot.shooter_ready` is `True`.
+    3. Set `robot.feeding` to `True`.
+    4. Wait 0.3 seconds.
+    5. Set `robot.feeding` to `False` and `robot.shoot_intent` to `False`.
+  - **6.3** `empty_hopper`, in this order:
+    1. Set `robot.shoot_intent` to `True`.
+    2. Wait while `robot.fuel_in_hopper` is more than 0.
+    3. Set `robot.shoot_intent` to `False`.
 starter: |
   from wpilib import Timer
   from wpilibextra.coroutine import commandify
@@ -31,11 +48,11 @@ starter: |
 
           self.intake = intake
 
-          # 5.1 stop_intake
+          # 6.1 stop_intake
 
-          # 5.2 shoot  (wait for time with: yield from wait(0.3))
+          # 6.2 shoot  (wait for time with: yield from wait(0.3))
 
-          # 5.3 empty_hopper
+          # 6.3 empty_hopper
 setup: |
   import cz_sim as sim
   from commands2 import Command
@@ -58,14 +75,14 @@ tests:
     co.intake.schedule()
     run(2)
     assert robot.is_intaking is True, "the example intake command must still set is_intaking"
-- name: 5.1 stop_intake
+- name: 6.1 stop_intake
   code: |
     sim.reset(); robot = sim.FakeRobot(); co = Coroutines(robot)
     robot.is_intaking = True
     get_command(co, "stop_intake").schedule()
     run(2)
     assert robot.is_intaking is False, "stop_intake must set robot.is_intaking to False"
-- name: 5.2 shoot waits for the shooter
+- name: 6.2 shoot waits for the shooter
   code: |
     sim.reset(); robot = sim.FakeRobot(); co = Coroutines(robot)
     shoot = get_command(co, "shoot")
@@ -76,7 +93,7 @@ tests:
     assert robot.feeding is False, (
         "the shooter is not ready yet, so shoot must NOT feed. Wait with: while not robot.shooter_ready: yield")
     assert shoot.isScheduled(), "shoot must keep running while it waits for the shooter"
-- name: 5.2 shoot feeds for 0.3 seconds
+- name: 6.2 shoot feeds for 0.3 seconds
   code: |
     sim.reset(); robot = sim.FakeRobot(); co = Coroutines(robot)
     shoot = get_command(co, "shoot")
@@ -91,7 +108,7 @@ tests:
     assert robot.feeding is False, "after 0.3 s, feeding should be False"
     assert robot.shoot_intent is False, "at the end, shoot_intent should be False"
     assert not shoot.isScheduled(), "shoot should be finished, so the scheduler removes it"
-- name: 5.3 empty_hopper runs until the hopper is empty
+- name: 6.3 empty_hopper runs until the hopper is empty
   code: |
     sim.reset(); robot = sim.FakeRobot(); co = Coroutines(robot)
     empty = get_command(co, "empty_hopper")
@@ -107,7 +124,7 @@ tests:
     run(2)
     assert not empty.isScheduled(), "the hopper is empty: empty_hopper must finish"
     assert robot.shoot_intent is False, "at the end, shoot_intent should be False"
-- name: 5.3 empty_hopper ends at once with no fuel
+- name: 6.3 empty_hopper ends at once with no fuel
   code: |
     sim.reset(); robot = sim.FakeRobot(); co = Coroutines(robot)
     empty = get_command(co, "empty_hopper")
@@ -117,8 +134,8 @@ tests:
     assert not empty.isScheduled(), "with no fuel, empty_hopper must finish at once"
 hints:
 - 'Each command: @commandify above def name():, then self.name = name after it.'
-- '5.2: while not robot.shooter_ready: yield'
-- '5.3: while robot.fuel_in_hopper > 0: yield'
+- '6.2: while not robot.shooter_ready: yield'
+- '6.3: while robot.fuel_in_hopper > 0: yield'
 solution: |
   from wpilib import Timer
   from wpilibextra.coroutine import commandify

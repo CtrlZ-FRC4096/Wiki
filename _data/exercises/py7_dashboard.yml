@@ -1,10 +1,27 @@
 title: The dashboard, the auto chooser, and match/case
 library: robotpy
 prompt: |
-  - **8.1** `log_shooter`: put `"Shooter/Fly Speed"` and `"Shooter/Hood Angle"` (numbers) and `"Shooter/Ready"` (a boolean) on the dashboard.
-  - **8.2** `make_auto_chooser`: make a `wpilib.SendableChooser`. The default option is `"Default (no auto)"` with the value 0. Add `"Right Trench"` (5) and `"Left Trench"` (6). Put it on the dashboard as `"Auto Chooser"`, then return it. From `robot.py`.
-  - **8.3** `pick_auto(choice)`: use `match`/`case`, as in `hopper.py`. 5 gives `"right_trench"`, 6 gives `"left_trench"`, and any other value gives `"no_auto"`.
-  - **8.4** `read_test_fly_speed`: read `"Test/Test fly speed"` from the dashboard, with the default 60.
+  **What you need**
+
+  - `SmartDashboard.putNumber(key, value)` puts a number on the dashboard. `SmartDashboard.putBoolean(key, value)` puts a `True`/`False` value.
+  - `SmartDashboard.getNumber(key, default)` reads a number. It gives `default` if the key is not on the dashboard.
+  - `chooser = wpilib.SendableChooser()` makes a chooser. `chooser.setDefaultOption(name, value)` adds the default option, and `chooser.addOption(name, value)` adds another option. `SmartDashboard.putData(key, chooser)` puts the chooser on the dashboard.
+  - `match`/`case` compares one value with each `case`, from the top. `case _:` matches any value:
+
+  ```python
+  match value:
+      case 1:
+          return "one"
+      case _:
+          return "something else"
+  ```
+
+  **The parts**
+
+  - **8.1** `log_shooter(fly_speed, hood_angle, ready)`: put `fly_speed` as `"Shooter/Fly Speed"`, `hood_angle` as `"Shooter/Hood Angle"`, and `ready` as `"Shooter/Ready"`. The first two are numbers. `ready` is `True` or `False`.
+  - **8.2** `make_auto_chooser()`: make a chooser. The default option is `"Default (no auto)"` with the value 0. Add `"Right Trench"` with the value 5, and `"Left Trench"` with the value 6. Put the chooser on the dashboard as `"Auto Chooser"`, then return it. From `robot.py`.
+  - **8.3** `pick_auto(choice)`: use `match`/`case`, as in the "Pick the auto" section above. Return `"right_trench"` for 5, `"left_trench"` for 6, and `"no_auto"` for any other value.
+  - **8.4** `read_test_fly_speed()`: return the number `"Test/Test fly speed"` from the dashboard, with the default 60.
 starter: |
   import wpilib
   from wpilib import SmartDashboard
