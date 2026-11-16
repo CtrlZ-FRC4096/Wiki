@@ -1,6 +1,6 @@
 """
-Runs one exercise the way the browser page does: the code, then the shared
-setup, then each check, all in one namespace. Reads JSON from stdin:
+Runs one exercise the way the browser page does: the shared setup, the code,
+the shared setup again, then each check, all in one namespace. Reads JSON from stdin:
 
     {"code": "...", "setup": "...", "tests": [{"name": "...", "code": "..."}]}
 
@@ -29,6 +29,13 @@ def main():
     namespace = {"__name__": "__main__"}
     sink = io.StringIO()
     result = {"error": None, "tests": []}
+    if job.get("setup"):
+        # The page runs the shared setup before the student's code too.
+        try:
+            with contextlib.redirect_stdout(io.StringIO()), contextlib.redirect_stderr(io.StringIO()):
+                exec(compile(job["setup"], "the checks", "exec"), namespace)
+        except BaseException:
+            pass
     try:
         with contextlib.redirect_stdout(sink), contextlib.redirect_stderr(sink):
             exec(compile(job["code"], "your code", "exec"), namespace)

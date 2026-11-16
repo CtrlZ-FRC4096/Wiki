@@ -14,6 +14,10 @@ prompt: |
 
   `pose()` returns your best guess right now.
 
+  Time starts at 0 at the start of the run, and each `update()` call is `dt`
+  (20 ms) later. A `timestamp` is in seconds on that same clock. Keep your own
+  clock by adding `dt` in `update()`.
+
   Three things go wrong:
 
   1. **The picture is old.** At 4.9 m/s a 0.14 s old picture is 0.69 m out of
@@ -23,9 +27,13 @@ prompt: |
   3. **At 6 s a defender shoves the robot.** The wheels keep turning and never
      notice. Only the camera knows, so you cannot simply stop believing it.
 
-  You are judged on three things in each of three runs: how close you stay once
-  settled, the worst you ever get late in the run, and how fast you recover from
-  being shoved.
+  You are judged on three things in each of three runs:
+
+  - **Settled:** after the first second, and not counting the 2 s after the
+    shove, the estimate must be within 0.15 m on average (root mean square).
+  - **Worst:** from 8 s to the end, it must never be more than 0.30 m out.
+  - **Recovery:** after the shove at 6 s, it must be back within 0.15 m in
+    1.5 s or less.
 
   {: .note }
   > The simulator shares your namespace, so you can read it. `_truth` is in there.

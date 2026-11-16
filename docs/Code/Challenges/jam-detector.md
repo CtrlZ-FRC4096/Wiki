@@ -58,13 +58,19 @@ Two details make it work:
 
 ## When you are stuck
 
-Print things. Your code can call `play(run)` and read `RUNS`. Run one case by
-hand and look at what it gives you:
+Print things. Put the code at the bottom of your answer, under your class.
+`RUNS` is the list of the seven runs. This prints the time and the current of
+the first run, every half second:
 
 ```python
 for i in range(0, 450, 25):
     print(i * DT, _amps(RUNS[0], i, _at(RUNS[0]["path"], i * DT)))
 ```
+
+`play(RUNS[0])` plays that run through your `JamDetector`. It gives back the
+time your detector fired, or `None`, and where the game piece ended up, in cm.
+Delete the exploring code when you are done, because it runs every time you
+press **Run checks**.
 
 ## Why the obvious answers fail
 

@@ -68,6 +68,14 @@ def _run(source, checks, setup=""):
     """Run one snippet, then each check against it. Same as the page does."""
     namespace = {"__name__": "__main__"}
     sink = io.StringIO()
+    # The page runs the shared setup before the student's code too, so that the
+    # student's code can use what it defines, such as RUNS and play().
+    if setup:
+        try:
+            with contextlib.redirect_stdout(io.StringIO()), contextlib.redirect_stderr(io.StringIO()):
+                exec(compile(setup, "the checks", "exec"), namespace)
+        except BaseException:
+            pass  # it runs again below, where an error is reported
     try:
         with contextlib.redirect_stdout(sink), contextlib.redirect_stderr(sink):
             exec(compile(source, "your code", "exec"), namespace)

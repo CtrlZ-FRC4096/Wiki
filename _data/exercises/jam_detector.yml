@@ -23,8 +23,11 @@ prompt: |
 
   There are seven runs. Get all seven.
 
-  You can call `play(run)` and read `RUNS` from your own code to see what the
-  seven runs give you.
+  To explore, put code at the bottom of your answer, under your class.
+  `RUNS` is the list of the seven runs, and `play(RUN)` plays one of them
+  through your `JamDetector`. It gives back the time your detector fired (or
+  `None`) and where the game piece ended up, in cm. Delete the exploring code
+  when you are done, because it runs every time you press **Run checks**.
 setup: |
   DT = 0.02
   IN_AT, JAM_AT, START_AT = 18.0, 5.0, 40.0
@@ -171,6 +174,7 @@ hints:
   - The middle value of your samples is safer than the average. One odd sample cannot move the middle value.
   - Look for a rise above the value you measured, not for a fixed number of amps.
   - Noise crosses any line for a single sample. A game piece keeps pushing. Make the rise last several samples in a row.
+  - Now find the edges. If the sagging battery run fires, the margin is too small or the rise is not held long enough. If the weak motor run never fires, the margin is too big. Pick a value in the middle of the band that works.
 solution: |
   class JamDetector:
       BLANK = 0.30      # let the starting current die away first

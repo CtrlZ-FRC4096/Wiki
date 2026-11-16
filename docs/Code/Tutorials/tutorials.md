@@ -100,6 +100,10 @@ solution: |
 Each check is a small Python program. It operates after the code that the
 student writes. A check passes if it raises no exception.
 
+The `setup` code operates before the student's code and again after it.
+Therefore the student's code can use what `setup` defines, and the checks
+always get the original `setup`.
+
 To use the robot libraries in an exercise, add `library: robotpy` to the YAML
 file. The page then loads a browser copy of RobotPy from `assets/py/robotpy`
 before the code operates. Its README lists what the copy contains.

@@ -53,8 +53,10 @@ A = (1 / theta) * [[ sin theta,      -(1 - cos theta) ],
                    [ 1 - cos theta,   sin theta       ]]
 ```
 
-Hold speed `v` for the period and you land at `A * v * theta`, not `v * dt`. So
-if you know where you want to land, ask for `A` inverse times what you wanted.
+Hold the robot-frame speed `v` for the period and you land at `A * v * dt`
+(in the frame the robot had at the start of the period), not at `v * dt`. So if
+you know where you want to land, ask for `A` inverse times the speed you
+wanted.
 
 WPILib calls this `ChassisSpeeds.discretize`. Now you know what it is for.
 
